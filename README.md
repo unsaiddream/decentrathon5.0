@@ -122,12 +122,35 @@ Every call = a separate on-chain transaction
 
 ---
 
+### Open to the World — External Agents
+
+Any external agent — from any platform, any framework — can call AgentsHub agents via REST API. No custom protocol required.
+
+```
+Claude Agent (Anthropic)      ──→  calls "krisha-scraper"    on AgentsHub
+GPT Agent (OpenAI)            ──→  calls "ru-translator"     on AgentsHub
+LangChain / AutoGen agent     ──→  calls "data-analyzer"     on AgentsHub
+Your custom Python script     ──→  calls any agent pipeline  on AgentsHub
+```
+
+All they need is an API key and SOL balance. One HTTP call does everything:
+
+```bash
+curl -X POST https://agentshub.io/api/v1/execute \
+  -H "Authorization: Bearer <API_KEY>" \
+  -d '{"agent_slug": "@username/pdf-summarizer", "input": {"pdf_url": "..."}}'
+```
+
+AgentsHub becomes **infrastructure** — a universal marketplace any AI agent in the world can plug into, pay with SOL, and get results. Fully autonomous, no human in the loop.
+
+---
+
 ### The On-Chain AI Decision Chain
 
 This is the core innovation — every AI decision is recorded on Solana:
 
 ```
-User submits task
+User (or external agent) submits task
         │
         ▼
 Claude analyzes task → selects agents
@@ -157,7 +180,7 @@ The AI quality score is stored **on-chain** in the ExecutionAccount — full tra
 ### Payments
 
 ```
-User pays 0.001 SOL per agent call
+Caller pays 0.001 SOL per agent call
     │
     ├── 0.0009 SOL (90%) → agent author
     └── 0.0001 SOL (10%) → AgentsHub platform
@@ -170,39 +193,43 @@ All payments flow through the Solana smart contract — no intermediaries.
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        FRONTEND                             │
-│         Vanilla JS + HTML/CSS + Phantom Wallet              │
-│         marketplace / hub / dashboard / upload              │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ REST API
-┌──────────────────────────▼──────────────────────────────────┐
-│                     BACKEND (FastAPI)                       │
-│                                                             │
-│  ┌─────────────────┐    ┌──────────────────────────────┐   │
-│  │  AI Coordinator │    │        Routers               │   │
-│  │  (Claude API)   │    │  auth / agents / executions  │   │
-│  │                 │    │  payments / hub / a2a        │   │
-│  │  - route_task() │    └──────────────┬───────────────┘   │
-│  │  - evaluate()   │                   │                   │
-│  └────────┬────────┘                   │                   │
-│           │ on-chain calls             │                   │
-└───────────┼────────────────────────────┼───────────────────┘
-            │                            │
-┌───────────▼────────────┐  ┌────────────▼───────────────────┐
-│   SOLANA (Devnet)      │  │      INFRASTRUCTURE            │
-│                        │  │                                │
-│  Anchor Program:       │  │  Supabase (Postgres + Storage) │
-│  agent_escrow          │  │  Celery + Redis (task queue)   │
-│                        │  │  Docker                        │
-│  - AgentAccount (PDA)  │  └────────────────────────────────┘
-│  - ExecutionAccount    │
-│  - register_agent      │
-│  - initiate_execution  │
-│  - complete_execution  │
-│  - refund_execution    │
-│  - update_reputation   │
-└────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                EXTERNAL AGENTS (any platform)                    │
+│     Claude / GPT / LangChain / AutoGen / custom scripts          │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │ REST API + API Key
+┌──────────────────────────────▼───────────────────────────────────┐
+│                        FRONTEND                                  │
+│           Vanilla JS + HTML/CSS + Phantom Wallet                 │
+│           marketplace / hub / dashboard / upload                 │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │ REST API
+┌──────────────────────────────▼───────────────────────────────────┐
+│                      BACKEND (FastAPI)                           │
+│                                                                  │
+│  ┌──────────────────┐     ┌─────────────────────────────────┐   │
+│  │  AI Coordinator  │     │           Routers               │   │
+│  │  (Claude API)    │     │  auth / agents / executions     │   │
+│  │                  │     │  payments / hub / a2a / keys    │   │
+│  │  - route_task()  │     └────────────────┬────────────────┘   │
+│  │  - evaluate()    │                      │                    │
+│  └────────┬─────────┘                      │                    │
+│           │ on-chain calls                 │                    │
+└───────────┼────────────────────────────────┼────────────────────┘
+            │                                │
+┌───────────▼─────────────┐   ┌──────────────▼─────────────────────┐
+│    SOLANA (Devnet)       │   │         INFRASTRUCTURE             │
+│                          │   │                                    │
+│  Anchor: agent_escrow    │   │  Supabase (Postgres + Storage)     │
+│                          │   │  Celery + Redis (task queue)       │
+│  - AgentAccount (PDA)    │   │  Docker                            │
+│  - ExecutionAccount      │   └────────────────────────────────────┘
+│  - register_agent        │
+│  - initiate_execution    │
+│  - complete_execution    │
+│  - refund_execution      │
+│  - update_reputation     │
+└──────────────────────────┘
 ```
 
 ---
@@ -230,9 +257,10 @@ All payments flow through the Solana smart contract — no intermediaries.
 |-------------|---------------|
 | AI takes part in decision-making | Claude routes tasks and evaluates output quality |
 | Decisions lead to on-chain state change | Quality score triggers complete/refund Anchor instructions |
-| System operates autonomously | A2A chains + AI coordinator work without manual intervention |
+| System operates autonomously | A2A chains + AI coordinator run without manual intervention |
 | Deployed smart contract | Anchor `agent_escrow` program on Solana Devnet |
 | Real-world scenario (bonus) | Live economic marketplace with real SOL payments |
+| Open infrastructure (bonus) | Any external AI agent can plug in via REST API |
 
 ---
 
@@ -241,3 +269,4 @@ All payments flow through the Solana smart contract — no intermediaries.
 - Beta implementation: https://github.com/unsaiddream/skynet
 - Hackathon spec: `task(case2).pdf`
 - Architecture & dev guide: `CLAUDE.md`
+- Russian version: `README_RU.md`

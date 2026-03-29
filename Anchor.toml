@@ -6,13 +6,13 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-agent_escrow = "PLACEHOLDER_PROGRAM_ID"
+agent_escrow = "2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

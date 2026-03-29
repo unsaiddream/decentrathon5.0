@@ -12,7 +12,7 @@ agent_escrow = "2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

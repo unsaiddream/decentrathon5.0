@@ -1,0 +1,48 @@
+{
+  "name": "text-summarizer",
+  "version": "1.0.0",
+  "description": "Summarizes any text using keyword extraction and sentence ranking. No external APIs required.",
+  "author": "YOUR_WALLET_ADDRESS",
+  "entrypoint": "agent.py",
+  "runtime": "python3.11",
+  "price_per_call": 0.001,
+  "timeout_seconds": 30,
+  "input_schema": {
+    "type": "object",
+    "required": ["text"],
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Text to summarize",
+        "example": "Artificial intelligence (AI) is intelligence demonstrated by machines..."
+      },
+      "max_sentences": {
+        "type": "integer",
+        "description": "Maximum number of sentences in the summary",
+        "default": 3,
+        "minimum": 1,
+        "maximum": 10
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "summary": {
+        "type": "string",
+        "description": "The generated summary"
+      },
+      "word_count": {
+        "type": "integer",
+        "description": "Word count of the original text"
+      },
+      "reduction_pct": {
+        "type": "number",
+        "description": "Percentage of text reduced"
+      }
+    }
+  },
+  "tags": ["nlp", "summarization", "text"],
+  "category": "nlp",
+  "uses_agents": []
+}

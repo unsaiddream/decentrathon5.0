@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deploy Agent — HiveMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">Cerebrum Vespiary</div></a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Agents</a>
+      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html" class="active">Deploy</a>
+      <a href="/ui/assistant.html" id="nav-assistant-link">Assistant</a>
+      <a href="/ui/swarm.html">Swarm</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Auth wall -->
+<div id="auth-wall" class="auth-wall hidden">
+  <div class="auth-wall-card">
+    <div class="auth-wall-icon">⚡</div>
+    <div class="auth-wall-overline">⬡ HiveMind Protocol</div>
+    <h2>Join Collective</h2>
+    <p>Sign in to deploy agents to the hub. Connect with GitHub or your Phantom wallet.</p>
+    <div class="auth-wall-btns">
+      <button class="btn btn-primary" onclick="loginWithGithub()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Continue with GitHub
+      </button>
+      <button class="btn btn-ghost" onclick="connectWallet().then(d=>{if(d)location.reload()})">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10H18a2 2 0 000 4h4"/></svg>
+        Connect Wallet
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="upload-content" class="hidden">
+<div class="container page" style="max-width:800px">
+  <div style="margin-bottom:36px">
+    <div class="section-title" style="margin-bottom:10px">Deploy</div>
+    <h1 style="font-size:2rem;margin-bottom:8px">Upload Agent</h1>
+    <p>Deploy your AI agent to the marketplace. Upload a zip or import from GitHub.</p>
+  </div>
+
+  <!-- Source tabs -->
+  <div class="tabs" style="margin-bottom:28px">
+    <div class="tab active" id="tab-zip" onclick="switchSource('zip', this)">⬡ Upload ZIP</div>
+    <div class="tab" id="tab-github" onclick="switchSource('github', this)">
+      <svg style="width:13px;height:13px;vertical-align:-2px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </div>
+  </div>
+
+  <!-- ZIP source -->
+  <div id="source-zip">
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="drop-icon">⬡</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-bottom:8px;letter-spacing:0.05em">Drop your agent.zip here</div>
+      <div style="font-size:13px;color:var(--text-dim)">or click to browse</div>
+      <div id="file-name" style="margin-top:16px;font-size:12px;color:var(--primary);font-family:'JetBrains Mono',monospace;display:none"></div>
+    </div>
+    <input type="file" id="file-input" accept=".zip" style="display:none" onchange="onFileSelect(event)">
+
+    <div id="manifest-preview" class="card hidden" style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3>manifest.json detected</h3>
+        <span class="badge badge-green">✓ Valid</span>
+      </div>
+      <div id="manifest-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px"></div>
+    </div>
+  </div>
+
+  <!-- GitHub source -->
+  <div id="source-github" class="hidden">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+        <div style="width:40px;height:40px;background:var(--primary-glow);border:1px solid var(--border-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px">Import from GitHub</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Public repositories only. Must contain manifest.json in root.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Repository URL</label>
+        <input class="input" id="github-url" placeholder="https://github.com/username/my-agent"
+          style="font-family:'JetBrains Mono',monospace;font-size:12px"
+          oninput="onGithubUrlInput()">
+        <div id="github-url-hint" style="font-size:11px;color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace">
+          Paste any GitHub repo URL. Branch auto-detected from URL.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Branch <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(default: main)</span></label>
+        <input class="input" id="github-branch" placeholder="main" value="main" style="font-family:'JetBrains Mono',monospace;font-size:12px">
+      </div>
+
+      <div id="github-repo-preview" class="hidden" style="background:rgba(245,158,11,0.05);border:1px solid var(--border-strong);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+        <svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        <span id="github-repo-label" style="font-size:12px;color:var(--primary);font-family:'JetBrains Mono',monospace"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Details -->
+  <div class="card" style="margin-top:20px">
+    <h3 style="margin-bottom:4px">Agent Details</h3>
+    <p style="font-size:12px;margin-bottom:24px">Override manifest fields (optional)</p>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea class="input" id="description" rows="3" placeholder="Short description of what your agent does..."></textarea>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Price per call (SOL)</label>
+        <input class="input" type="number" id="price" step="0.0001" min="0.0001" placeholder="0.001" style="font-family:'JetBrains Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select class="input" id="category">
+          <option value="">Select category...</option>
+          <option value="document-processing">Document Processing</option>
+          <option value="data-analysis">Data Analysis</option>
+          <option value="nlp">NLP</option>
+          <option value="automation">Automation</option>
+          <option value="image">Image</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Tags <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-dim)">(comma separated)</span></label>
+      <input class="input" id="tags" placeholder="pdf, summarization, nlp">
+    </div>
+
+    <hr>
+
+    <!-- Manifest reference -->
+    <div style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:24px">
+      <div style="font-size:10px;color:var(--primary);font-family:'JetBrains Mono',monospace;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.25em">Required manifest.json</div>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);line-height:1.8;overflow-x:auto">{
+  <span style="color:#fbbf24">"name"</span>: <span style="color:#86efac">"my-agent"</span>,
+  <span style="color:#fbbf24">"version"</span>: <span style="color:#86efac">"1.0.0"</span>,
+  <span style="color:#fbbf24">"description"</span>: <span style="color:#86efac">"What it does"</span>,
+  <span style="color:#fbbf24">"entrypoint"</span>: <span style="color:#86efac">"agent.py"</span>,
+  <span style="color:#fbbf24">"runtime"</span>: <span style="color:#86efac">"python3.11"</span>,
+  <span style="color:#fbbf24">"price_per_call"</span>: 0.001,
+  <span style="color:#fbbf24">"timeout_seconds"</span>: 30,
+  <span style="color:#fbbf24">"input_schema"</span>: { <span style="color:#fbbf24">"type"</span>: <span style="color:#86efac">"object"</span> },
+  <span style="color:#fbbf24">"output_schema"</span>: { <span style="color:#fbbf24">"type"</span>: <span style="color:#86efac">"object"</span> },
+  <span style="color:#fbbf24">"tags"</span>: [],
+  <span style="color:#fbbf24">"category"</span>: <span style="color:#86efac">"nlp"</span>,
+  <span style="color:#fbbf24">"uses_agents"</span>: []
+}</pre>
+    </div>
+
+    <div id="upload-error" class="hidden" style="color:var(--error);font-size:13px;margin-bottom:16px;padding:12px 16px;background:rgba(239,68,68,0.08);border-radius:8px;border:1px solid rgba(239,68,68,0.2);font-family:'JetBrains Mono',monospace"></div>
+
+    <button class="btn btn-primary" id="upload-btn" style="width:100%;justify-content:center" onclick="submit()" disabled>
+      Upload Agent
+    </button>
+  </div>
+</div>
+</div><!-- /upload-content -->
+
+<script src="/ui/static/app.js"></script>
+<script>
+  initNav();
+
+  let selectedFile = null;
+  let activeSource = 'zip';
+
+  function switchSource(src, el) {
+    activeSource = src;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('source-zip').classList.toggle('hidden', src !== 'zip');
+    document.getElementById('source-github').classList.toggle('hidden', src !== 'github');
+    document.getElementById('upload-btn').textContent = src === 'github' ? 'Import from GitHub' : 'Upload Agent';
+    validateBtn();
+  }
+
+  function validateBtn() {
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = activeSource === 'zip' ? !selectedFile : !document.getElementById('github-url').value.trim();
+  }
+
+  const zone = document.getElementById('drop-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f) processFile(f);
+  });
+
+  function onFileSelect(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+  async function processFile(file) {
+    if (!file.name.endsWith('.zip')) { toast('Only .zip files accepted', 'error'); return; }
+    selectedFile = file;
+    document.getElementById('file-name').style.display = 'block';
+    document.getElementById('file-name').textContent = `✓ ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+    validateBtn();
+  }
+
+  function onGithubUrlInput() {
+    const val = document.getElementById('github-url').value.trim();
+    const preview = document.getElementById('github-repo-preview');
+    const label = document.getElementById('github-repo-label');
+    const hint = document.getElementById('github-url-hint');
+    const branchInput = document.getElementById('github-branch');
+
+    const m = val.match(/github\.com\/([^/]+)\/([^/]+?)(?:\/tree\/([^/]+))?(?:\.git)?(?:\/|$)/);
+    if (m) {
+      const [, owner, repo, branch] = m;
+      label.textContent = `${owner}/${repo}`;
+      preview.classList.remove('hidden');
+      preview.style.display = 'flex';
+      if (branch) branchInput.value = branch;
+      hint.textContent = '';
+    } else {
+      preview.classList.add('hidden');
+      hint.textContent = val ? 'Not a valid GitHub URL. Example: https://github.com/username/my-agent' : 'Paste any GitHub repo URL. Branch auto-detected.';
+    }
+    validateBtn();
+  }
+
+  function submit() {
+    if (activeSource === 'zip') uploadZip();
+    else importGithub();
+  }
+
+  function _buildOverrides() {
+    const overrides = {};
+    const desc = document.getElementById('description').value.trim();
+    const price = document.getElementById('price').value;
+    const cat = document.getElementById('category').value;
+    const tagsStr = document.getElementById('tags').value.trim();
+    if (desc) overrides.description = desc;
+    if (price) overrides.price_per_call = parseFloat(price);
+    if (cat) overrides.category = cat;
+    if (tagsStr) overrides.tags = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+    return overrides;
+  }
+
+  function _setLoading(loading, label) {
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = loading;
+    btn.innerHTML = loading ? `<div class="spinner"></div> ${label}` : (activeSource === 'github' ? 'Import from GitHub' : 'Upload Agent');
+  }
+
+  function _showError(msg) {
+    const el = document.getElementById('upload-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  async function uploadZip() {
+    if (!requireAuth()) return;
+    if (!selectedFile) { toast('Select a file first', 'error'); return; }
+    document.getElementById('upload-error').classList.add('hidden');
+    _setLoading(true, 'Uploading...');
+    try {
+      const form = new FormData();
+      form.append('bundle', selectedFile);
+      const overrides = _buildOverrides();
+      if (Object.keys(overrides).length) form.append('manifest_override', JSON.stringify(overrides));
+      const agent = await apiUpload('/api/v1/agents', form);
+      toast(`Agent "${agent.name}" deployed!`, 'success');
+      setTimeout(() => location.href = `/ui/agent-detail.html?slug=${encodeURIComponent(agent.slug)}`, 1000);
+    } catch(e) {
+      _showError(e.message);
+      toast(e.message, 'error');
+      _setLoading(false);
+    }
+  }
+
+  async function importGithub() {
+    if (!requireAuth()) return;
+    const repoUrl = document.getElementById('github-url').value.trim();
+    if (!repoUrl) { toast('Enter a GitHub URL', 'error'); return; }
+    document.getElementById('upload-error').classList.add('hidden');
+    _setLoading(true, 'Fetching from GitHub...');
+    try {
+      const body = {
+        repo_url: repoUrl,
+        branch: document.getElementById('github-branch').value.trim() || 'main',
+      };
+      const overrides = _buildOverrides();
+      if (Object.keys(overrides).length) body.manifest_override = overrides;
+      const agent = await apiFetch('POST', '/api/v1/agents/import-github', body);
+      toast(`Agent "${agent.name}" imported!`, 'success');
+      setTimeout(() => location.href = `/ui/agent-detail.html?slug=${encodeURIComponent(agent.slug)}`, 1000);
+    } catch(e) {
+      _showError(e.message);
+      toast(e.message, 'error');
+      _setLoading(false);
+    }
+  }
+
+  // Auth gate
+  if (!isLoggedIn()) {
+    document.getElementById('auth-wall').classList.remove('hidden');
+  } else {
+    document.getElementById('upload-content').classList.remove('hidden');
+  }
+</script>
+</body>
+</html>

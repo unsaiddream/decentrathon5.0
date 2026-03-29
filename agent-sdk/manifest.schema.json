@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentsHub Manifest",
+  "description": "Schema for manifest.json — required file in every agent bundle (.zip)",
+  "type": "object",
+  "required": ["name", "version", "description", "author", "entrypoint", "runtime", "price_per_call", "input_schema", "output_schema"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Agent name (kebab-case, unique per author)",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$",
+      "examples": ["pdf-summarizer", "data-analyzer", "email-writer"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0", "2.3.1"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of what the agent does",
+      "maxLength": 500
+    },
+    "author": {
+      "type": "string",
+      "description": "Solana wallet address of the author (base58, 32–44 chars)",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "entrypoint": {
+      "type": "string",
+      "description": "Main Python file to execute (relative path inside the zip)",
+      "examples": ["agent.py", "src/main.py"]
+    },
+    "runtime": {
+      "type": "string",
+      "description": "Python runtime version",
+      "enum": ["python3.10", "python3.11", "python3.12"],
+      "default": "python3.11"
+    },
+    "price_per_call": {
+      "type": "number",
+      "description": "Price in SOL per single execution",
+      "minimum": 0.000001,
+      "maximum": 1000,
+      "examples": [0.001, 0.01, 0.1]
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "description": "Maximum execution time in seconds",
+      "minimum": 1,
+      "maximum": 300,
+      "default": 30
+    },
+    "input_schema": {
+      "type": "object",
+      "description": "JSON Schema for the agent's input payload",
+      "properties": {
+        "type": { "type": "string" },
+        "properties": { "type": "object" },
+        "required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "output_schema": {
+      "type": "object",
+      "description": "JSON Schema for the agent's output payload"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Search tags",
+      "items": { "type": "string", "maxLength": 30 },
+      "maxItems": 10,
+      "default": []
+    },
+    "category": {
+      "type": "string",
+      "description": "Agent category for marketplace filtering",
+      "enum": ["document-processing", "data-analysis", "nlp", "automation", "image", "other"],
+      "default": "other"
+    },
+    "uses_agents": {
+      "type": "array",
+      "description": "Slugs of other AgentsHub agents this agent calls (for composable pipelines)",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "env_vars": {
+      "type": "array",
+      "description": "Environment variable names the agent requires (values set by user in dashboard)",
+      "items": { "type": "string" },
+      "default": []
+    }
+  }
+}

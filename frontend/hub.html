@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Network — HiveMind Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <style>
+    #graph-canvas { width: 100%; height: 600px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: var(--radius); display: block; }
+    .node-tooltip {
+      position: fixed; z-index: 500;
+      background: rgba(7,6,0,0.97); backdrop-filter: blur(20px);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px; padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text); pointer-events: none;
+      max-width: 260px;
+    }
+    .capability-pill {
+      display: inline-block; padding: 2px 8px;
+      background: var(--primary-glow); border: 1px solid var(--border-strong);
+      border-radius: 3px; font-size: 10px; color: var(--primary);
+      margin: 2px; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .agent-row {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition); cursor: pointer;
+    }
+    .agent-row:hover { background: rgba(245,158,11,0.04); }
+    .agent-row:last-child { border-bottom: none; }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">Cerebrum Vespiary</div></a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Agents</a>
+      <a href="/ui/hub.html" class="active">Network</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
+      <a href="/ui/assistant.html" id="nav-assistant-link">Assistant</a>
+      <a href="/ui/swarm.html">Swarm</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container page">
+  <!-- Header -->
+  <div style="margin-bottom:32px">
+    <div class="section-title" style="margin-bottom:10px">AgentHub Protocol</div>
+    <h1 style="font-size:2rem;margin-bottom:8px">Agent Network</h1>
+    <p>Live graph of agent-to-agent communication. Each edge is a real call.</p>
+  </div>
+
+  <!-- Hub Stats -->
+  <div class="stats-row" style="margin-bottom:40px" id="hub-stats">
+    <div class="card stat-card"><div class="stat-value" id="stat-agents">—</div><div class="stat-label">Agents</div></div>
+    <div class="card stat-card"><div class="stat-value" id="stat-messages">—</div><div class="stat-label">A2A Calls</div></div>
+    <div class="card stat-card"><div class="stat-value" id="stat-conversations">—</div><div class="stat-label">Conversations</div></div>
+    <div class="card stat-card"><div class="stat-value" id="stat-pipelines">—</div><div class="stat-label">Pipeline Steps</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+    <!-- Graph -->
+    <div>
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">Live Graph</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="loadGraph()">↻ Refresh</button>
+        </div>
+      </div>
+      <canvas id="graph-canvas"></canvas>
+      <div id="node-tooltip" class="node-tooltip hidden"></div>
+      <div style="display:flex;gap:24px;margin-top:12px;font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">
+        <span>⬡ Node = Agent</span>
+        <span>→ Edge = A2A Call (thickness = frequency)</span>
+      </div>
+    </div>
+
+    <!-- Sidebar: agents list -->
+    <div>
+      <div class="section-title" style="margin-bottom:16px">Active Agents</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="agents-list" style="max-height:600px;overflow-y:auto">
+          <div style="padding:32px;text-align:center;color:var(--text-muted)">
+            <div class="spinner" style="margin:0 auto 12px"></div>
+            <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SDK quick reference -->
+      <div class="card" style="margin-top:16px">
+        <div class="section-title" style="margin-bottom:12px">SDK Quick Reference</div>
+        <pre style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.9;overflow-x:auto"><span style="color:var(--primary)">from</span> agentshub <span style="color:var(--primary)">import</span> *
+
+<span style="color:var(--text-dim)"># Discover agents</span>
+agents = <span style="color:#fbbf24">discover_agents</span>(
+  capabilities=[<span style="color:#86efac">"summarization"</span>]
+)
+
+<span style="color:var(--text-dim)"># Direct call</span>
+result = <span style="color:#fbbf24">call_agent</span>(
+  <span style="color:#86efac">"user/agent"</span>, {<span style="color:#86efac">"text"</span>: <span style="color:#86efac">"..."</span>}
+)
+
+<span style="color:var(--text-dim)"># Pipeline</span>
+result = <span style="color:#fbbf24">pipeline</span>([
+  {<span style="color:#86efac">"agent"</span>: <span style="color:#86efac">"user/step1"</span>},
+  {<span style="color:#86efac">"agent"</span>: <span style="color:#86efac">"user/step2"</span>},
+])
+
+<span style="color:var(--text-dim)"># Conversation</span>
+conv = <span style="color:#fbbf24">new_conversation</span>()
+reply = <span style="color:#fbbf24">message</span>(
+  <span style="color:#86efac">"user/advisor"</span>,
+  {<span style="color:#86efac">"q"</span>: <span style="color:#86efac">"help me"</span>},
+  conv
+)</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Protocol docs -->
+  <div style="margin-top:56px">
+    <div class="section-title" style="margin-bottom:24px">AgentHub Protocol</div>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-hex">⬡</div>
+        <div class="feature-label">Discovery</div>
+        <div class="feature-title">Capability-based</div>
+        <div class="feature-desc">Agents find each other at runtime by declaring capabilities in manifest.json. No hardcoded slugs needed.</div>
+        <pre style="margin-top:12px;font-size:10px;color:var(--primary-light);font-family:'JetBrains Mono',monospace;line-height:1.7;background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;border:1px solid var(--border)">discover_agents(
+  capabilities=["ocr"]
+)</pre>
+      </div>
+      <div class="feature-item">
+        <div class="feature-hex">🔗</div>
+        <div class="feature-label">Pipeline</div>
+        <div class="feature-title">Auto-wired Chains</div>
+        <div class="feature-desc">Chain agents sequentially. Output of each step automatically becomes input for the next. No glue code.</div>
+        <pre style="margin-top:12px;font-size:10px;color:var(--primary-light);font-family:'JetBrains Mono',monospace;line-height:1.7;background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;border:1px solid var(--border)">pipeline([
+  {"agent": "extract"},
+  {"agent": "summarize"},
+  {"agent": "translate"},
+])</pre>
+      </div>
+      <div class="feature-item">
+        <div class="feature-hex">💬</div>
+        <div class="feature-label">Messaging</div>
+        <div class="feature-title">Multi-turn Conversations</div>
+        <div class="feature-desc">Persistent conversation threads. Each message is enriched with full conversation history so agents maintain context.</div>
+        <pre style="margin-top:12px;font-size:10px;color:var(--primary-light);font-family:'JetBrains Mono',monospace;line-height:1.7;background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;border:1px solid var(--border)">conv = new_conversation()
+message("advisor", q, conv)
+message("advisor", q2, conv)</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/ui/static/app.js"></script>
+<script>
+  initNav();
+
+  let graphData = { nodes: [], edges: [] };
+  let animFrame = null;
+
+  // ── Load stats ──────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const data = await apiFetch('GET', '/api/v1/hub/stats');
+      document.getElementById('stat-agents').textContent = formatNumber(data.total_agents);
+      document.getElementById('stat-messages').textContent = formatNumber(data.total_messages);
+      document.getElementById('stat-conversations').textContent = formatNumber(data.total_conversations);
+      document.getElementById('stat-pipelines').textContent = formatNumber(data.total_pipeline_steps);
+    } catch(e) { console.error(e); }
+  }
+
+  // ── Load graph data ──────────────────────────────────────────────────────
+  async function loadGraph() {
+    try {
+      const data = await apiFetch('GET', '/api/v1/hub/graph');
+      graphData = data;
+      renderAgentsList(data.nodes);
+      drawGraph(data);
+    } catch(e) { console.error('graph error', e); }
+  }
+
+  // ── Agents list ──────────────────────────────────────────────────────────
+  function renderAgentsList(nodes) {
+    const list = document.getElementById('agents-list');
+    if (!nodes.length) {
+      list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:12px">No agents yet</div>';
+      return;
+    }
+    list.innerHTML = nodes.map(n => `
+      <div class="agent-row" onclick="location.href='/ui/agent-detail.html?slug=${encodeURIComponent(n.id)}'">
+        <div style="width:32px;height:32px;background:var(--primary-glow);border:1px solid var(--border-strong);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);font-size:14px">⬡</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.name)}</div>
+          <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${esc(n.id)}</div>
+          ${n.capabilities?.length ? `<div style="margin-top:4px">${n.capabilities.slice(0,3).map(c => `<span class="capability-pill">${esc(c)}</span>`).join('')}</div>` : ''}
+        </div>
+        <div style="font-size:10px;color:var(--primary);font-family:'JetBrains Mono',monospace;flex-shrink:0">${formatNumber(n.call_count || 0)}</div>
+      </div>
+    `).join('');
+  }
+
+  // ── Graph drawing ─────────────────────────────────────────────────────────
+  function drawGraph(data) {
+    const canvas = document.getElementById('graph-canvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = canvas.offsetWidth;
+    const H = canvas.height = 600;
+
+    if (animFrame) cancelAnimationFrame(animFrame);
+
+    if (!data.nodes.length) {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(250,247,237,0.2)';
+      ctx.font = '12px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('No agents yet — deploy your first agent', W/2, H/2);
+      return;
+    }
+
+    // Layout: force-directed style (simple circular for now)
+    const nodes = data.nodes.map((n, i) => {
+      const angle = (i / data.nodes.length) * Math.PI * 2;
+      const r = Math.min(W, H) * 0.32;
+      return {
+        ...n,
+        x: W/2 + Math.cos(angle) * r,
+        y: H/2 + Math.sin(angle) * r,
+        vx: 0, vy: 0,
+        radius: 8 + Math.min((n.call_count || 0) / 10, 12),
+      };
+    });
+
+    const maxWeight = Math.max(...data.edges.map(e => e.weight), 1);
+    const tooltip = document.getElementById('node-tooltip');
+    let hovered = null;
+
+    // Simple force simulation
+    function simulate() {
+      for (let iter = 0; iter < 100; iter++) {
+        // Repulsion
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+            const force = 3000 / (dist * dist);
+            nodes[i].vx += dx / dist * force;
+            nodes[i].vy += dy / dist * force;
+            nodes[j].vx -= dx / dist * force;
+            nodes[j].vy -= dy / dist * force;
+          }
+        }
+        // Attraction to center
+        for (const n of nodes) {
+          n.vx += (W/2 - n.x) * 0.002;
+          n.vy += (H/2 - n.y) * 0.002;
+        }
+        // Edge attraction
+        for (const e of data.edges) {
+          const src = nodes.find(n => n.id === e.from);
+          const dst = nodes.find(n => n.id === e.to);
+          if (!src || !dst) continue;
+          const dx = dst.x - src.x;
+          const dy = dst.y - src.y;
+          const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+          const force = dist * 0.0005;
+          src.vx += dx * force;
+          src.vy += dy * force;
+          dst.vx -= dx * force;
+          dst.vy -= dy * force;
+        }
+        // Apply + dampen
+        for (const n of nodes) {
+          n.x += n.vx * 0.3;
+          n.y += n.vy * 0.3;
+          n.vx *= 0.5;
+          n.vy *= 0.5;
+          n.x = Math.max(n.radius + 20, Math.min(W - n.radius - 20, n.x));
+          n.y = Math.max(n.radius + 20, Math.min(H - n.radius - 20, n.y));
+        }
+      }
+    }
+
+    if (nodes.length > 1) simulate();
+
+    function draw(t) {
+      ctx.clearRect(0, 0, W, H);
+
+      // Draw edges
+      for (const e of data.edges) {
+        const src = nodes.find(n => n.id === e.from);
+        const dst = nodes.find(n => n.id === e.to);
+        if (!src || !dst) continue;
+        const alpha = 0.15 + (e.weight / maxWeight) * 0.5;
+        const width = 0.5 + (e.weight / maxWeight) * 2.5;
+        ctx.beginPath();
+        ctx.moveTo(src.x, src.y);
+        // Arrow direction
+        const angle = Math.atan2(dst.y - src.y, dst.x - src.x);
+        const arrowLen = dst.radius + 6;
+        ctx.lineTo(dst.x - Math.cos(angle) * arrowLen, dst.y - Math.sin(angle) * arrowLen);
+        ctx.strokeStyle = `rgba(245,158,11,${alpha})`;
+        ctx.lineWidth = width;
+        ctx.stroke();
+
+        // Arrowhead
+        ctx.beginPath();
+        const ex = dst.x - Math.cos(angle) * arrowLen;
+        const ey = dst.y - Math.sin(angle) * arrowLen;
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - 8 * Math.cos(angle - 0.4), ey - 8 * Math.sin(angle - 0.4));
+        ctx.lineTo(ex - 8 * Math.cos(angle + 0.4), ey - 8 * Math.sin(angle + 0.4));
+        ctx.closePath();
+        ctx.fillStyle = `rgba(245,158,11,${alpha * 1.5})`;
+        ctx.fill();
+      }
+
+      // Draw nodes
+      for (const n of nodes) {
+        const pulse = Math.sin(t * 0.002 + n.x * 0.01) * 0.3 + 0.7;
+        const isHovered = hovered === n;
+        const r = n.radius * (isHovered ? 1.3 : 1);
+
+        // Glow
+        if (isHovered) {
+          const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 2.5);
+          grad.addColorStop(0, 'rgba(245,158,11,0.3)');
+          grad.addColorStop(1, 'rgba(245,158,11,0)');
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, r * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+
+        // Hex shape
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
+          const px = n.x + Math.cos(a) * r;
+          const py = n.y + Math.sin(a) * r;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = isHovered ? 'rgba(245,158,11,0.25)' : `rgba(245,158,11,${0.08 * pulse})`;
+        ctx.fill();
+        ctx.strokeStyle = isHovered ? 'rgba(245,158,11,0.9)' : `rgba(245,158,11,${0.4 * pulse})`;
+        ctx.lineWidth = isHovered ? 1.5 : 1;
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = isHovered ? '#fbbf24' : 'rgba(250,247,237,0.7)';
+        ctx.font = `${isHovered ? 600 : 400} 9px JetBrains Mono`;
+        ctx.textAlign = 'center';
+        const label = n.name.length > 12 ? n.name.slice(0, 11) + '…' : n.name;
+        ctx.fillText(label, n.x, n.y + r + 12);
+      }
+
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    animFrame = requestAnimationFrame(draw);
+
+    // Hover detection
+    canvas.onmousemove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      hovered = null;
+      for (const n of nodes) {
+        const dx = n.x - mx, dy = n.y - my;
+        if (Math.sqrt(dx*dx + dy*dy) < n.radius + 6) {
+          hovered = n;
+          tooltip.classList.remove('hidden');
+          tooltip.style.left = (e.clientX + 16) + 'px';
+          tooltip.style.top = (e.clientY - 8) + 'px';
+          const caps = n.capabilities?.length ? n.capabilities.map(c => `<span class="capability-pill">${esc(c)}</span>`).join('') : '—';
+          tooltip.innerHTML = `
+            <div style="color:var(--primary);font-weight:700;margin-bottom:6px">${esc(n.name)}</div>
+            <div style="color:var(--text-dim);font-size:10px;margin-bottom:8px">${esc(n.id)}</div>
+            <div style="margin-bottom:4px">${caps}</div>
+            <div style="color:var(--text-muted);margin-top:8px;font-size:10px">${formatNumber(n.call_count||0)} calls · ${n.category||'—'}</div>
+          `;
+          return;
+        }
+      }
+      tooltip.classList.add('hidden');
+    };
+
+    canvas.onclick = (e) => {
+      if (hovered) {
+        location.href = `/ui/agent-detail.html?slug=${encodeURIComponent(hovered.id)}`;
+      }
+    };
+
+    canvas.onmouseleave = () => {
+      tooltip.classList.add('hidden');
+      hovered = null;
+    };
+  }
+
+  loadStats();
+  loadGraph();
+</script>
+</body>
+</html>

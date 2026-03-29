@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent — HiveMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">Cerebrum Vespiary</div></a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Agents</a>
+      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
+      <a href="/ui/assistant.html" id="nav-assistant-link">Assistant</a>
+      <a href="/ui/swarm.html">Swarm</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container page" id="content">
+  <div style="text-align:center;padding:100px;color:var(--text-muted)">
+    <div class="spinner" style="margin:0 auto 16px"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase">Loading...</div>
+  </div>
+</div>
+
+<script src="/ui/static/app.js"></script>
+<script>
+  initNav();
+
+  const slug = new URLSearchParams(location.search).get('slug');
+  if (!slug) location.href = '/ui/marketplace.html';
+
+  let agent = null;
+
+  async function load() {
+    try {
+      agent = await apiFetch('GET', `/api/v1/agents/${encodeURIComponent(slug)}`);
+      render();
+      loadSecrets();
+    } catch(e) {
+      document.getElementById('content').innerHTML = `<div class="empty-state"><h3>Agent not found</h3><p>${e.message}</p></div>`;
+    }
+  }
+
+  function render() {
+    const tags = (agent.tags || []).map(t => `<span class="tag tag-gray">${esc(t)}</span>`).join('');
+    const manifest = agent.manifest || {};
+    const inputSchema = JSON.stringify(manifest.input_schema || {}, null, 2);
+    const exampleInput = buildExampleInput(manifest.input_schema);
+
+    document.title = `${agent.name} — HiveMind`;
+    document.getElementById('content').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start" id="agent-layout">
+
+        <!-- Left -->
+        <div>
+          <div style="margin-bottom:12px">
+            <a href="/ui/marketplace.html" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase">← Marketplace</a>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+            <div>
+              <div class="section-title" style="margin-bottom:10px">${esc(agent.category || 'Agent')}</div>
+              <h1 style="font-size:2rem;margin-bottom:8px">${esc(agent.name)}</h1>
+              <code style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${esc(agent.slug)}</code>
+            </div>
+            <span class="badge ${agent.is_active ? 'badge-green' : 'badge-gray'}" style="margin-top:8px;flex-shrink:0">${agent.is_active ? 'Active' : 'Inactive'}</span>
+          </div>
+
+          <p style="font-size:15px;margin-bottom:24px;line-height:1.8">${esc(agent.description || 'No description provided.')}</p>
+
+          ${tags ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">${tags}</div>` : ''}
+
+          <!-- Stats bar -->
+          <div id="agent-stats-bar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">
+            <div style="background:rgba(245,158,11,0.04);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--primary)" id="stat-total">—</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px">Calls</div>
+            </div>
+            <div style="background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.15);border-radius:8px;padding:10px 12px;text-align:center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--success)" id="stat-success-rate">—</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px">Success</div>
+            </div>
+            <div style="background:rgba(245,158,11,0.04);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text-secondary)" id="stat-avg-time">—</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px">Avg Time</div>
+            </div>
+            <div style="background:rgba(245,158,11,0.04);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text-secondary)" id="stat-24h">—</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px">24h</div>
+            </div>
+          </div>
+
+          <!-- Input Schema -->
+          <div class="card" style="margin-bottom:20px">
+            <div class="section-title" style="margin-bottom:12px">Input Schema</div>
+            <pre style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);white-space:pre-wrap;line-height:1.8;background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;border:1px solid var(--border)">${esc(inputSchema)}</pre>
+          </div>
+
+          <!-- Details -->
+          <div class="card">
+            <div class="section-title" style="margin-bottom:16px">Details</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px">
+              <div>
+                <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Runtime</div>
+                <strong style="font-family:'JetBrains Mono',monospace">${esc(manifest.runtime || '—')}</strong>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Timeout</div>
+                <strong style="font-family:'JetBrains Mono',monospace">${manifest.timeout_seconds || 30}s</strong>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Total Calls</div>
+                <strong style="font-family:'JetBrains Mono',monospace;color:var(--primary)">${agent.call_count || 0}</strong>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Rating</div>
+                <strong style="font-family:'JetBrains Mono',monospace">★ ${agent.rating_avg || '—'} (${agent.rating_count || 0})</strong>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Category</div>
+                <strong>${esc(agent.category || '—')}</strong>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Version</div>
+                <strong style="font-family:'JetBrains Mono',monospace">${esc(manifest.version || '1.0.0')}</strong>
+              </div>
+            </div>
+
+            ${manifest.github_repo ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap">
+              <a href="${esc(manifest.github_repo)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--primary);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em">
+                <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                View on GitHub ↗
+              </a>
+              <a href="/ui/swarm.html?agent=${encodeURIComponent(agent.slug)}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+                ⬡ Open in Swarm
+              </a>
+            </div>` : `
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+              <a href="/ui/swarm.html?agent=${encodeURIComponent(agent.slug)}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+                ⬡ Open in Swarm
+              </a>
+            </div>`}
+
+            ${manifest.env_vars?.length ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:10px">Required credentials</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                ${manifest.env_vars.map(v => `<code style="font-size:10px;padding:3px 8px;background:rgba(239,68,68,0.08);color:var(--error);border-radius:4px;border:1px solid rgba(239,68,68,0.2);font-family:'JetBrains Mono',monospace">${esc(v)}</code>`).join('')}
+              </div>
+            </div>` : ''}
+          </div>
+        </div>
+
+          <!-- README -->
+          <div id="readme-section" class="hidden">
+            <div class="card" style="position:relative">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div class="section-title" style="display:flex;align-items:center;gap:8px;margin:0">
+                  <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                  README
+                </div>
+                <button id="readme-toggle" onclick="toggleReadme()" style="display:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);cursor:pointer;letter-spacing:0.05em">Show more</button>
+              </div>
+              <div id="readme-wrap" style="max-height:320px;overflow:hidden;position:relative;transition:max-height 0.3s ease">
+                <div id="readme-content" style="font-size:13.5px;line-height:1.8;color:var(--text-secondary);overflow-wrap:break-word;word-break:break-word"></div>
+                <div id="readme-fade" style="display:none;position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--surface));pointer-events:none"></div>
+              </div>
+            </div>
+          </div>
+
+        <!-- Right: pricing + playground -->
+        <div>
+          <!-- Pricing -->
+          <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(13,11,1,0.9),rgba(245,158,11,0.06))">
+            <div style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:8px">Price per call</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:700;color:var(--primary)">${agent.price_per_call} <span style="font-size:1rem;font-weight:400;color:var(--text-muted)">SOL</span></div>
+            <button class="btn btn-primary" style="width:100%;margin-top:20px;justify-content:center" onclick="scrollToPlayground()">
+              ▶ Try it now
+            </button>
+          </div>
+
+          <!-- Credentials -->
+          <div class="card" id="secrets-card" style="margin-bottom:16px">
+            <div class="section-title" style="margin-bottom:6px">Credentials</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">
+              Environment variables injected at runtime.
+            </div>
+
+            ${(manifest.env_vars?.length) ? `
+            <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">Required by agent</div>
+            ${manifest.env_vars.map(k => `
+              <div class="form-group" style="margin-bottom:12px">
+                <label style="font-family:'JetBrains Mono',monospace">${esc(k)}</label>
+                <div style="display:flex;gap:8px">
+                  <input class="input" type="password" id="secret-${esc(k)}" placeholder="Enter value..."
+                    style="font-family:'JetBrains Mono',monospace;font-size:12px" autocomplete="off">
+                  <button class="btn btn-ghost btn-sm" onclick="saveSecret('${esc(k)}')" style="flex-shrink:0">Save</button>
+                </div>
+                <div id="secret-status-${esc(k)}" style="font-size:10px;margin-top:4px;font-family:'JetBrains Mono',monospace"></div>
+              </div>
+            `).join('')}
+            <hr style="margin:16px 0">
+            ` : ''}
+
+            <div style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">Custom variable</div>
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <input class="input" id="custom-secret-key" placeholder="KEY_NAME" style="font-family:'JetBrains Mono',monospace;font-size:11px;flex:1;text-transform:uppercase">
+              <input class="input" type="password" id="custom-secret-value" placeholder="value" style="font-family:'JetBrains Mono',monospace;font-size:11px;flex:1.5">
+              <button class="btn btn-primary btn-sm" onclick="saveCustomSecret()" style="flex-shrink:0">Add</button>
+            </div>
+            <div id="saved-secrets-list" style="font-size:12px"></div>
+          </div>
+
+          <!-- Playground -->
+          <div class="card" id="playground-card">
+            <div class="section-title" style="margin-bottom:16px">Playground</div>
+
+            <div class="form-group">
+              <label>Input JSON</label>
+              <textarea class="code-area" id="input-json" rows="6">${esc(exampleInput)}</textarea>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%;justify-content:center" id="run-btn" onclick="runAgent()">
+              ▶ Execute
+            </button>
+
+            <!-- Live Console -->
+            <div id="console-panel" class="hidden" style="margin-top:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.15em;text-transform:uppercase;display:flex;align-items:center;gap:8px">
+                  <span id="console-dot" style="width:7px;height:7px;border-radius:50%;background:var(--warning);display:inline-block;animation:pulse 1s infinite"></span>
+                  <span id="console-title">Console</span>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="clearConsole()" style="padding:2px 8px;font-size:10px">Clear</button>
+              </div>
+              <pre id="console-log" style="background:rgba(0,0,0,0.7);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#86efac;line-height:1.7;max-height:280px;overflow-y:auto;white-space:pre-wrap;min-height:80px"></pre>
+            </div>
+
+            <div id="output-section" class="hidden" style="margin-top:16px">
+              <div style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Output</div>
+              <pre id="output-json" style="background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary-light);white-space:pre-wrap;overflow-x:auto;line-height:1.7"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildExampleInput(schema) {
+    if (!schema?.properties) return '{\n  \n}';
+    const ex = {};
+    for (const [k, v] of Object.entries(schema.properties)) {
+      if (v.type === 'string') ex[k] = v.example || `example_${k}`;
+      else if (v.type === 'number' || v.type === 'integer') ex[k] = 0;
+      else if (v.type === 'boolean') ex[k] = true;
+      else if (v.type === 'array') ex[k] = [];
+      else ex[k] = null;
+    }
+    return JSON.stringify(ex, null, 2);
+  }
+
+  function scrollToPlayground() {
+    document.getElementById('playground-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function appendLog(text) {
+    const el = document.getElementById('console-log');
+    if (!el) return;
+    el.textContent += text + '\n';
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function clearConsole() {
+    const el = document.getElementById('console-log');
+    if (el) el.textContent = '';
+  }
+
+  async function runAgent() {
+    if (!requireAuth()) return;
+
+    let input;
+    try {
+      input = JSON.parse(document.getElementById('input-json').value);
+    } catch(e) {
+      toast('Invalid JSON input', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('run-btn');
+    const consolePanel = document.getElementById('console-panel');
+    const outputSection = document.getElementById('output-section');
+    const consoleDot = document.getElementById('console-dot');
+    const consoleTitle = document.getElementById('console-title');
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Executing...';
+    clearConsole();
+    consolePanel.classList.remove('hidden');
+    outputSection.classList.add('hidden');
+    consoleDot.style.background = 'var(--warning)';
+    consoleTitle.textContent = 'starting...';
+
+    try {
+      const exec = await apiFetch('POST', '/api/v1/execute', { agent_slug: agent.slug, input });
+      appendLog(`[system] Execution ID: ${exec.id}`);
+      consoleTitle.textContent = 'connecting...';
+
+      const token = getToken();
+      const streamUrl = `${API}/api/v1/executions/${exec.id}/stream`;
+      const response = await fetch(streamUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+
+      if (!response.ok) throw new Error(`Stream failed: ${response.status}`);
+
+      consoleTitle.textContent = 'live';
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '__DONE__') {
+              const result = await apiFetch('GET', `/api/v1/executions/${exec.id}`);
+              if (result.status === 'done') {
+                consoleDot.style.background = 'var(--success)';
+                consoleDot.style.animation = 'none';
+                consoleTitle.textContent = `done (${result.duration_ms || '?'}ms)`;
+                outputSection.classList.remove('hidden');
+                document.getElementById('output-json').textContent = JSON.stringify(result.output, null, 2);
+                toast('Executed successfully!', 'success');
+              } else {
+                consoleDot.style.background = 'var(--error)';
+                consoleDot.style.animation = 'none';
+                consoleTitle.textContent = 'failed';
+                appendLog(`[error] ${result.error || 'Unknown error'}`);
+                toast('Execution failed', 'error');
+              }
+              reader.cancel();
+              break;
+            }
+            appendLog(data);
+          }
+        }
+      }
+    } catch(e) {
+      appendLog(`[error] ${e.message}`);
+      consoleDot.style.background = 'var(--error)';
+      consoleDot.style.animation = 'none';
+      consoleTitle.textContent = 'error';
+      toast(e.message, 'error');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '▶ Execute';
+  }
+
+  async function loadSecrets() {
+    if (!isLoggedIn()) return;
+    try {
+      const saved = await apiFetch('GET', `/api/v1/secrets/${encodeURIComponent(agent.slug)}`);
+      saved.forEach(s => {
+        const statusEl = document.getElementById(`secret-status-${s.key}`);
+        if (statusEl) {
+          statusEl.textContent = '✓ Saved';
+          statusEl.style.color = 'var(--success)';
+        }
+      });
+      const envVars = agent.manifest?.env_vars || [];
+      const custom = saved.filter(s => !envVars.includes(s.key));
+      const listEl = document.getElementById('saved-secrets-list');
+      if (listEl && custom.length) {
+        listEl.innerHTML = custom.map(s => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(245,158,11,0.04);border:1px solid var(--border);border-radius:6px;margin-bottom:4px">
+            <code style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">${esc(s.key)}</code>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:10px;color:var(--success);font-family:'JetBrains Mono',monospace">✓ saved</span>
+              <button class="btn btn-ghost btn-sm" onclick="deleteSecret('${esc(s.key)}')" style="padding:2px 6px;font-size:10px;color:var(--error);border-color:rgba(239,68,68,0.2)">×</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch(e) { /* non-critical */ }
+  }
+
+  async function saveSecret(key) {
+    if (!requireAuth()) return;
+    const input = document.getElementById(`secret-${key}`);
+    const statusEl = document.getElementById(`secret-status-${key}`);
+    const value = input.value.trim();
+    if (!value) { toast('Enter a value', 'error'); return; }
+    try {
+      await apiFetch('PUT', `/api/v1/secrets/${encodeURIComponent(agent.slug)}`, { key, value });
+      input.value = '';
+      input.placeholder = '••••••••';
+      statusEl.textContent = '✓ Saved';
+      statusEl.style.color = 'var(--success)';
+      toast(`${key} saved`, 'success');
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function saveCustomSecret() {
+    if (!requireAuth()) return;
+    const keyInput = document.getElementById('custom-secret-key');
+    const valInput = document.getElementById('custom-secret-value');
+    const key = keyInput.value.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '');
+    const value = valInput.value.trim();
+    if (!key) { toast('Enter a key name', 'error'); return; }
+    if (!value) { toast('Enter a value', 'error'); return; }
+    try {
+      await apiFetch('PUT', `/api/v1/secrets/${encodeURIComponent(agent.slug)}`, { key, value });
+      keyInput.value = '';
+      valInput.value = '';
+      toast(`${key} saved`, 'success');
+      loadSecrets();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function deleteSecret(key) {
+    if (!requireAuth()) return;
+    try {
+      await apiFetch('DELETE', `/api/v1/secrets/${encodeURIComponent(agent.slug)}`, { key });
+      toast(`${key} deleted`, 'success');
+      const statusEl = document.getElementById(`secret-status-${key}`);
+      if (statusEl) statusEl.textContent = '';
+      loadSecrets();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  // ── Agent Stats ───────────────────────────────────────────────────────────
+  async function loadAgentStats() {
+    try {
+      const s = await apiFetch('GET', `/api/v1/agents/${encodeURIComponent(slug)}/stats`);
+      const el = (id) => document.getElementById(id);
+      if (el('stat-total')) el('stat-total').textContent = s.total_calls || 0;
+      if (el('stat-success-rate')) el('stat-success-rate').textContent = s.success_rate + '%';
+      if (el('stat-avg-time')) {
+        const ms = s.avg_duration_ms || 0;
+        el('stat-avg-time').textContent = ms > 1000 ? (ms/1000).toFixed(1) + 's' : ms + 'ms';
+      }
+      if (el('stat-24h')) el('stat-24h').textContent = s.calls_24h || 0;
+    } catch(e) { /* stats are non-critical */ }
+  }
+
+  // ── README ──────────────────────────────────────────────────────────────
+  let readmeExpanded = false;
+
+  async function loadReadme() {
+    try {
+      const data = await apiFetch('GET', `/api/v1/agents/${encodeURIComponent(slug)}/readme`);
+      if (data.readme) {
+        const section = document.getElementById('readme-section');
+        const content = document.getElementById('readme-content');
+        if (section && content) {
+          content.innerHTML = renderMarkdown(data.readme);
+          section.classList.remove('hidden');
+          // Check if content overflows and show toggle
+          requestAnimationFrame(() => {
+            const wrap = document.getElementById('readme-wrap');
+            if (wrap && wrap.scrollHeight > 340) {
+              document.getElementById('readme-toggle').style.display = 'block';
+              document.getElementById('readme-fade').style.display = 'block';
+            }
+          });
+        }
+      }
+    } catch(e) { /* readme is optional */ }
+  }
+
+  function toggleReadme() {
+    const wrap = document.getElementById('readme-wrap');
+    const btn = document.getElementById('readme-toggle');
+    const fade = document.getElementById('readme-fade');
+    readmeExpanded = !readmeExpanded;
+    if (readmeExpanded) {
+      wrap.style.maxHeight = wrap.scrollHeight + 'px';
+      btn.textContent = 'Show less';
+      fade.style.display = 'none';
+    } else {
+      wrap.style.maxHeight = '320px';
+      btn.textContent = 'Show more';
+      fade.style.display = 'block';
+    }
+  }
+
+  function renderMarkdown(text) {
+    // Truncate extremely long READMEs
+    if (text.length > 15000) text = text.slice(0, 15000) + '\n\n*... README truncated ...*';
+
+    // Escape HTML first
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Code blocks (```) — must be before inline code
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;color:#86efac;overflow-x:auto;margin:12px 0;white-space:pre-wrap">${code.trim()}</pre>`
+    );
+
+    // Inline code
+    html = html.replace(/`([^`\n]+)`/g,
+      '<code style="font-family:\'JetBrains Mono\',monospace;font-size:11px;background:rgba(245,158,11,0.08);padding:2px 5px;border-radius:3px;color:var(--primary)">$1</code>');
+
+    // Headers
+    html = html.replace(/^#### (.+)$/gm, '<h5 style="font-size:13px;font-weight:600;margin:14px 0 6px;color:var(--text)">$1</h5>');
+    html = html.replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:600;margin:16px 0 8px;color:var(--text)">$1</h4>');
+    html = html.replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text)">$1</h3>');
+    html = html.replace(/^# (.+)$/gm, '<h2 style="font-size:17px;font-weight:800;margin:24px 0 12px;color:var(--text)">$1</h2>');
+
+    // Bold, italic
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline">$1</a>');
+
+    // Images — render as small placeholder, not full-size
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+      '<span style="font-size:10px;color:var(--text-dim);font-family:\'JetBrains Mono\',monospace">[image: $1]</span>');
+
+    // Lists
+    html = html.replace(/^(\d+)\. (.+)$/gm, '<li style="margin-left:20px;list-style:decimal;margin-bottom:4px">$2</li>');
+    html = html.replace(/^- (.+)$/gm, '<li style="margin-left:16px;list-style:disc;margin-bottom:4px">$1</li>');
+
+    // Horizontal rules
+    html = html.replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:16px 0">');
+
+    // Blockquotes
+    html = html.replace(/^&gt; (.+)$/gm,
+      '<blockquote style="border-left:3px solid rgba(245,158,11,0.3);padding-left:12px;margin:8px 0;color:var(--text-muted);font-style:italic">$1</blockquote>');
+
+    // Line breaks
+    html = html.replace(/\n\n/g, '<br><br>');
+    html = html.replace(/\n/g, '<br>');
+
+    return html;
+  }
+
+  load();
+  // Load stats and readme after main load
+  setTimeout(() => { loadAgentStats(); loadReadme(); }, 100);
+</script>
+</body>
+</html>

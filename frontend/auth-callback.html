@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logging in... — HiveMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="container" style="text-align:center;padding:140px 24px">
+  <div class="spinner" style="margin:0 auto 20px;width:24px;height:24px;border-width:3px"></div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--primary);letter-spacing:0.4em;text-transform:uppercase;margin-bottom:12px">Authenticating</div>
+  <h3 id="status" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem">Logging in...</h3>
+  <p id="detail" style="color:var(--text-muted);margin-top:10px;font-size:13px"></p>
+</div>
+
+<script src="/ui/static/app.js"></script>
+<script>
+  // Parse token from URL fragment: #token=xxx&wallet=yyy&username=zzz&avatar=aaa
+  const params = new URLSearchParams(location.hash.slice(1));
+  const token = params.get('token');
+  const wallet = params.get('wallet');
+  const username = params.get('username');
+  const avatar = params.get('avatar');
+
+  if (token && wallet) {
+    setToken(token);
+    localStorage.setItem('hivemind_wallet', wallet);
+    if (username) localStorage.setItem('hivemind_username', username);
+    if (avatar) localStorage.setItem('hivemind_avatar', avatar);
+
+    document.getElementById('status').textContent = `Welcome, ${username || wallet}!`;
+    document.getElementById('detail').textContent = 'Redirecting to dashboard...';
+
+    setTimeout(() => {
+      location.href = '/ui/dashboard.html';
+    }, 800);
+  } else {
+    document.getElementById('status').textContent = 'Login failed';
+    document.getElementById('detail').innerHTML = 'No token received. <a href="/ui/" style="color:var(--primary)">Go home</a>';
+  }
+</script>
+</body>
+</html>

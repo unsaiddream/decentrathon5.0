@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Cabinet — HiveMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <style>
+    /* ── Profile header ── */
+    .profile-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(0,0,0,0) 60%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 36px;
+      display: flex; align-items: center; gap: 28px;
+      margin-bottom: 28px; position: relative; overflow: hidden;
+    }
+    .profile-banner::before {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 280px; height: 100%;
+      background: radial-gradient(ellipse at right, rgba(245,158,11,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      border: 2px solid rgba(245,158,11,0.3);
+      background: var(--surface);
+      flex-shrink: 0; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-name {
+      font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .profile-handle {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-muted); letter-spacing: 0.05em;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .profile-handle .sep { color: var(--border-strong); }
+    .profile-bee {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(245,158,11,0.07); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 10px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--primary); letter-spacing: 0.08em; cursor: pointer;
+      transition: all var(--transition); text-decoration: none;
+    }
+    .profile-bee:hover { border-color: var(--border-strong); background: rgba(245,158,11,0.12); }
+    .profile-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── Stats strip ── */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 22px;
+      transition: border-color var(--transition);
+    }
+    .stat-card:hover { border-color: var(--border-strong); }
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 10px;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700;
+      color: var(--text); line-height: 1;
+    }
+    .stat-value.amber { color: var(--primary); }
+    .stat-value.green { color: var(--success); }
+    .stat-sub {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      color: var(--text-dim); margin-top: 6px;
+    }
+
+    /* ── Tabs ── */
+    .cabinet-tabs {
+      display: flex; gap: 2px; border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .cabinet-tab {
+      padding: 10px 18px; font-size: 12px; font-weight: 500;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 2px solid transparent; cursor: pointer;
+      margin-bottom: -1px; transition: all var(--transition);
+    }
+    .cabinet-tab:hover { color: var(--text); }
+    .cabinet-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ── Agent rows ── */
+    .agent-row-card {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 8px;
+      background: var(--card); transition: border-color var(--transition);
+    }
+    .agent-row-card:hover { border-color: var(--border-strong); }
+    .agent-row-icon {
+      width: 38px; height: 38px; border-radius: 8px;
+      background: rgba(245,158,11,0.08); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .agent-row-info { flex: 1; min-width: 0; }
+    .agent-row-name {
+      font-weight: 600; font-size: 14px; color: var(--text);
+      text-decoration: none; display: block;
+    }
+    .agent-row-name:hover { color: var(--primary); }
+    .agent-row-slug {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text-dim); margin-top: 2px;
+    }
+    .agent-row-stats {
+      display: flex; gap: 20px; align-items: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);
+    }
+    .agent-row-price { color: var(--primary); font-weight: 600; }
+
+    /* ── Exec / tx rows ── */
+    .exec-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      font-size: 13px; transition: background var(--transition);
+    }
+    .exec-row:hover { background: rgba(245,158,11,0.02); }
+    .exec-row:last-child { border-bottom: none; }
+
+    /* ── Deposit modal ── */
+    .deposit-addr {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; word-break: break-all;
+      color: var(--primary); cursor: pointer; position: relative;
+    }
+    .deposit-addr:hover { border-color: var(--border-strong); }
+
+    @media (max-width: 680px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .profile-banner { flex-direction: column; text-align: center; }
+      .profile-actions { justify-content: center; }
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">Cerebrum Vespiary</div></a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Agents</a>
+      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/dashboard.html" class="active">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
+      <a href="/ui/assistant.html" id="nav-assistant-link">Assistant</a>
+      <a href="/ui/swarm.html">Swarm</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Join Collective</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Auth wall -->
+<div id="auth-wall" class="auth-wall hidden">
+  <div class="auth-wall-card">
+    <div class="auth-wall-icon">⬡</div>
+    <div class="auth-wall-overline">⬡ HiveMind Protocol</div>
+    <h2>Join Collective</h2>
+    <p>Sign in to access your personal cabinet — manage agents, track executions, and control your balance.</p>
+    <div class="auth-wall-btns">
+      <button class="btn btn-primary" onclick="loginWithGithub()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Continue with GitHub
+      </button>
+      <button class="btn btn-ghost" onclick="connectAndLoad()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10H18a2 2 0 000 4h4"/></svg>
+        Connect Wallet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cabinet content -->
+<div id="cabinet" class="hidden container page">
+
+  <!-- Profile banner -->
+  <div class="profile-banner">
+    <div class="profile-avatar" id="profile-avatar">⬡</div>
+    <div class="profile-info">
+      <div class="profile-name" id="profile-name">Loading...</div>
+      <div class="profile-handle">
+        <span id="profile-wallet">—</span>
+        <span class="sep">·</span>
+        <span id="profile-joined" style="color:var(--text-dim)">—</span>
+        <a href="/ui/assistant.html" class="profile-bee" id="profile-bee" style="display:none">
+          <span id="bee-emoji-nav">🐝</span>
+          <span id="bee-name-nav">My Assistant</span>
+        </a>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <a href="/ui/upload.html" class="btn btn-primary btn-sm">+ Deploy Agent</a>
+      <button class="btn btn-ghost btn-sm" onclick="if(confirm('Sign out?'))logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-label">Balance</div>
+      <div class="stat-value amber" id="stat-balance">—</div>
+      <div class="stat-sub">SOL · <button onclick="openDepositModal()" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:9px;font-family:'JetBrains Mono',monospace;padding:0;letter-spacing:0.05em">+ DEPOSIT</button> · <button onclick="openWithdrawModal()" style="background:none;border:none;color:#22c55e;cursor:pointer;font-size:9px;font-family:'JetBrains Mono',monospace;padding:0;letter-spacing:0.05em">↑ WITHDRAW</button></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Earned (30d)</div>
+      <div class="stat-value green" id="stat-earned">—</div>
+      <div class="stat-sub">SOL from calls</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">My Agents</div>
+      <div class="stat-value" id="stat-agents">—</div>
+      <div class="stat-sub">deployed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Calls</div>
+      <div class="stat-value" id="stat-calls">—</div>
+      <div class="stat-sub">received</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="cabinet-tabs">
+    <div class="cabinet-tab active" onclick="switchTab('agents',this)">My Agents</div>
+    <div class="cabinet-tab" onclick="switchTab('executions',this)">Executions</div>
+    <div class="cabinet-tab" onclick="switchTab('transactions',this)">Transactions</div>
+    <div class="cabinet-tab" onclick="switchTab('assistant',this)">Assistant</div>
+    <div class="cabinet-tab" onclick="switchTab('apikeys',this)">API Keys</div>
+  </div>
+
+  <!-- Tab: My Agents -->
+  <div id="tab-agents">
+    <div class="section-header" style="margin-bottom:16px">
+      <span id="agents-count" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.1em"></span>
+      <a href="/ui/upload.html" class="btn btn-primary btn-sm">+ New Agent</a>
+    </div>
+    <div id="agents-list">
+      <div style="text-align:center;padding:64px;color:var(--text-muted)">
+        <div class="spinner" style="margin:0 auto 16px"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Executions -->
+  <div id="tab-executions" class="hidden">
+    <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div id="exec-list">
+        <div style="text-align:center;padding:64px;color:var(--text-muted)">
+          <div class="spinner" style="margin:0 auto 16px"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Transactions -->
+  <div id="tab-transactions" class="hidden">
+    <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div id="tx-list">
+        <div style="text-align:center;padding:64px;color:var(--text-muted)">
+          <div class="spinner" style="margin:0 auto 16px"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: API Keys -->
+  <div id="tab-apikeys" class="hidden">
+    <div style="max-width:640px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px">API Keys</div>
+          <div style="font-size:12px;color:var(--text-muted)">Используй ключи чтобы агенты могли вызывать HiveMind API</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openCreateKeyModal()">+ New Key</button>
+      </div>
+
+      <!-- Usage hint -->
+      <div style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);line-height:1.8">
+        <div style="color:#f59e0b;margin-bottom:6px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase">Usage</div>
+        <div>POST https://hivemind.cv/api/v1/execute</div>
+        <div>Authorization: Bearer <span style="color:#f59e0b">hm_sk_...</span></div>
+      </div>
+
+      <!-- Keys list -->
+      <div id="keys-list">
+        <div style="text-align:center;padding:48px;color:var(--text-muted)">
+          <div class="spinner" style="margin:0 auto 12px"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create key modal -->
+    <div id="create-key-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+      <div style="background:#0c0b06;border:1px solid rgba(245,158,11,0.2);border-radius:16px;padding:28px;width:360px;position:relative">
+        <button onclick="closeCreateKeyModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;line-height:1">✕</button>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px">New API Key</div>
+        <input id="key-name-input" type="text" placeholder='e.g. "My Agent"' maxlength="100"
+          style="width:100%;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text-primary);outline:none;box-sizing:border-box;margin-bottom:16px">
+        <button class="btn btn-primary" style="width:100%" onclick="createKey()">Generate Key</button>
+
+        <!-- Key reveal (shown after creation) -->
+        <div id="key-reveal" class="hidden" style="margin-top:20px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#f59e0b;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">⚠ Copy now — shown only once</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <code id="key-reveal-value" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 10px;word-break:break-all;color:var(--text-primary)"></code>
+            <button onclick="copyRevealedKey()" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 10px;cursor:pointer;color:#f59e0b;font-size:12px;flex-shrink:0;white-space:nowrap">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Assistant -->
+  <div id="tab-assistant" class="hidden">
+    <div style="max-width:540px">
+      <div class="card" id="assistant-card">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div style="font-size:48px;line-height:1" id="asst-emoji">🐝</div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:4px" id="asst-name">Not configured</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:0.1em" id="asst-provider">—</div>
+          </div>
+        </div>
+        <p style="font-size:13px;margin-bottom:20px">Your personal AI assistant named after a bee. It can call any agent in the hub on your behalf.</p>
+        <div style="display:flex;gap:8px">
+          <a href="/ui/assistant.html" class="btn btn-primary btn-sm">Open Chat</a>
+          <a href="/ui/assistant.html" class="btn btn-ghost btn-sm">Configure</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Deposit Modal -->
+<div id="deposit-modal" class="modal-overlay hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="font-size:9px;color:var(--primary);font-family:'JetBrains Mono',monospace;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:16px">⬡ Deposit SOL</div>
+    <h3 style="margin-bottom:8px">Add Funds</h3>
+    <p style="font-size:13px;margin-bottom:20px;color:var(--text-muted)">Send SOL to the platform wallet, then confirm the transaction hash.</p>
+    <div class="form-group">
+      <label>Platform Wallet</label>
+      <div class="deposit-addr" id="platform-addr" onclick="copyText(this.textContent.trim())">
+        6S8E8K9DBr6c1zbv6T98DAPm8JaoaKxeCqLAqQ2BkY24
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:4px;font-family:'JetBrains Mono',monospace">Click to copy</div>
+    </div>
+    <div class="form-group">
+      <label>Amount (SOL)</label>
+      <input class="input" type="number" step="0.001" min="0.001" id="deposit-amount" placeholder="0.1" style="font-family:'JetBrains Mono',monospace">
+    </div>
+    <div class="form-group">
+      <label>Transaction Hash</label>
+      <input class="input" id="deposit-hash" placeholder="Solana tx hash..." style="font-family:'JetBrains Mono',monospace;font-size:12px">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="document.getElementById('deposit-modal').classList.add('hidden')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitDeposit()">Confirm Deposit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div id="withdraw-modal" class="modal-overlay hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="font-size:9px;color:#22c55e;font-family:'JetBrains Mono',monospace;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:16px">↑ Withdraw SOL</div>
+    <h3 style="margin-bottom:8px">Withdraw Funds</h3>
+    <p style="font-size:13px;margin-bottom:20px;color:var(--text-muted)">Send SOL from your HiveMind balance to any Solana wallet. Platform fee: <strong style="color:var(--primary)">10%</strong></p>
+    <div class="form-group">
+      <label>Your Balance</label>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;color:var(--primary);font-weight:700" id="withdraw-balance">—</div>
+    </div>
+    <div class="form-group">
+      <label>Amount (SOL)</label>
+      <input class="input" type="number" step="0.001" min="0.01" id="withdraw-amount" placeholder="0.1" style="font-family:'JetBrains Mono',monospace" oninput="updateWithdrawPreview()">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:6px" id="withdraw-preview"></div>
+    </div>
+    <div class="form-group">
+      <label>Destination Wallet</label>
+      <input class="input" id="withdraw-wallet" placeholder="Solana wallet address..." style="font-family:'JetBrains Mono',monospace;font-size:12px">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="document.getElementById('withdraw-modal').classList.add('hidden')">Cancel</button>
+      <button class="btn btn-primary" id="withdraw-btn" onclick="submitWithdraw()">Withdraw</button>
+    </div>
+    <!-- Success result -->
+    <div id="withdraw-result" class="hidden" style="margin-top:20px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:14px 16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#22c55e;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Transaction Sent</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);word-break:break-all" id="withdraw-tx-hash"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/ui/static/app.js"></script>
+<script>
+  initNav();
+
+  async function connectAndLoad() {
+    const ok = await connectWallet();
+    if (ok) init();
+  }
+
+  async function init() {
+    if (!isLoggedIn()) {
+      document.getElementById('auth-wall').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('cabinet').classList.remove('hidden');
+    loadProfile();
+    loadStats();
+    loadMyAgents();
+  }
+
+  // ── Profile ──────────────────────────────────────────────────────────────
+  async function loadProfile() {
+    try {
+      const user = await apiFetch('GET', '/api/v1/auth/me');
+      const ghUsername = localStorage.getItem('hivemind_username');
+      const ghAvatar = localStorage.getItem('hivemind_avatar');
+
+      // Avatar
+      const avatarEl = document.getElementById('profile-avatar');
+      if (ghAvatar) {
+        avatarEl.innerHTML = `<img src="${esc(ghAvatar)}" alt="">`;
+      } else {
+        avatarEl.textContent = (user.wallet_address || '?')[0].toUpperCase();
+      }
+
+      // Name
+      document.getElementById('profile-name').textContent =
+        ghUsername || (user.wallet_address ? user.wallet_address.slice(0,8) + '...' + user.wallet_address.slice(-4) : 'Anonymous');
+
+      // Handle
+      document.getElementById('profile-wallet').textContent =
+        user.wallet_address ? user.wallet_address.slice(0,6) + '...' + user.wallet_address.slice(-4) : '—';
+
+      if (user.created_at) {
+        const d = new Date(user.created_at);
+        document.getElementById('profile-joined').textContent =
+          'Joined ' + d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+
+      // Balance in stat
+      document.getElementById('stat-balance').textContent =
+        parseFloat(user.balance_sol || 0).toFixed(4);
+
+    } catch(e) { console.error(e); }
+
+    // Load assistant
+    try {
+      const asst = await apiFetch('GET', '/api/v1/assistant/me');
+      if (asst.has_api_key) {
+        const bee = document.getElementById('profile-bee');
+        bee.style.display = 'flex';
+        document.getElementById('bee-emoji-nav').textContent = asst.emoji || '🐝';
+        document.getElementById('bee-name-nav').textContent = asst.name || 'Assistant';
+        document.getElementById('asst-emoji').textContent = asst.emoji || '🐝';
+        document.getElementById('asst-name').textContent = asst.name;
+        document.getElementById('asst-provider').textContent =
+          (asst.provider || '').toUpperCase() + ' · PERSONAL ASSISTANT';
+      }
+    } catch(e) {}
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    // Earnings
+    try {
+      const data = await apiFetch('GET', '/api/v1/payments/earnings?period=30d');
+      document.getElementById('stat-earned').textContent =
+        parseFloat(data.total_earned_sol || 0).toFixed(4);
+    } catch(e) {}
+
+    // Agents count + total calls
+    try {
+      const data = await apiFetch('GET', '/api/v1/agents/my?limit=100');
+      document.getElementById('stat-agents').textContent = data.total || 0;
+      const totalCalls = (data.agents || []).reduce((s, a) => s + (a.call_count || 0), 0);
+      document.getElementById('stat-calls').textContent = formatNumber(totalCalls);
+    } catch(e) {}
+  }
+
+  // ── My Agents ─────────────────────────────────────────────────────────────
+  async function loadMyAgents() {
+    try {
+      const data = await apiFetch('GET', '/api/v1/agents/my?limit=50');
+      const list = document.getElementById('agents-list');
+      const count = data.total || 0;
+      document.getElementById('agents-count').textContent =
+        count === 0 ? 'No agents deployed' : `${count} agent${count > 1 ? 's' : ''}`;
+
+      if (!data.agents?.length) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:36px;margin-bottom:16px">⬡</div>
+            <h3>No agents yet</h3>
+            <p>Deploy your first agent to the hub</p>
+            <a href="/ui/upload.html" class="btn btn-primary" style="margin-top:20px">Deploy Agent</a>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = data.agents.map(a => `
+        <div class="agent-row-card">
+          <div class="agent-row-icon">${a.emoji || '⬡'}</div>
+          <div class="agent-row-info">
+            <a href="/ui/agent-detail.html?slug=${encodeURIComponent(a.slug)}" class="agent-row-name">${esc(a.name)}</a>
+            <div class="agent-row-slug">${esc(a.slug)}</div>
+          </div>
+          <div class="agent-row-stats">
+            <span class="agent-row-price">${parseFloat(a.price_per_call).toFixed(4)} SOL</span>
+            <span>${formatNumber(a.call_count || 0)} calls</span>
+            <span class="badge ${a.is_active ? 'badge-green' : 'badge-gray'}">${a.is_active ? 'Active' : 'Paused'}</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <a href="/ui/agent-detail.html?slug=${encodeURIComponent(a.slug)}" class="btn btn-ghost btn-sm">View</a>
+            <button class="btn btn-ghost btn-sm" onclick="toggleAgent('${esc(a.slug)}',${!a.is_active})">${a.is_active ? 'Pause' : 'Resume'}</button>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      document.getElementById('agents-list').innerHTML =
+        `<div class="empty-state"><p>${esc(e.message)}</p></div>`;
+    }
+  }
+
+  // ── Executions ────────────────────────────────────────────────────────────
+  async function loadExecutions() {
+    const list = document.getElementById('exec-list');
+    try {
+      const data = await apiFetch('GET', '/api/v1/executions?limit=25');
+      if (!data?.length) {
+        list.innerHTML = `<div style="text-align:center;padding:56px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px">No executions yet</div>`;
+        return;
+      }
+      list.innerHTML = data.map(e => {
+        const sc = e.status === 'done' ? 'badge-green' : e.status === 'failed' ? 'badge-gray' : 'badge-yellow';
+        return `<div class="exec-row">
+          <span class="badge ${sc}">${e.status}</span>
+          <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);flex:1">${esc(e.id?.slice(0,16))}…</code>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim)">${e.duration_ms ? e.duration_ms + 'ms' : '—'}</span>
+          <span style="font-size:11px;color:var(--text-dim);min-width:80px;text-align:right">${formatDate(e.created_at)}</span>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--error);font-size:13px">${esc(e.message)}</div>`;
+    }
+  }
+
+  // ── Transactions ──────────────────────────────────────────────────────────
+  async function loadTransactions() {
+    const list = document.getElementById('tx-list');
+    try {
+      const data = await apiFetch('GET', '/api/v1/payments/history');
+      if (!data?.length) {
+        list.innerHTML = `<div style="text-align:center;padding:56px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px">No transactions yet</div>`;
+        return;
+      }
+      list.innerHTML = data.map(t => `
+        <div class="exec-row">
+          <span class="badge ${t.type === 'deposit' ? 'badge-green' : 'badge-purple'}">${t.type}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--primary);flex:1">${parseFloat(t.amount_sol).toFixed(6)} SOL</span>
+          ${t.tx_hash ? `<code style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim)" onclick="copyText('${esc(t.tx_hash)}')" title="Click to copy">${t.tx_hash.slice(0,10)}…</code>` : '<span>—</span>'}
+          <span style="font-size:11px;color:var(--text-dim);min-width:80px;text-align:right">${formatDate(t.created_at)}</span>
+        </div>`).join('');
+    } catch(e) {
+      list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--error);font-size:13px">${esc(e.message)}</div>`;
+    }
+  }
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(name, el) {
+    document.querySelectorAll('.cabinet-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    ['agents','executions','transactions','assistant','apikeys'].forEach(t =>
+      document.getElementById('tab-' + t).classList.add('hidden'));
+    document.getElementById('tab-' + name).classList.remove('hidden');
+    if (name === 'executions') loadExecutions();
+    if (name === 'transactions') loadTransactions();
+    if (name === 'apikeys') loadApiKeys();
+  }
+
+  // ── API Keys ──────────────────────────────────────────────────────────────
+  async function loadApiKeys() {
+    const list = document.getElementById('keys-list');
+    try {
+      const keys = await apiFetch('GET', '/api/v1/keys');
+      if (!keys.length) {
+        list.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text-muted)">
+          <div style="font-size:28px;margin-bottom:12px">🔑</div>
+          <div style="font-size:13px">No API keys yet. Create one to get started.</div>
+        </div>`;
+        return;
+      }
+      list.innerHTML = `<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        ${keys.map(k => `
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);last-child{border:none}">
+            <div style="width:8px;height:8px;border-radius:50%;background:${k.is_active ? '#22c55e' : 'var(--text-dim)'};box-shadow:${k.is_active ? '0 0 6px rgba(34,197,94,0.5)' : 'none'};flex-shrink:0"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:500;margin-bottom:2px">${esc(k.name)}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">${esc(k.key_prefix)}</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);text-align:right;flex-shrink:0">
+              <div>${k.last_used_at ? 'Last used ' + relativeTime(k.last_used_at) : 'Never used'}</div>
+              <div style="margin-top:2px">${new Date(k.created_at).toLocaleDateString()}</div>
+            </div>
+            <button onclick="revokeKey('${k.id}', '${esc(k.name)}')"
+              style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;padding:5px 10px;font-size:11px;color:#fca5a5;cursor:pointer;flex-shrink:0;font-family:'JetBrains Mono',monospace">
+              Revoke
+            </button>
+          </div>
+        `).join('')}
+      </div>`;
+    } catch(e) {
+      list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--error);font-size:13px">${esc(e.message)}</div>`;
+    }
+  }
+
+  function openCreateKeyModal() {
+    document.getElementById('create-key-modal').classList.remove('hidden');
+    document.getElementById('key-reveal').classList.add('hidden');
+    document.getElementById('key-name-input').value = '';
+    setTimeout(() => document.getElementById('key-name-input').focus(), 50);
+  }
+
+  function closeCreateKeyModal() {
+    document.getElementById('create-key-modal').classList.add('hidden');
+    loadApiKeys();
+  }
+
+  async function createKey() {
+    const name = document.getElementById('key-name-input').value.trim();
+    if (!name) { toast('Enter a key name', 'error'); return; }
+    try {
+      const result = await apiFetch('POST', '/api/v1/keys', { name });
+      // Show the key
+      document.getElementById('key-reveal').classList.remove('hidden');
+      document.getElementById('key-reveal-value').textContent = result.key;
+      document.getElementById('key-name-input').disabled = true;
+      document.querySelector('#create-key-modal .btn.btn-primary').textContent = 'Done';
+      document.querySelector('#create-key-modal .btn.btn-primary').onclick = closeCreateKeyModal;
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function copyRevealedKey() {
+    const val = document.getElementById('key-reveal-value').textContent;
+    navigator.clipboard.writeText(val).then(() => toast('Copied!', 'success'));
+  }
+
+  async function revokeKey(id, name) {
+    if (!confirm(`Revoke key "${name}"? This cannot be undone.`)) return;
+    try {
+      await apiFetch('DELETE', `/api/v1/keys/${id}`);
+      toast('Key revoked', 'success');
+      loadApiKeys();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function relativeTime(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+  }
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+  async function toggleAgent(slug, newActive) {
+    try {
+      await apiFetch('PUT', `/api/v1/agents/${encodeURIComponent(slug)}`, { is_active: newActive });
+      toast(newActive ? 'Agent activated' : 'Agent paused', 'success');
+      loadMyAgents();
+      loadStats();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function openDepositModal() { document.getElementById('deposit-modal').classList.remove('hidden'); }
+
+  function openWithdrawModal() {
+    const bal = document.getElementById('stat-balance').textContent;
+    document.getElementById('withdraw-balance').textContent = bal + ' SOL';
+    document.getElementById('withdraw-amount').value = '';
+    document.getElementById('withdraw-wallet').value = '';
+    document.getElementById('withdraw-preview').textContent = '';
+    document.getElementById('withdraw-result').classList.add('hidden');
+    document.getElementById('withdraw-btn').disabled = false;
+    document.getElementById('withdraw-btn').textContent = 'Withdraw';
+    document.getElementById('withdraw-modal').classList.remove('hidden');
+  }
+
+  function updateWithdrawPreview() {
+    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+    const el = document.getElementById('withdraw-preview');
+    if (!amount || amount <= 0) { el.textContent = ''; return; }
+    const fee = (amount * 0.1).toFixed(6);
+    const payout = (amount * 0.9).toFixed(6);
+    el.innerHTML = `Fee: <span style="color:#fca5a5">${fee} SOL</span> · You receive: <span style="color:#22c55e">${payout} SOL</span>`;
+  }
+
+  async function submitWithdraw() {
+    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+    const wallet = document.getElementById('withdraw-wallet').value.trim();
+    if (!amount || amount < 0.01) { toast('Minimum withdrawal: 0.01 SOL', 'error'); return; }
+    if (!wallet || wallet.length < 32) { toast('Enter a valid Solana wallet address', 'error'); return; }
+    if (!confirm(`Withdraw ${amount} SOL?\nFee: ${(amount*0.1).toFixed(6)} SOL\nYou receive: ${(amount*0.9).toFixed(6)} SOL\nTo: ${wallet}`)) return;
+
+    const btn = document.getElementById('withdraw-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const result = await apiFetch('POST', '/api/v1/payments/withdraw', { amount_sol: amount, to_wallet: wallet });
+      toast('Withdrawal successful!', 'success');
+      document.getElementById('withdraw-result').classList.remove('hidden');
+      document.getElementById('withdraw-tx-hash').innerHTML =
+        `<a href="https://explorer.solana.com/tx/${esc(result.tx_hash)}?cluster=devnet" target="_blank" style="color:#22c55e;text-decoration:underline">${result.tx_hash}</a>`;
+      btn.textContent = 'Done';
+      // Обновляем баланс
+      document.getElementById('stat-balance').textContent = parseFloat(result.new_balance_sol).toFixed(4);
+      document.getElementById('withdraw-balance').textContent = parseFloat(result.new_balance_sol).toFixed(4) + ' SOL';
+    } catch(e) {
+      toast(e.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Withdraw';
+    }
+  }
+
+  async function submitDeposit() {
+    const amount = parseFloat(document.getElementById('deposit-amount').value);
+    const hash = document.getElementById('deposit-hash').value.trim();
+    if (!amount || !hash) { toast('Fill all fields', 'error'); return; }
+    try {
+      await apiFetch('POST', '/api/v1/payments/deposit', { amount_sol: amount, tx_hash: hash });
+      toast('Deposit confirmed!', 'success');
+      document.getElementById('deposit-modal').classList.add('hidden');
+      loadProfile();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  init();
+</script>
+</body>
+</html>

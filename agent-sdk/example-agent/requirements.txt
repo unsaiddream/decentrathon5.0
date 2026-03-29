@@ -1,0 +1,4 @@
+# No external dependencies — uses only stdlib
+# Add your dependencies here, e.g.:
+# openai==1.40.0
+# httpx==0.27.2

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marketplace — HiveMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">Cerebrum Vespiary</div></a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html" class="active">Agents</a>
+      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
+      <a href="/ui/assistant.html" id="nav-assistant-link">Assistant</a>
+      <a href="/ui/swarm.html">Swarm</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container page">
+  <div style="margin-bottom:32px">
+    <div class="section-title" style="margin-bottom:10px">Agent Network</div>
+    <h1 style="font-size:2rem;margin-bottom:6px">Marketplace</h1>
+    <p style="font-size:14px" id="total-label">Loading agents...</p>
+  </div>
+
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon">⬡</span>
+      <input class="input" id="search-input" placeholder="Search agents..." oninput="onSearch()" style="font-family:'JetBrains Mono',monospace;font-size:12px;">
+    </div>
+    <div class="filters" id="category-filters">
+      <button class="filter-btn active" data-cat="" onclick="setCategory(this, '')">All</button>
+      <button class="filter-btn" data-cat="document-processing" onclick="setCategory(this, 'document-processing')">Documents</button>
+      <button class="filter-btn" data-cat="data-analysis" onclick="setCategory(this, 'data-analysis')">Data</button>
+      <button class="filter-btn" data-cat="nlp" onclick="setCategory(this, 'nlp')">NLP</button>
+      <button class="filter-btn" data-cat="automation" onclick="setCategory(this, 'automation')">Automation</button>
+      <button class="filter-btn" data-cat="other" onclick="setCategory(this, 'other')">Other</button>
+    </div>
+    <select class="input" id="sort-select" style="width:auto;min-width:160px;font-family:'JetBrains Mono',monospace;font-size:11px;" onchange="loadAgents()">
+      <option value="popular">Most Popular</option>
+      <option value="recent">Most Recent</option>
+      <option value="price_asc">Price: Low → High</option>
+      <option value="price_desc">Price: High → Low</option>
+    </select>
+  </div>
+
+  <div class="agents-grid" id="agents-grid">
+    <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:70%"></div><div class="sk-line skeleton" style="width:80%"></div><div class="sk-line skeleton" style="width:50%"></div></div>
+    <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:60%"></div><div class="sk-line skeleton" style="width:90%"></div><div class="sk-line skeleton" style="width:45%"></div></div>
+    <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:75%"></div><div class="sk-line skeleton" style="width:70%"></div><div class="sk-line skeleton" style="width:55%"></div></div>
+    <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:65%"></div><div class="sk-line skeleton" style="width:85%"></div><div class="sk-line skeleton" style="width:40%"></div></div>
+    <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:80%"></div><div class="sk-line skeleton" style="width:60%"></div><div class="sk-line skeleton" style="width:50%"></div></div>
+    <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:55%"></div><div class="sk-line skeleton" style="width:75%"></div><div class="sk-line skeleton" style="width:35%"></div></div>
+  </div>
+
+  <div id="pagination" class="flex items-center justify-between" style="margin-top:32px;display:none">
+    <button class="btn btn-ghost btn-sm" id="prev-btn" onclick="prevPage()">← Prev</button>
+    <span id="page-info" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em"></span>
+    <button class="btn btn-ghost btn-sm" id="next-btn" onclick="nextPage()">Next →</button>
+  </div>
+</div>
+
+<script src="/ui/static/app.js"></script>
+<script>
+  let page = 1, totalPages = 1, currentCat = '', searchTimer;
+
+  initNav();
+  loadAgents();
+
+  function onSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { page = 1; loadAgents(); }, 350);
+  }
+
+  function setCategory(el, cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    currentCat = cat;
+    page = 1;
+    loadAgents();
+  }
+
+  async function loadAgents() {
+    const search = document.getElementById('search-input').value;
+    const sort = document.getElementById('sort-select').value;
+    const limit = 12;
+    let url = `/api/v1/agents?page=${page}&limit=${limit}&sort=${sort}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (currentCat) url += `&category=${encodeURIComponent(currentCat)}`;
+
+    const grid = document.getElementById('agents-grid');
+    grid.innerHTML = skeletonCards(6);
+
+    try {
+      const data = await apiFetch('GET', url);
+      totalPages = Math.ceil(data.total / limit) || 1;
+      document.getElementById('total-label').textContent = `${data.total} agents found`;
+
+      if (!data.agents?.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>No agents found</h3><p>Try a different search or category</p></div>';
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+
+      grid.innerHTML = data.agents.map(renderAgentCard).join('');
+
+      const pag = document.getElementById('pagination');
+      pag.style.display = 'flex';
+      document.getElementById('page-info').textContent = `Page ${page} / ${totalPages}`;
+      document.getElementById('prev-btn').disabled = page <= 1;
+      document.getElementById('next-btn').disabled = page >= totalPages;
+    } catch(e) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>${e.message}</p></div>`;
+    }
+  }
+
+  function prevPage() { if (page > 1) { page--; loadAgents(); } }
+  function nextPage() { if (page < totalPages) { page++; loadAgents(); } }
+</script>
+</body>
+</html>

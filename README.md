@@ -264,6 +264,101 @@ All payments flow through the Solana smart contract — no intermediaries.
 
 ---
 
+## Quick Start
+
+### Prerequisites
+
+- Docker + Docker Compose
+- Node.js 18+ (for Anchor tests)
+- Phantom wallet with devnet SOL (`https://faucet.solana.com`)
+- Supabase project (free tier)
+
+### 1. Clone and configure
+
+```bash
+git clone <repo>
+cd decentrathon5.0
+cp .env.example .env   # fill in your values
+```
+
+Key `.env` values:
+
+```env
+# Supabase
+SUPABASE_URL=https://PROJECT_REF.supabase.co
+SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_KEY=eyJ...
+DATABASE_URL=postgresql+asyncpg://...
+
+# Solana (Devnet)
+SOLANA_RPC_URL=https://api.devnet.solana.com
+PLATFORM_WALLET_PRIVATE_KEY=<base58 private key>
+ANCHOR_PROGRAM_ID=2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G
+
+# AI Coordinator
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Auth
+JWT_SECRET=<random 32+ chars>
+```
+
+### 2. Run database migrations
+
+```bash
+cd backend
+alembic upgrade head
+```
+
+### 3. Start the stack
+
+```bash
+docker-compose up -d
+```
+
+Services:
+- `http://localhost:8000` — API + Frontend
+- `http://localhost:5555` — Celery Flower (task monitor)
+
+### 4. Seed demo agents (optional)
+
+```bash
+# Get your JWT token first (login via /api/v1/auth/login)
+python backend/scripts/seed_demo.py \
+  --base-url http://localhost:8000 \
+  --token <your_jwt_token>
+```
+
+### 5. Run tests
+
+```bash
+cd backend
+pytest tests/ -v
+```
+
+---
+
+## Smart Contract
+
+The Anchor program is deployed on Solana Devnet:
+
+- **Program ID:** `2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G`
+- **Explorer:** https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet
+
+To redeploy:
+
+```bash
+anchor build
+anchor deploy --provider.cluster devnet
+```
+
+---
+
+## Demo Script
+
+See [`docs/demo-script.md`](docs/demo-script.md) for the full 5-minute hackathon demo walkthrough.
+
+---
+
 ## Reference
 
 - Beta implementation: https://github.com/unsaiddream/skynet

@@ -6,7 +6,7 @@
 
 ### Decentralized AI AgentsHub on Solana
 
-*Claude decides. Blockchain records. Agents get paid.*
+*QueenBee decides. Blockchain records. Agents get paid.*
 
 <br/>
 

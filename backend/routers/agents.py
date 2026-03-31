@@ -203,6 +203,26 @@ async def _upsert_agent(
     await db.commit()
     await db.refresh(agent)
     log.info("agent_created", slug=slug, owner=current_user.wallet_address)
+
+    # Регистрируем агента on-chain (graceful — не блокирует если ANCHOR_PROGRAM_ID не задан)
+    if current_user.wallet_address and settings.ANCHOR_PROGRAM_ID:
+        try:
+            from decimal import Decimal
+            from services.onchain_billing import register_agent_onchain
+            price_lamports = int(Decimal(str(agent.price_per_call)) * 1_000_000_000)
+            agent_pda, register_tx = await register_agent_onchain(
+                owner_address=current_user.wallet_address,
+                slug=agent.slug,
+                price_per_call_lamports=price_lamports,
+            )
+            if agent_pda:
+                agent.on_chain_address = agent_pda
+                agent.register_tx_hash = register_tx
+                await db.commit()
+                log.info("agent_registered_onchain", slug=agent.slug, pda=agent_pda)
+        except Exception as e:
+            log.error("onchain_registration_failed", slug=agent.slug, error=str(e))
+
     return agent
 
 

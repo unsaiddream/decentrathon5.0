@@ -1,0 +1,35 @@
+{
+  "name": "text-summarizer",
+  "version": "1.0.0",
+  "description": "Summarizes any text into a one-sentence summary and 3 key bullet points using AI",
+  "author": "agentshub-demo",
+  "entrypoint": "agent.py",
+  "runtime": "python3.11",
+  "price_per_call": 0.001,
+  "timeout_seconds": 30,
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Text to summarize (max 10000 chars)"
+      },
+      "language": {
+        "type": "string",
+        "enum": ["en", "ru"],
+        "default": "en"
+      }
+    },
+    "required": ["text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "summary": {"type": "string"},
+      "bullets": {"type": "array", "items": {"type": "string"}}
+    }
+  },
+  "tags": ["nlp", "summarization", "text"],
+  "category": "text-processing",
+  "uses_agents": []
+}

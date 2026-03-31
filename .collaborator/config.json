@@ -1,7 +1,12 @@
 {
-  "selected_file": null,
+  "selected_file": "/Users/33karaulov/Documents/decentrathon5.0/docs/demo-script.md",
   "expanded_dirs": [
-    "/Users/33karaulov/Documents/decentrathon5.0/.collaborator",
+    "/Users/33karaulov/Documents/decentrathon5.0/.planning/phases/02-ai-coordinator",
+    "/Users/33karaulov/Documents/decentrathon5.0/docs/plans",
+    "/Users/33karaulov/Documents/decentrathon5.0/frontend/static",
+    "/Users/33karaulov/Documents/decentrathon5.0/docs",
+    "/Users/33karaulov/Documents/decentrathon5.0/.planning",
+    "/Users/33karaulov/Documents/decentrathon5.0/.planning/phases",
     "/Users/33karaulov/Documents/decentrathon5.0"
   ],
   "agent_skip_permissions": false

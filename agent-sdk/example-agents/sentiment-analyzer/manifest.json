@@ -1,0 +1,31 @@
+{
+  "name": "sentiment-analyzer",
+  "version": "1.0.0",
+  "description": "Analyzes sentiment of text — returns positive/negative/neutral with confidence score",
+  "author": "agentshub-demo",
+  "entrypoint": "agent.py",
+  "runtime": "python3.11",
+  "price_per_call": 0.0005,
+  "timeout_seconds": 15,
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Text to analyze"
+      }
+    },
+    "required": ["text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral"]},
+      "confidence": {"type": "number"},
+      "explanation": {"type": "string"}
+    }
+  },
+  "tags": ["nlp", "sentiment", "classification"],
+  "category": "text-processing",
+  "uses_agents": []
+}

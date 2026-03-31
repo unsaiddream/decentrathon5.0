@@ -46,5 +46,12 @@ class Settings(BaseSettings):
     MAX_AGENT_BUNDLE_SIZE_MB: int = 50
     EXECUTION_TIMEOUT_SECONDS: int = 60
 
+    # ─── AI Координатор ─────────────────────────────────────────────
+    ANTHROPIC_API_KEY: str = ""
+    AI_QUALITY_THRESHOLD: int = 70
+
+    # ─── Anchor Смарт-Контракт ───────────────────────────────────────
+    ANCHOR_PROGRAM_ID: str = ""
+
 
 settings = Settings()

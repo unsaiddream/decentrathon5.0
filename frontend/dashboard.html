@@ -559,10 +559,22 @@
       }
       list.innerHTML = data.map(e => {
         const sc = e.status === 'done' ? 'badge-green' : e.status === 'failed' ? 'badge-gray' : 'badge-yellow';
-        return `<div class="exec-row">
+        let onchainHtml = '';
+        if (e.complete_tx_hash) {
+          onchainHtml += `<a href="https://explorer.solana.com/tx/${e.complete_tx_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 TX</a>`;
+        }
+        if (e.on_chain_execution_id) {
+          onchainHtml += `<a href="https://explorer.solana.com/address/${e.on_chain_execution_id}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 PDA</a>`;
+        }
+        if (e.ai_quality_score !== null && e.ai_quality_score !== undefined) {
+          const cls = e.ai_quality_score >= 70 ? 'score-good' : 'score-poor';
+          onchainHtml += `<span class="ai-score ${cls}" style="padding:2px 8px;font-size:11px;margin-bottom:0">AI: ${e.ai_quality_score}/100</span>`;
+        }
+        return `<div class="exec-row" style="flex-wrap:wrap;gap:6px">
           <span class="badge ${sc}">${e.status}</span>
           <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);flex:1">${esc(e.id?.slice(0,16))}…</code>
           <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim)">${e.duration_ms ? e.duration_ms + 'ms' : '—'}</span>
+          ${onchainHtml}
           <span style="font-size:11px;color:var(--text-dim);min-width:80px;text-align:right">${formatDate(e.created_at)}</span>
         </div>`;
       }).join('');

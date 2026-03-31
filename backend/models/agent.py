@@ -41,3 +41,6 @@ class Agent(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    # On-chain данные (заполняются при регистрации агента на Solana)
+    on_chain_address: Mapped[str | None] = mapped_column(String(88), nullable=True)
+    register_tx_hash: Mapped[str | None] = mapped_column(String(88), nullable=True)

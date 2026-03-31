@@ -131,6 +131,44 @@ reply = <span style="color:#fbbf24">message</span>(
     </div>
   </div>
 
+  <!-- AI Task Section -->
+  <div style="margin-top:48px" id="ai-task-section">
+    <div class="section-title" style="margin-bottom:16px">🤖 AI Task Coordinator</div>
+    <div class="card" style="padding:24px">
+      <p style="font-size:13px;opacity:0.7;margin:0 0 16px 0">Describe your task — AI will select the right agents, execute on-chain, and show results.</p>
+      <div style="display:flex;gap:12px">
+        <input id="ai-task-input" class="input" type="text" placeholder="e.g. Summarize this text and analyze its sentiment..."
+          style="flex:1" onkeydown="if(event.key==='Enter') planTask()" />
+        <button class="btn btn-primary" onclick="planTask()">Plan with AI</button>
+      </div>
+
+      <!-- AI Plan Preview -->
+      <div id="ai-plan-section" style="display:none">
+        <div class="ai-plan-preview">
+          <h4>🤖 AI Coordinator Plan</h4>
+          <p id="plan-reasoning" style="font-size:13px;opacity:0.7;margin:0 0 12px 0"></p>
+          <div id="plan-agents-list"></div>
+          <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
+            <button class="btn btn-primary" onclick="executeFromPlan()">Confirm &amp; Execute</button>
+            <button class="btn btn-ghost" onclick="cancelPlan()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="ai-results-section" style="display:none;margin-top:16px">
+        <div class="section-title" style="margin-bottom:12px;color:#c77dff">Execution Results</div>
+        <div id="ai-results-content"></div>
+      </div>
+
+      <!-- Loading -->
+      <div id="ai-loading" style="display:none;padding:24px;text-align:center">
+        <div class="spinner" style="margin:0 auto 12px"></div>
+        <div id="ai-loading-text" style="font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Protocol docs -->
   <div style="margin-top:56px">
     <div class="section-title" style="margin-bottom:24px">AgentHub Protocol</div>
@@ -417,6 +455,77 @@ message("advisor", q2, conv)</pre>
 
   loadStats();
   loadGraph();
+
+  // ─── AI Plan flow ──────────────────────────────────────────────────────────
+  let currentPlan = null;
+
+  async function planTask() {
+    const task = document.getElementById('ai-task-input').value.trim();
+    if (!task) return;
+
+    document.getElementById('ai-plan-section').style.display = 'none';
+    document.getElementById('ai-results-section').style.display = 'none';
+    document.getElementById('ai-loading').style.display = 'block';
+    document.getElementById('ai-loading-text').textContent = 'AI is planning your task...';
+
+    try {
+      const plan = await requestAIPlan(task);
+      currentPlan = plan;
+      renderAIPlan(plan);
+      document.getElementById('ai-plan-section').style.display = 'block';
+    } catch (e) {
+      toast(e.message || 'AI planning failed', 'error');
+    } finally {
+      document.getElementById('ai-loading').style.display = 'none';
+    }
+  }
+
+  function renderAIPlan(plan) {
+    document.getElementById('plan-reasoning').textContent = plan.reasoning || '';
+    const listEl = document.getElementById('plan-agents-list');
+    listEl.innerHTML = (plan.calls || []).map((call, i) => `
+      <div class="plan-agent-item">
+        <span style="color:#c77dff;font-size:18px;font-weight:700">${i + 1}.</span>
+        <div>
+          <div class="plan-agent-slug">${esc(call.slug)}</div>
+          <div class="plan-agent-reason">${esc(call.reason || '')}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function executeFromPlan() {
+    if (!currentPlan || !currentPlan.calls?.length) return;
+    const firstCall = currentPlan.calls[0];
+
+    document.getElementById('ai-plan-section').style.display = 'none';
+    document.getElementById('ai-loading').style.display = 'block';
+    document.getElementById('ai-loading-text').textContent = 'Executing via smart contract...';
+
+    try {
+      const resp = await apiFetch('POST', '/api/v1/execute', {
+        agent_slug: firstCall.slug,
+        input: firstCall.input || {},
+      });
+
+      document.getElementById('ai-loading-text').textContent = 'Waiting for result...';
+      const execution = await pollExecution(resp.id || resp.execution_id);
+
+      document.getElementById('ai-results-content').innerHTML = renderExecutionResult(execution);
+      document.getElementById('ai-results-section').style.display = 'block';
+      toast('Execution complete!', 'success');
+    } catch (e) {
+      toast(e.message || 'Execution failed', 'error');
+    } finally {
+      document.getElementById('ai-loading').style.display = 'none';
+    }
+  }
+
+  function cancelPlan() {
+    document.getElementById('ai-plan-section').style.display = 'none';
+    currentPlan = null;
+  }
 </script>
+<script src="/ui/static/onchain.js"></script>
 </body>
 </html>

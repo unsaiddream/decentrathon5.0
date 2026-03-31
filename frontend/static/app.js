@@ -322,6 +322,7 @@ function renderAgentCard(a) {
           <span>★ ${a.rating_avg && a.rating_avg !== '0.00' ? parseFloat(a.rating_avg).toFixed(1) : '—'}</span>
         </span>
       </div>
+      ${a.on_chain_address ? `<div class="onchain-badge"><span class="onchain-label">On-chain</span><a href="https://explorer.solana.com/address/${a.on_chain_address}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="explorer-badge" onclick="event.stopPropagation()">🔗 Solana</a></div>` : ''}
     </a>`;
 }
 

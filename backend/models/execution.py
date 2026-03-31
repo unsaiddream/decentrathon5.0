@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Text, Integer, DateTime, func, ForeignKey
+from sqlalchemy import String, Text, Integer, SmallInteger, DateTime, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
@@ -34,6 +34,13 @@ class Execution(Base):
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     logs: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # On-chain данные (заполняются после взаимодействия со смарт-контрактом)
+    on_chain_execution_id: Mapped[str | None] = mapped_column(String(88), nullable=True)
+    on_chain_tx_hash: Mapped[str | None] = mapped_column(String(88), nullable=True)
+    complete_tx_hash: Mapped[str | None] = mapped_column(String(88), nullable=True)
+    ai_quality_score: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    ai_reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

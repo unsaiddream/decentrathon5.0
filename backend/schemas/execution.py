@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -26,3 +26,9 @@ class ExecutionOut(BaseModel):
     started_at: datetime | None
     finished_at: datetime | None
     created_at: datetime
+    # On-chain данные
+    on_chain_execution_id: Optional[str] = None
+    on_chain_tx_hash: Optional[str] = None
+    complete_tx_hash: Optional[str] = None
+    ai_quality_score: Optional[int] = None
+    ai_reasoning: Optional[str] = None

@@ -10,7 +10,9 @@ from config import settings
 from database import AsyncSessionLocal
 from models.agent import Agent
 from models.execution import Execution
+from schemas.coordinator import AgentInfo, CoordinatorError
 from services.agent_runner import run_agent_in_sandbox
+from services.onchain_billing import complete_execution_onchain, refund_execution_onchain
 from tasks.celery_app import celery_app
 
 log = structlog.get_logger()
@@ -62,7 +64,7 @@ async def _run_execution_async(execution_id: UUID):
             await db.commit()
             await redis.publish(channel, "[system] Status: running")
 
-            # 3. Получаем wallet владельца
+            # 3. Получаем wallet владельца агента и вызывающего пользователя
             from models.user import User
             owner_result = await db.execute(select(User).where(User.id == agent.owner_id))
             owner = owner_result.scalar_one_or_none()
@@ -71,6 +73,9 @@ async def _run_execution_async(execution_id: UUID):
                 execution.error = "Владелец агента не найден"
                 await db.commit()
                 return
+
+            caller_result = await db.execute(select(User).where(User.id == execution.caller_id))
+            caller = caller_result.scalar_one_or_none()
 
             # 4. Загружаем секреты
             from models.secret import AgentSecret
@@ -105,6 +110,10 @@ async def _run_execution_async(execution_id: UUID):
                 execution.logs = "\n".join(all_logs)
                 agent.call_count = (agent.call_count or 0) + 1
 
+                # AI оценка качества + on-chain решение (если программа настроена)
+                if settings.ANCHOR_PROGRAM_ID and settings.ANTHROPIC_API_KEY:
+                    await _evaluate_and_settle(execution, agent, owner, caller)
+
                 await redis.publish(channel, f"[system] Done in {duration_ms}ms")
                 log.info("execution_done", execution_id=str(execution_id), duration_ms=duration_ms)
 
@@ -131,3 +140,73 @@ async def _run_execution_async(execution_id: UUID):
 
     finally:
         await redis.aclose()
+
+
+async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, caller) -> None:
+    """
+    Оценивает качество выполнения через AI координатор и вызывает on-chain settle.
+
+    Вызывается только если ANCHOR_PROGRAM_ID и ANTHROPIC_API_KEY заданы.
+    Не бросает исключения — on-chain failure не должен портить execution record.
+    """
+    # Импорт здесь — избегаем проблем с event loop при инициализации модуля
+    from anthropic import AsyncAnthropic
+    from services.ai_coordinator import evaluate_output
+
+    agent_info = AgentInfo(
+        slug=agent.slug,
+        name=agent.name,
+        description=agent.description or "",
+        capabilities=agent.manifest.get("capabilities", []),
+        price_per_call=str(agent.price_per_call),
+    )
+
+    try:
+        evaluation = await evaluate_output(
+            agent=agent_info,
+            input_data=execution.input or {},
+            output_data=execution.output or {},
+            execution_id=str(execution.id),
+        )
+
+        # Сохраняем оценку в execution record
+        execution.ai_quality_score = evaluation.score
+        execution.ai_reasoning = evaluation.reasoning
+
+        # On-chain settle на основе решения координатора
+        agent_pda = agent.on_chain_address or ""
+        owner_wallet = owner.wallet_address or ""
+
+        if evaluation.decision == "complete" and agent_pda and owner_wallet:
+            tx = await complete_execution_onchain(
+                execution_id=str(execution.id),
+                agent_pda=agent_pda,
+                agent_owner_address=owner_wallet,
+                ai_quality_score=evaluation.score,
+            )
+            execution.complete_tx_hash = tx
+            log.info(
+                "onchain_complete",
+                execution_id=str(execution.id),
+                score=evaluation.score,
+                tx=tx,
+            )
+        # Refund возвращает SOL вызывающему пользователю (caller), не владельцу агента
+        caller_wallet = caller.wallet_address if caller else ""
+        if evaluation.decision == "refund" and caller_wallet:
+            tx = await refund_execution_onchain(
+                execution_id=str(execution.id),
+                caller_address=caller_wallet,
+            )
+            execution.complete_tx_hash = tx
+            log.info(
+                "onchain_refund",
+                execution_id=str(execution.id),
+                score=evaluation.score,
+                tx=tx,
+            )
+
+    except CoordinatorError as e:
+        log.warning("ai_coordinator_error", execution_id=str(execution.id), error=str(e))
+    except Exception as e:
+        log.error("onchain_settle_error", execution_id=str(execution.id), error=str(e))

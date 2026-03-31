@@ -24,6 +24,8 @@ class AgentOut(BaseModel):
     call_count: int
     rating_avg: Decimal
     rating_count: int
+    on_chain_address: str | None = None
+    register_tx_hash: str | None = None
     created_at: datetime
     updated_at: datetime
 

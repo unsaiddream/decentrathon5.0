@@ -9,261 +9,407 @@
   <link rel="stylesheet" href="/ui/static/style.css?v=5">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
   <style>
-    /* ─── Demo-specific styles ─── */
-    .demo-hero {
-      text-align: center;
-      padding: 64px 24px 40px;
-    }
-    .demo-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 16px; border-radius: 100px;
-      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
-      font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase;
-      margin-bottom: 24px;
-    }
-    .demo-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+/* ═══════════════════════════════════════════════════════
+   DEMO PAGE STYLES
+═══════════════════════════════════════════════════════ */
 
-    .demo-title {
-      font-family: 'Syne', sans-serif; font-size: clamp(36px, 6vw, 72px);
-      font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
-      color: var(--text); margin-bottom: 16px;
-    }
-    .demo-title span { color: var(--primary); }
-    .demo-subtitle {
-      font-size: 18px; color: var(--text-muted); max-width: 560px; margin: 0 auto 40px;
-    }
+.demo-hero {
+  text-align: center; padding: 64px 24px 48px;
+}
+.live-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 18px; border-radius: 100px;
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--primary); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); animation: blink 1.4s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
 
-    /* ─── Auth gate ─── */
-    .auth-gate {
-      max-width: 480px; margin: 0 auto 40px;
-      background: var(--card); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); padding: 28px;
-      text-align: center;
-    }
-    .auth-gate h3 { font-size: 16px; margin-bottom: 8px; }
-    .auth-gate p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
-    .auth-gate-inputs { display: flex; flex-direction: column; gap: 10px; }
-    .auth-gate-inputs input {
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; color: var(--text);
-      font-family: 'JetBrains Mono', monospace; font-size: 13px;
-      outline: none; transition: border-color var(--transition);
-    }
-    .auth-gate-inputs input:focus { border-color: var(--primary); }
-    .auth-gate-inputs input::placeholder { color: var(--text-dim); }
-    #auth-error { font-size: 12px; color: var(--error); margin-top: 6px; min-height: 16px; }
+.demo-title {
+  font-family: 'Syne', sans-serif; font-size: clamp(40px, 7vw, 80px);
+  font-weight: 800; line-height: 1.0; letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+.demo-title span { color: var(--primary); }
+.demo-subtitle { font-size: 18px; color: var(--text-muted); max-width: 600px; margin: 0 auto 48px; line-height: 1.65; }
 
-    /* ─── Workflow steps ─── */
-    .workflow {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
-      max-width: 900px; margin: 0 auto 48px; position: relative;
-    }
-    @media (max-width: 700px) { .workflow { grid-template-columns: 1fr 1fr; } }
-    .workflow::before {
-      content: ''; position: absolute; top: 28px; left: 12.5%; right: 12.5%;
-      height: 1px; background: var(--border); z-index: 0;
-    }
-    .wf-step {
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      padding: 0 8px; position: relative; z-index: 1;
-      transition: all 0.3s ease;
-    }
-    .wf-icon {
-      width: 56px; height: 56px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--surface); border: 1px solid var(--border);
-      font-size: 22px; transition: all 0.4s ease;
-      position: relative;
-    }
-    .wf-step.active .wf-icon {
-      background: rgba(245,158,11,0.1); border-color: var(--primary);
-      box-shadow: 0 0 20px rgba(245,158,11,0.25);
-    }
-    .wf-step.done .wf-icon {
-      background: rgba(16,185,129,0.1); border-color: var(--success);
-      box-shadow: 0 0 16px rgba(16,185,129,0.2);
-    }
-    .wf-step.active .wf-icon::after {
-      content: ''; position: absolute; inset: -4px; border-radius: 50%;
-      border: 2px solid rgba(245,158,11,0.3); animation: spin 2s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .wf-label {
-      font-size: 11px; font-family: 'JetBrains Mono', monospace;
-      color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
-      text-align: center; transition: color 0.3s;
-    }
-    .wf-step.active .wf-label { color: var(--primary); }
-    .wf-step.done .wf-label { color: var(--success); }
+/* ─── Section titles ─── */
+.sec-title {
+  font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700;
+  margin-bottom: 8px;
+}
+.sec-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; }
+.sec-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--primary); text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
 
-    /* ─── Demo Panel ─── */
-    .demo-panel {
-      max-width: 800px; margin: 0 auto;
-      display: flex; flex-direction: column; gap: 20px;
-    }
-    .demo-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden;
-    }
-    .demo-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px; border-bottom: 1px solid var(--border);
-      background: rgba(0,0,0,0.2);
-    }
-    .demo-card-title {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .demo-card-title .dot {
-      width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim);
-    }
-    .demo-card-title .dot.amber { background: var(--primary); }
-    .demo-card-title .dot.green { background: var(--success); }
-    .demo-card-body { padding: 20px; }
+/* ═══════════════════════════════════════════════════════
+   PIPELINE VISUALIZER
+═══════════════════════════════════════════════════════ */
+.pipeline-wrap {
+  position: relative; overflow: hidden;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 40px 32px 48px; margin-bottom: 64px;
+}
+.pipeline-bg-grid {
+  position: absolute; inset: 0; opacity: 0.04;
+  background-image: linear-gradient(var(--primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--primary) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
 
-    /* Task input */
-    .task-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-    .preset-btn {
-      padding: 5px 12px; border-radius: 6px;
-      border: 1px solid var(--border); background: transparent;
-      color: var(--text-muted); font-size: 12px; cursor: pointer;
-      transition: all var(--transition); font-family: 'Outfit', sans-serif;
-    }
-    .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+/* Stage columns */
+.pipeline-stages {
+  display: grid; grid-template-columns: 1fr 20px 1fr 20px 1fr 20px 1fr;
+  gap: 0; align-items: start; position: relative; z-index: 1;
+}
+@media(max-width:900px){ .pipeline-stages { grid-template-columns: 1fr; } .pipeline-arrow{ display:none; } }
 
-    #task-input {
-      width: 100%; background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border); border-radius: 10px;
-      padding: 14px 16px; color: var(--text);
-      font-family: 'Outfit', sans-serif; font-size: 15px;
-      outline: none; resize: vertical; min-height: 80px;
-      transition: border-color var(--transition);
-    }
-    #task-input:focus { border-color: var(--primary); }
-    #task-input::placeholder { color: var(--text-dim); }
+.stage { display: flex; flex-direction: column; gap: 0; }
+.stage-header {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 16px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.stage-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.stage-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
-    .run-btn {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      width: 100%; padding: 14px;
-      background: var(--primary); color: #000;
-      border: none; border-radius: 10px; font-weight: 600; font-size: 15px;
-      cursor: pointer; transition: all var(--transition); margin-top: 14px;
-      font-family: 'Outfit', sans-serif;
-    }
-    .run-btn:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); }
-    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .run-btn .spinner {
-      width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3);
-      border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite;
-      display: none;
-    }
-    .run-btn.loading .spinner { display: block; }
+/* Stage colors */
+.stage-external .stage-icon  { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); }
+.stage-ai       .stage-icon  { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); }
+.stage-exec     .stage-icon  { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); }
+.stage-chain    .stage-icon  { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); }
 
-    /* AI Plan */
-    #plan-section { display: none; }
-    .agent-call-card {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 14px 0; border-bottom: 1px solid var(--border);
-    }
-    .agent-call-card:last-child { border-bottom: none; }
-    .agent-num {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--primary-glow); border: 1px solid var(--border-strong);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);
-      flex-shrink: 0; margin-top: 2px;
-    }
-    .agent-call-slug {
-      font-family: 'JetBrains Mono', monospace; font-size: 13px;
-      color: var(--primary); margin-bottom: 4px;
-    }
-    .agent-call-reason { font-size: 13px; color: var(--text-muted); }
-    .agent-call-status {
-      margin-left: auto; font-size: 11px; padding: 3px 10px;
-      border-radius: 100px; font-family: 'JetBrains Mono', monospace;
-      border: 1px solid var(--border); color: var(--text-dim); white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .agent-call-status.running { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-    .agent-call-status.done { border-color: var(--success); color: var(--success); background: rgba(16,185,129,0.08); }
-    .agent-call-status.failed { border-color: var(--error); color: var(--error); background: rgba(239,68,68,0.08); }
+/* Node boxes */
+.node {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+  font-size: 13px; position: relative; transition: all 0.35s ease;
+}
+.node-icon { font-size: 15px; margin-right: 8px; }
+.node-title { font-weight: 500; }
+.node-sub { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
 
-    /* Execution log */
-    #exec-section { display: none; }
-    .log-terminal {
-      background: #050400; border-radius: 8px; padding: 16px;
-      font-family: 'JetBrains Mono', monospace; font-size: 12px;
-      color: #a8a090; max-height: 200px; overflow-y: auto;
-      line-height: 1.8;
-    }
-    .log-terminal .log-system { color: rgba(245,158,11,0.6); }
-    .log-terminal .log-error { color: var(--error); }
-    .log-terminal .log-done { color: var(--success); }
+.node.active {
+  border-color: var(--primary); background: rgba(245,158,11,0.06);
+  box-shadow: 0 0 0 1px rgba(245,158,11,0.2), 0 4px 20px rgba(245,158,11,0.12);
+}
+.node.done   { border-color: var(--success); background: rgba(16,185,129,0.05); }
+.node.active .node-title { color: var(--primary); }
+.node.done   .node-title { color: var(--success); }
 
-    /* Results */
-    #results-section { display: none; }
-    .result-card {
-      border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px;
-    }
-    .result-card:last-child { margin-bottom: 0; }
-    .result-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
-      flex-wrap: wrap; gap: 8px;
-    }
-    .result-agent { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); }
-    .result-meta { display: flex; align-items: center; gap: 8px; }
-    .score-badge {
-      padding: 3px 10px; border-radius: 100px; font-size: 11px;
-      font-family: 'JetBrains Mono', monospace; font-weight: 600;
-    }
-    .score-badge.high { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
-    .score-badge.low { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid rgba(239,68,68,0.3); }
-    .onchain-link {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 10px; border-radius: 100px; font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15);
-      color: var(--primary); text-decoration: none;
-      transition: all var(--transition);
-    }
-    .onchain-link:hover { background: rgba(245,158,11,0.12); }
-    .result-body { padding: 16px; }
-    .result-output {
-      background: #050400; border-radius: 8px; padding: 14px;
-      font-family: 'JetBrains Mono', monospace; font-size: 12px;
-      color: #c8c0a8; white-space: pre-wrap; overflow-x: auto; max-height: 200px; overflow-y: auto;
-    }
-    .result-reasoning {
-      margin-top: 10px; font-size: 12px; color: var(--text-muted);
-      padding: 10px 14px; background: rgba(245,158,11,0.04);
-      border-left: 2px solid rgba(245,158,11,0.3); border-radius: 0 6px 6px 0;
-    }
+/* Arrow connector */
+.pipeline-arrow {
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 42px;
+}
+.arrow-line {
+  width: 20px; height: 2px; background: var(--border);
+  position: relative; overflow: visible;
+}
+.arrow-line::after {
+  content: '▶'; position: absolute; right: -8px; top: -7px;
+  color: var(--border); font-size: 10px;
+}
+.arrow-line.lit { background: var(--primary); }
+.arrow-line.lit::after { color: var(--primary); }
 
-    /* Error */
-    .demo-error {
-      padding: 14px 18px; border-radius: 8px;
-      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
-      color: var(--error); font-size: 13px; margin-top: 12px;
-      display: none;
-    }
+/* Data packet animation */
+@keyframes packet {
+  0%   { left: -6px; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: calc(100% + 4px); opacity: 0; }
+}
+.packet {
+  position: absolute; top: -4px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--primary); box-shadow: 0 0 8px var(--primary);
+  animation: packet 1.2s ease-in-out infinite;
+}
 
-    /* Program info bar */
-    .program-bar {
-      max-width: 800px; margin: 32px auto 0;
-      padding: 14px 20px;
-      background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.12);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 12px;
-    }
-    .program-bar-label { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
-    .program-bar-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary); }
-    .program-bar a { color: var(--primary); text-decoration: none; font-size: 11px; }
-    .program-bar a:hover { text-decoration: underline; }
+/* Action log */
+.action-log {
+  margin-top: 28px; background: #050400; border-radius: 10px;
+  padding: 16px; max-height: 140px; overflow-y: auto; position: relative; z-index: 1;
+}
+.action-log-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 10px;
+}
+.alog-line {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.9; display: flex; align-items: baseline; gap: 10px;
+  opacity: 0; animation: fadein 0.4s ease forwards;
+}
+@keyframes fadein { to { opacity: 1; } }
+.alog-ts { color: rgba(245,158,11,0.4); flex-shrink: 0; }
+.alog-sys  { color: rgba(245,158,11,0.75); }
+.alog-ok   { color: var(--success); }
+.alog-err  { color: var(--error); }
+.alog-info { color: var(--text-muted); }
+.alog-chain{ color: #9945ff; }
+
+/* Run button */
+.vis-run-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 36px; border-radius: 10px;
+  background: var(--primary); color: #000;
+  border: none; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition); margin: 28px auto 0;
+  position: relative; z-index: 1;
+}
+.vis-run-btn:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,158,11,0.3); }
+.vis-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.vis-spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+.vis-run-btn.loading .vis-spinner { display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   FEATURES GRID
+═══════════════════════════════════════════════════════ */
+.features-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;
+  margin-bottom: 64px;
+}
+.feat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px; position: relative; overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s;
+}
+.feat-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.feat-card::before {
+  content: ''; position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(circle at 60% 0%, rgba(245,158,11,0.06) 0%, transparent 70%);
+  transition: opacity 0.3s;
+}
+.feat-card:hover::before { opacity: 1; }
+.feat-icon { font-size: 28px; margin-bottom: 16px; }
+.feat-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.feat-desc { font-size: 14px; color: var(--text-muted); line-height: 1.65; margin-bottom: 14px; }
+.feat-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--primary);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.feat-badge.green { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.2); color: var(--success); }
+.feat-badge.purple { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
+
+/* ═══════════════════════════════════════════════════════
+   CODE SNIPPET
+═══════════════════════════════════════════════════════ */
+.code-section { margin-bottom: 64px; }
+.code-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.code-tab {
+  padding: 10px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all var(--transition); background: transparent; border-top: none; border-left: none; border-right: none;
+}
+.code-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.code-wrap {
+  background: #050400; border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 12px 12px; overflow: hidden; position: relative;
+}
+.code-wrap pre {
+  padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  line-height: 1.8; color: #c8c0a8; overflow-x: auto; margin: 0;
+  tab-size: 2;
+}
+.code-copy-btn {
+  position: absolute; top: 12px; right: 12px;
+  padding: 5px 12px; border-radius: 6px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  cursor: pointer; transition: all var(--transition);
+}
+.code-copy-btn:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+
+/* syntax */
+.kw  { color: #f59e0b; }
+.fn  { color: #60a5fa; }
+.str { color: #86efac; }
+.cm  { color: rgba(250,247,237,0.3); font-style: italic; }
+.num { color: #f9a8d4; }
+.var { color: #c8c0a8; }
+
+/* ═══════════════════════════════════════════════════════
+   LIVE DEMO PANEL
+═══════════════════════════════════════════════════════ */
+.live-panel { max-width: 800px; margin: 0 auto 80px; }
+.demo-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; margin-bottom: 16px;
+}
+.demo-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+.demo-card-hl {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
+  display: flex; align-items: center; gap: 8px;
+}
+.dot-sm { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
+.dot-sm.amber { background: var(--primary); animation: blink 1.5s infinite; }
+.dot-sm.green { background: var(--success); }
+.demo-card-body { padding: 20px; }
+
+/* Auth gate */
+.auth-gate {
+  max-width: 440px; margin: 0 auto 32px;
+  background: var(--card); border: 1px solid var(--border-strong);
+  border-radius: 16px; padding: 32px; text-align: center;
+}
+.auth-gate h3 { font-size: 17px; margin-bottom: 8px; }
+.auth-gate p { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
+.auth-input {
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 11px 14px; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  outline: none; transition: border-color var(--transition); margin-bottom: 10px;
+}
+.auth-input:focus { border-color: var(--primary); }
+.auth-input::placeholder { color: var(--text-dim); }
+#auth-error { font-size: 12px; color: var(--error); min-height: 16px; margin-top: 4px; }
+
+/* preset tasks */
+.preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.preset {
+  padding: 6px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-muted); font-size: 12px; cursor: pointer;
+  transition: all var(--transition); font-family: 'Outfit', sans-serif;
+}
+.preset:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+
+#task-input {
+  width: 100%; background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; resize: vertical; min-height: 80px;
+  transition: border-color var(--transition);
+}
+#task-input:focus { border-color: var(--primary); }
+#task-input::placeholder { color: var(--text-dim); }
+
+.run-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 14px;
+  background: var(--primary); color: #000;
+  border: none; border-radius: 10px; font-weight: 600; font-size: 15px;
+  cursor: pointer; transition: all var(--transition); margin-top: 14px;
+  font-family: 'Outfit', sans-serif;
+}
+.run-btn:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.run-spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+.run-btn.loading .run-spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* plan */
+.plan-call {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.plan-call:last-child { border-bottom: none; }
+.plan-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--primary-glow); border: 1px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);
+  flex-shrink: 0; margin-top: 2px;
+}
+.plan-slug { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); margin-bottom: 4px; }
+.plan-reason { font-size: 13px; color: var(--text-muted); }
+.plan-status {
+  margin-left: auto; font-size: 11px; padding: 3px 10px;
+  border-radius: 100px; font-family: 'JetBrains Mono', monospace;
+  border: 1px solid var(--border); color: var(--text-dim); white-space: nowrap; flex-shrink: 0;
+}
+.plan-status.running { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+.plan-status.done    { border-color: var(--success); color: var(--success); background: rgba(16,185,129,0.08); }
+.plan-status.failed  { border-color: var(--error);   color: var(--error);   background: rgba(239,68,68,0.08); }
+
+/* exec log */
+.exec-log {
+  background: #050400; border-radius: 8px; padding: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: #a8a090; max-height: 180px; overflow-y: auto; line-height: 1.85;
+}
+.exec-log .ls { color: rgba(245,158,11,0.65); }
+.exec-log .le { color: var(--error); }
+.exec-log .ld { color: var(--success); }
+
+/* result */
+.res-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.res-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 8px;
+}
+.res-slug { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); }
+.res-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.score-pill {
+  padding: 3px 10px; border-radius: 100px; font-size: 11px;
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+}
+.score-pill.hi { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+.score-pill.lo { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid rgba(239,68,68,0.3); }
+.tx-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px; font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(153,69,255,0.08); border: 1px solid rgba(153,69,255,0.25);
+  color: #a78bfa; text-decoration: none; transition: all var(--transition);
+}
+.tx-link:hover { background: rgba(153,69,255,0.14); }
+.res-body { padding: 16px; }
+.res-out {
+  background: #050400; border-radius: 8px; padding: 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: #c8c0a8; white-space: pre-wrap; overflow-x: auto; max-height: 180px; overflow-y: auto;
+}
+.res-ai {
+  margin-top: 10px; font-size: 12px; color: var(--text-muted);
+  padding: 10px 14px; background: rgba(245,158,11,0.04);
+  border-left: 2px solid rgba(245,158,11,0.3); border-radius: 0 6px 6px 0;
+}
+.demo-err {
+  padding: 12px 16px; border-radius: 8px;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+  color: var(--error); font-size: 13px; margin-top: 12px; display: none;
+}
+
+/* ─── Program bar ─── */
+.program-bar {
+  max-width: 800px; margin: 0 auto 80px;
+  padding: 16px 22px;
+  background: rgba(153,69,255,0.04); border: 1px solid rgba(153,69,255,0.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.program-bar-lbl { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.program-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #a78bfa; }
+.program-bar a {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  background: rgba(153,69,255,0.1); border: 1px solid rgba(153,69,255,0.2);
+  color: #a78bfa; text-decoration: none; font-size: 13px;
+  transition: all var(--transition);
+}
+.program-bar a:hover { background: rgba(153,69,255,0.18); }
   </style>
 </head>
 <body>
@@ -297,159 +443,474 @@
 
 <div class="container page">
 
-  <!-- Hero -->
-  <div class="demo-hero">
-    <div class="demo-badge">Live Interactive Demo</div>
-    <h1 class="demo-title">AI decides.<br><span>Blockchain records.</span></h1>
-    <p class="demo-subtitle">
-      Type a task — Claude routes it to agents, evaluates quality,
-      and every decision is recorded on Solana automatically.
-    </p>
+<!-- ═══════════════════════════════════ HERO ═══════════════════════ -->
+<div class="demo-hero">
+  <div class="live-badge"><div class="live-dot"></div>Live Interactive Demo</div>
+  <h1 class="demo-title">AI decides.<br><span>Blockchain records.</span></h1>
+  <p class="demo-subtitle">
+    Type a task — Claude routes it to agents, evaluates quality,
+    and every decision is permanently recorded on Solana.
+    No humans. No middlemen. Fully autonomous.
+  </p>
+</div>
+
+<!-- ═══════════════════════════════ PIPELINE VIS ═══════════════════ -->
+<div style="margin-bottom:20px">
+  <div class="sec-label">How it works</div>
+  <h2 class="sec-title">Full Pipeline Visualization</h2>
+  <p class="sec-sub">Watch the data flow in real time — from external agent request to on-chain settlement.</p>
+</div>
+
+<div class="pipeline-wrap" id="pipeline-wrap">
+  <div class="pipeline-bg-grid"></div>
+
+  <div class="pipeline-stages">
+
+    <!-- Stage 1: External Agents -->
+    <div class="stage stage-external">
+      <div class="stage-header">
+        <div class="stage-icon">🌐</div>
+        <div>
+          <div class="stage-name">External Agents</div>
+        </div>
+      </div>
+      <div class="node" id="n-claude"><span class="node-icon">🤖</span><span class="node-title">Claude Agent</span><div class="node-sub">Anthropic SDK</div></div>
+      <div class="node" id="n-gpt"><span class="node-icon">💬</span><span class="node-title">GPT Agent</span><div class="node-sub">OpenAI API</div></div>
+      <div class="node" id="n-custom"><span class="node-icon">🐍</span><span class="node-title">Python Script</span><div class="node-sub">httpx / requests</div></div>
+      <div class="node" id="n-langchain"><span class="node-icon">🔗</span><span class="node-title">LangChain</span><div class="node-sub">AutoGen / CrewAI</div></div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="pipeline-arrow">
+      <div class="arrow-line" id="arr-1"><div class="packet" id="pkt-1" style="display:none"></div></div>
+    </div>
+
+    <!-- Stage 2: HiveMind Hub + AI -->
+    <div class="stage stage-ai">
+      <div class="stage-header">
+        <div class="stage-icon">🧠</div>
+        <div><div class="stage-name">AI Coordinator</div></div>
+      </div>
+      <div class="node" id="n-api"><span class="node-icon">🔑</span><span class="node-title">REST API</span><div class="node-sub">POST /api/v1/execute</div></div>
+      <div class="node" id="n-route"><span class="node-icon">🗺️</span><span class="node-title">route_task()</span><div class="node-sub">Claude selects agents</div></div>
+      <div class="node" id="n-eval"><span class="node-icon">📊</span><span class="node-title">evaluate_output()</span><div class="node-sub">Claude scores 0–100</div></div>
+      <div class="node" id="n-decision"><span class="node-icon">⚖️</span><span class="node-title">Decision</span><div class="node-sub">score ≥ 70 → pay / refund</div></div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="pipeline-arrow">
+      <div class="arrow-line" id="arr-2"><div class="packet" id="pkt-2" style="display:none"></div></div>
+    </div>
+
+    <!-- Stage 3: Agent Execution -->
+    <div class="stage stage-exec">
+      <div class="stage-header">
+        <div class="stage-icon">⚙️</div>
+        <div><div class="stage-name">Agent Execution</div></div>
+      </div>
+      <div class="node" id="n-queue"><span class="node-icon">📥</span><span class="node-title">Celery Queue</span><div class="node-sub">Redis task broker</div></div>
+      <div class="node" id="n-sandbox"><span class="node-icon">📦</span><span class="node-title">Sandbox</span><div class="node-sub">subprocess isolation</div></div>
+      <div class="node" id="n-agent1"><span class="node-icon">📝</span><span class="node-title">text-summarizer</span><div class="node-sub">agent.py running</div></div>
+      <div class="node" id="n-agent2"><span class="node-icon">💡</span><span class="node-title">sentiment-analyzer</span><div class="node-sub">agent.py running</div></div>
+    </div>
+
+    <!-- Arrow 3 -->
+    <div class="pipeline-arrow">
+      <div class="arrow-line" id="arr-3"><div class="packet" id="pkt-3" style="display:none"></div></div>
+    </div>
+
+    <!-- Stage 4: Solana -->
+    <div class="stage stage-chain">
+      <div class="stage-header">
+        <div class="stage-icon">⛓️</div>
+        <div><div class="stage-name">Solana On-chain</div></div>
+      </div>
+      <div class="node" id="n-initiate"><span class="node-icon">🔒</span><span class="node-title">initiate_execution</span><div class="node-sub">SOL locked in PDA</div></div>
+      <div class="node" id="n-escrow"><span class="node-icon">💰</span><span class="node-title">ExecutionAccount</span><div class="node-sub">status = Pending</div></div>
+      <div class="node" id="n-complete"><span class="node-icon">✅</span><span class="node-title">complete_execution</span><div class="node-sub">90% → owner, 10% → platform</div></div>
+      <div class="node" id="n-reputation"><span class="node-icon">⭐</span><span class="node-title">update_reputation</span><div class="node-sub">score stored on-chain</div></div>
+    </div>
+
+  </div><!-- /pipeline-stages -->
+
+  <!-- Action log -->
+  <div class="action-log">
+    <div class="action-log-title">● Pipeline Log</div>
+    <div id="alog"></div>
   </div>
 
-  <!-- Workflow Steps -->
-  <div class="workflow" id="workflow">
-    <div class="wf-step" id="wf-0">
-      <div class="wf-icon">📝</div>
-      <div class="wf-label">Task Input</div>
+  <button class="vis-run-btn" id="vis-btn" onclick="runVisualization()">
+    <span class="vis-spinner"></span>
+    ▶ &nbsp;Animate Pipeline
+  </button>
+
+</div><!-- /pipeline-wrap -->
+
+
+<!-- ═══════════════════════════════ FEATURES ═══════════════════════ -->
+<div style="margin-bottom:28px">
+  <div class="sec-label">Hackathon Case 2: AI + Blockchain</div>
+  <h2 class="sec-title">Every Feature, Explained</h2>
+  <p class="sec-sub">All six hackathon criteria — fully implemented and live.</p>
+</div>
+
+<div class="features-grid">
+
+  <div class="feat-card">
+    <div class="feat-icon">🤖</div>
+    <div class="feat-title">AI Makes Real Decisions</div>
+    <div class="feat-desc">
+      Claude <code>claude-sonnet-4-6</code> analyzes every task and selects which agents to call. Then it evaluates the output quality (0–100). These aren't suggestions — they trigger real financial transactions on Solana.
     </div>
-    <div class="wf-step" id="wf-1">
-      <div class="wf-icon">🤖</div>
-      <div class="wf-label">AI Routes</div>
-    </div>
-    <div class="wf-step" id="wf-2">
-      <div class="wf-icon">⚙️</div>
-      <div class="wf-label">Agents Run</div>
-    </div>
-    <div class="wf-step" id="wf-3">
-      <div class="wf-icon">⛓️</div>
-      <div class="wf-label">On-chain</div>
-    </div>
+    <span class="feat-badge">route_task() + evaluate_output()</span>
   </div>
 
-  <!-- Auth Gate (shown when not logged in) -->
-  <div class="auth-gate" id="auth-gate">
-    <h3>Sign in to run the live demo</h3>
-    <p>Connect your Phantom wallet or use email + password to try the full on-chain AI pipeline.</p>
-    <div class="auth-gate-inputs">
-      <input type="text" id="login-wallet" placeholder="Wallet address (or email)" autocomplete="off">
-      <input type="password" id="login-password" placeholder="Password">
-      <button class="run-btn" id="login-btn" onclick="doLogin()" style="margin-top:0">
-        <span class="spinner"></span>
-        Sign In
+  <div class="feat-card">
+    <div class="feat-icon">⛓️</div>
+    <div class="feat-title">Every Decision is On-chain</div>
+    <div class="feat-desc">
+      The AI quality score is stored in <code>ExecutionAccount.ai_quality_score</code> on Solana. Every payment and refund is a verifiable transaction. Anyone can check Solana Explorer — the AI's judgment is public and immutable.
+    </div>
+    <span class="feat-badge">ExecutionAccount PDA</span>
+  </div>
+
+  <div class="feat-card">
+    <div class="feat-icon">🔄</div>
+    <div class="feat-title">Fully Autonomous</div>
+    <div class="feat-desc">
+      No human approves payments. The pipeline runs end-to-end: task input → AI routing → agent execution → quality evaluation → on-chain settlement. Agents can also call other agents (A2A), creating autonomous multi-agent chains.
+    </div>
+    <span class="feat-badge">A2A Protocol</span>
+  </div>
+
+  <div class="feat-card">
+    <div class="feat-icon">📋</div>
+    <div class="feat-title">Deployed Smart Contract</div>
+    <div class="feat-desc">
+      Anchor program <code>agent_escrow</code> is live on Solana Devnet with 5 instructions: <code>register_agent</code>, <code>initiate_execution</code>, <code>complete_execution</code>, <code>refund_execution</code>, <code>update_reputation</code>. Agents have PDA addresses and on-chain reputation scores.
+    </div>
+    <span class="feat-badge purple">2qP9Gp...C4G</span>
+  </div>
+
+  <div class="feat-card">
+    <div class="feat-icon">💸</div>
+    <div class="feat-title">Real Economic Model</div>
+    <div class="feat-desc">
+      Callers pay SOL per agent call. On successful execution: 90% goes to the agent developer, 10% to the platform — automatically via smart contract, no intermediaries. On poor quality: 100% refunded. Agents build on-chain reputation over time.
+    </div>
+    <span class="feat-badge green">90% owner · 10% platform</span>
+  </div>
+
+  <div class="feat-card">
+    <div class="feat-icon">🌍</div>
+    <div class="feat-title">Open to Any AI Agent</div>
+    <div class="feat-desc">
+      Any external agent — Claude, GPT, LangChain, AutoGen, a custom Python script — can call HiveMind agents via a single REST API call with an API key. HiveMind becomes infrastructure that any AI in the world can use.
+    </div>
+    <span class="feat-badge purple">REST API + API Keys</span>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════ CODE ══════════════════════════ -->
+<div class="code-section">
+  <div class="sec-label">External Agent Integration</div>
+  <h2 class="sec-title">One HTTP call. Full pipeline.</h2>
+  <p class="sec-sub">Any AI agent can use HiveMind as infrastructure — no blockchain knowledge required.</p>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'py')">Python</button>
+      <button class="code-tab" onclick="switchTab(this,'curl')">cURL</button>
+      <button class="code-tab" onclick="switchTab(this,'js')">JavaScript</button>
+    </div>
+    <div class="code-wrap">
+      <button class="code-copy-btn" onclick="copyCode()">Copy</button>
+      <pre id="code-pre"></pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ LIVE DEMO ══════════════════════ -->
+<div style="margin-bottom:28px;max-width:800px;margin-left:auto;margin-right:auto">
+  <div class="sec-label">Try it yourself</div>
+  <h2 class="sec-title">Live Demo</h2>
+  <p class="sec-sub">Execute the real pipeline — Claude routes your task, agents run, Solana settles.</p>
+</div>
+
+<!-- Auth gate -->
+<div class="auth-gate" id="auth-gate">
+  <h3>Sign in to run the live demo</h3>
+  <p>Use your wallet address + password to authenticate and run the full on-chain AI pipeline.</p>
+  <input class="auth-input" type="text" id="login-wallet" placeholder="Wallet address (or email)" autocomplete="off">
+  <input class="auth-input" type="password" id="login-password" placeholder="Password">
+  <button class="run-btn" id="login-btn" onclick="doLogin()" style="margin-top:4px">
+    <span class="run-spinner"></span>Sign In
+  </button>
+  <div id="auth-error"></div>
+</div>
+
+<!-- Demo panel -->
+<div class="live-panel" id="demo-panel" style="display:none">
+
+  <!-- Input -->
+  <div class="demo-card">
+    <div class="demo-card-head">
+      <div class="demo-card-hl"><div class="dot-sm amber"></div>Task Input</div>
+      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 1 — What do you need?</span>
+    </div>
+    <div class="demo-card-body">
+      <div class="preset-row">
+        <button class="preset" onclick="setTask(this)">Summarize &amp; analyze sentiment</button>
+        <button class="preset" onclick="setTask(this)">Translate to Russian and summarize</button>
+        <button class="preset" onclick="setTask(this)">Analyze sentiment: HiveMind is a revolutionary AI marketplace on Solana built for the Decentrathon 5.0 hackathon</button>
+      </div>
+      <textarea id="task-input" placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
+      <div class="demo-err" id="demo-err"></div>
+      <button class="run-btn" id="run-btn" onclick="runDemo()">
+        <span class="run-spinner"></span>▶ &nbsp;Run with AI
       </button>
-      <div id="auth-error"></div>
     </div>
   </div>
 
-  <!-- Demo Panel (shown when logged in) -->
-  <div class="demo-panel" id="demo-panel" style="display:none">
-
-    <!-- Task Input Card -->
-    <div class="demo-card">
-      <div class="demo-card-header">
-        <div class="demo-card-title">
-          <div class="dot amber"></div>
-          Task
-        </div>
-        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 1 / 4</span>
-      </div>
-      <div class="demo-card-body">
-        <div class="task-presets">
-          <button class="preset-btn" onclick="setTask(this)">Summarize &amp; analyze sentiment of a text</button>
-          <button class="preset-btn" onclick="setTask(this)">Translate this paragraph to Russian and summarize it</button>
-          <button class="preset-btn" onclick="setTask(this)">Analyze sentiment: AgentsHub is a revolutionary AI marketplace on Solana</button>
-        </div>
-        <textarea id="task-input" rows="3"
-          placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
-        <div class="demo-error" id="demo-error"></div>
-        <button class="run-btn" id="run-btn" onclick="runDemo()">
-          <span class="spinner"></span>
-          ▶ Run with AI
-        </button>
-      </div>
+  <!-- Plan -->
+  <div class="demo-card" id="plan-sec" style="display:none">
+    <div class="demo-card-head">
+      <div class="demo-card-hl"><div class="dot-sm amber"></div>Claude's Plan</div>
+      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 2 — AI Routing Decision</span>
     </div>
-
-    <!-- AI Plan Card -->
-    <div class="demo-card" id="plan-section">
-      <div class="demo-card-header">
-        <div class="demo-card-title">
-          <div class="dot amber"></div>
-          Claude's Plan
-        </div>
-        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 2 / 4</span>
-      </div>
-      <div class="demo-card-body">
-        <div id="plan-reasoning" style="font-size:13px;color:var(--text-muted);margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)"></div>
-        <div id="plan-calls"></div>
-      </div>
+    <div class="demo-card-body">
+      <div id="plan-reason" style="font-size:13px;color:var(--text-muted);padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)"></div>
+      <div id="plan-calls"></div>
     </div>
-
-    <!-- Execution Log Card -->
-    <div class="demo-card" id="exec-section">
-      <div class="demo-card-header">
-        <div class="demo-card-title">
-          <div class="dot amber"></div>
-          Execution Log
-        </div>
-        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 3 / 4</span>
-      </div>
-      <div class="demo-card-body">
-        <div class="log-terminal" id="exec-log"></div>
-      </div>
-    </div>
-
-    <!-- Results Card -->
-    <div class="demo-card" id="results-section">
-      <div class="demo-card-header">
-        <div class="demo-card-title">
-          <div class="dot green"></div>
-          Results &amp; On-chain Record
-        </div>
-        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 4 / 4</span>
-      </div>
-      <div class="demo-card-body">
-        <div id="results-list"></div>
-      </div>
-    </div>
-
-  </div><!-- /demo-panel -->
-
-  <!-- Program info bar -->
-  <div class="program-bar">
-    <div>
-      <div class="program-bar-label">Solana Program (Devnet)</div>
-      <div class="program-bar-value">2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G</div>
-    </div>
-    <a href="https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet" target="_blank">
-      View on Explorer ↗
-    </a>
   </div>
+
+  <!-- Exec log -->
+  <div class="demo-card" id="exec-sec" style="display:none">
+    <div class="demo-card-head">
+      <div class="demo-card-hl"><div class="dot-sm amber"></div>Execution Log</div>
+      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 3 — Agents Running</span>
+    </div>
+    <div class="demo-card-body">
+      <div class="exec-log" id="exec-log"></div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="demo-card" id="res-sec" style="display:none">
+    <div class="demo-card-head">
+      <div class="demo-card-hl"><div class="dot-sm green"></div>Results &amp; On-chain Record</div>
+      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 4 — Settled on Solana</span>
+    </div>
+    <div class="demo-card-body">
+      <div id="res-list"></div>
+    </div>
+  </div>
+
+</div><!-- /live-panel -->
+
+
+<!-- ═══════════════════════════════ PROGRAM BAR ════════════════════ -->
+<div class="program-bar">
+  <div>
+    <div class="program-bar-lbl">Anchor Program · Solana Devnet</div>
+    <div class="program-bar-val">2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G</div>
+  </div>
+  <a href="https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet" target="_blank">
+    ⛓ View on Solana Explorer ↗
+  </a>
+</div>
 
 </div><!-- /container -->
 
+<!-- ════════════════════════════════ SCRIPTS ═══════════════════════ -->
 <script src="/ui/static/app.js"></script>
 <script>
-/* ─── Demo page logic ─────────────────────────────────────────────────────── */
-
 const PROGRAM_ID = '2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G';
-const EXPLORER = `https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`;
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+/* ─── Code tabs ─── */
+const CODE = {
+  py: `<span class="kw">import</span> httpx, asyncio
+
+API = <span class="str">"https://hivemind.cv/api/v1"</span>
+KEY = <span class="str">"hm_your_api_key"</span>
+
+<span class="kw">async def</span> <span class="fn">call_agent</span>(slug, input_data):
+    headers = {<span class="str">"Authorization"</span>: <span class="str">f"Bearer {KEY}"</span>}
+    <span class="kw">async with</span> httpx.AsyncClient() <span class="kw">as</span> c:
+
+        <span class="cm"># 1. Start execution — AI coordinator routes the task</span>
+        r = <span class="kw">await</span> c.post(<span class="str">f"{API}/execute"</span>,
+            headers=headers,
+            json={<span class="str">"agent_slug"</span>: slug, <span class="str">"input"</span>: input_data})
+        exec_id = r.json()[<span class="str">"id"</span>]
+
+        <span class="cm"># 2. Poll until done (Claude evaluates quality async)</span>
+        <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="num">30</span>):
+            <span class="kw">await</span> asyncio.sleep(<span class="num">2</span>)
+            d = (<span class="kw">await</span> c.get(<span class="str">f"{API}/executions/{exec_id}"</span>, headers=headers)).json()
+            <span class="kw">if</span> d[<span class="str">"status"</span>] <span class="kw">in</span> (<span class="str">"done"</span>, <span class="str">"failed"</span>):
+                <span class="kw">return</span> d
+
+result = asyncio.run(<span class="fn">call_agent</span>(
+    <span class="str">"@demo/text-summarizer"</span>,
+    {<span class="str">"text"</span>: <span class="str">"HiveMind is a decentralized AI marketplace..."</span>}
+))
+
+print(result[<span class="str">"output"</span>][<span class="str">"summary"</span>])          <span class="cm"># Agent output</span>
+print(result[<span class="str">"ai_quality_score"</span>])           <span class="cm"># Claude's score 0–100</span>
+print(result[<span class="str">"complete_tx_hash"</span>])           <span class="cm"># Solana TX — immutable proof</span>`,
+
+  curl: `<span class="cm"># Step 1: Start execution</span>
+curl -X POST https://hivemind.cv/api/v1/execute <span class="kw">\\</span>
+  -H <span class="str">"Authorization: Bearer hm_your_api_key"</span> <span class="kw">\\</span>
+  -H <span class="str">"Content-Type: application/json"</span> <span class="kw">\\</span>
+  -d <span class="str">'{"agent_slug":"@demo/text-summarizer","input":{"text":"..."}}'</span>
+
+<span class="cm"># Response: {"id":"550e8400-...","status":"pending"}</span>
+
+<span class="cm"># Step 2: Check result (poll until status = "done")</span>
+curl https://hivemind.cv/api/v1/executions/550e8400-... <span class="kw">\\</span>
+  -H <span class="str">"Authorization: Bearer hm_your_api_key"</span>
+
+<span class="cm"># Response:</span>
+<span class="cm"># {</span>
+<span class="cm">#   "status": "done",</span>
+<span class="cm">#   "output": {"summary": "...", "word_count": 42},</span>
+<span class="cm">#   "ai_quality_score": 87,                  ← Claude's verdict</span>
+<span class="cm">#   "ai_reasoning": "Clear and accurate...",  ← why</span>
+<span class="cm">#   "complete_tx_hash": "5KtPn1x...",         ← Solana TX</span>
+<span class="cm">#   "on_chain_execution_id": "7xKw3..."        ← PDA address</span>
+<span class="cm"># }</span>`,
+
+  js: `<span class="kw">const</span> API = <span class="str">'https://hivemind.cv/api/v1'</span>;
+<span class="kw">const</span> KEY = <span class="str">'hm_your_api_key'</span>;
+<span class="kw">const</span> headers = { <span class="str">'Authorization'</span>: <span class="str">\`Bearer \${KEY}\`</span>, <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> };
+
+<span class="kw">async function</span> <span class="fn">callAgent</span>(slug, input) {
+  <span class="cm">// 1. Trigger execution — Claude selects agents automatically</span>
+  <span class="kw">const</span> { id } = <span class="kw">await</span> fetch(<span class="str">\`\${API}/execute\`</span>, {
+    method: <span class="str">'POST'</span>, headers,
+    body: JSON.stringify({ agent_slug: slug, input })
+  }).then(r => r.json());
+
+  <span class="cm">// 2. Poll for result</span>
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">30</span>; i++) {
+    <span class="kw">await new</span> Promise(r => setTimeout(r, <span class="num">2000</span>));
+    <span class="kw">const</span> data = <span class="kw">await</span> fetch(<span class="str">\`\${API}/executions/\${id}\`</span>, { headers }).then(r => r.json());
+    <span class="kw">if</span> ([<span class="str">'done'</span>, <span class="str">'failed'</span>].includes(data.status)) <span class="kw">return</span> data;
+  }
 }
 
-/* ─── Auth gate ─── */
-function checkAuth() {
-  if (isLoggedIn()) {
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('demo-panel').style.display = 'flex';
-  } else {
-    document.getElementById('auth-gate').style.display = 'block';
-    document.getElementById('demo-panel').style.display = 'none';
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">callAgent</span>(<span class="str">'@demo/text-summarizer'</span>, {
+  text: <span class="str">'HiveMind is a decentralized AI marketplace on Solana...'</span>
+});
+
+console.log(result.output.summary);          <span class="cm">// Agent result</span>
+console.log(result.ai_quality_score);        <span class="cm">// 0–100 from Claude</span>
+console.log(result.complete_tx_hash);        <span class="cm">// Solana TX hash</span>`
+};
+
+let activeTab = 'py';
+function switchTab(btn, tab) {
+  document.querySelectorAll('.code-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTab = tab;
+  document.getElementById('code-pre').innerHTML = CODE[tab];
+}
+function copyCode() {
+  const text = document.getElementById('code-pre').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.code-copy-btn');
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('code-pre').innerHTML = CODE.py;
+});
+
+/* ─── Pipeline visualization ─── */
+let visRunning = false;
+const VIS_STEPS = [
+  { node: 'n-claude',     arr: null,  pkt: null,  msg: 'External agent sends task via REST API', cls: 'alog-info' },
+  { node: 'n-gpt',        arr: null,  pkt: null,  msg: 'Multiple agents can use HiveMind simultaneously', cls: 'alog-info' },
+  { node: 'n-api',        arr: 'arr-1', pkt: 'pkt-1', msg: 'Request received at POST /api/v1/execute', cls: 'alog-sys' },
+  { node: 'n-route',      arr: null,  pkt: null,  msg: 'Claude analyzes task → selects optimal agents', cls: 'alog-sys' },
+  { node: 'n-queue',      arr: 'arr-2', pkt: 'pkt-2', msg: 'Celery enqueues execution tasks', cls: 'alog-info' },
+  { node: 'n-initiate',   arr: 'arr-3', pkt: 'pkt-3', msg: 'initiate_execution → SOL locked in PDA escrow', cls: 'alog-chain' },
+  { node: 'n-escrow',     arr: null,  pkt: null,  msg: 'ExecutionAccount PDA created (status = Pending)', cls: 'alog-chain' },
+  { node: 'n-sandbox',    arr: null,  pkt: null,  msg: 'Agent subprocess spawned in sandbox', cls: 'alog-info' },
+  { node: 'n-agent1',     arr: null,  pkt: null,  msg: 'text-summarizer running agent.py...', cls: 'alog-info' },
+  { node: 'n-agent2',     arr: null,  pkt: null,  msg: 'sentiment-analyzer running agent.py...', cls: 'alog-info' },
+  { node: 'n-eval',       arr: null,  pkt: null,  msg: 'Claude evaluates output quality → score 88/100', cls: 'alog-sys' },
+  { node: 'n-decision',   arr: null,  pkt: null,  msg: 'Decision: score ≥ 70 → complete_execution', cls: 'alog-sys' },
+  { node: 'n-complete',   arr: null,  pkt: null,  msg: 'complete_execution TX → 90% SOL to owner, 10% platform', cls: 'alog-ok' },
+  { node: 'n-reputation', arr: null,  pkt: null,  msg: 'update_reputation → score 88 stored on-chain', cls: 'alog-ok' },
+];
+
+function alog(msg, cls='alog-info') {
+  const alogEl = document.getElementById('alog');
+  const now = new Date().toISOString().slice(11,19);
+  const div = document.createElement('div');
+  div.className = `alog-line ${cls}`;
+  div.innerHTML = `<span class="alog-ts">${now}</span><span>${esc(msg)}</span>`;
+  alogEl.appendChild(div);
+  alogEl.scrollTop = alogEl.scrollHeight;
+}
+
+async function runVisualization() {
+  if (visRunning) return;
+  visRunning = true;
+  const btn = document.getElementById('vis-btn');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  // Reset all nodes
+  document.querySelectorAll('.node').forEach(n => n.classList.remove('active','done'));
+  document.querySelectorAll('.arrow-line').forEach(a => a.classList.remove('lit'));
+  document.querySelectorAll('.packet').forEach(p => p.style.display='none');
+  document.getElementById('alog').innerHTML = '';
+
+  alog('Pipeline started', 'alog-sys');
+
+  for (let i = 0; i < VIS_STEPS.length; i++) {
+    const s = VIS_STEPS[i];
+    await sleep(600);
+
+    // Activate node
+    const nodeEl = document.getElementById(s.node);
+    if (nodeEl) { nodeEl.classList.add('active'); }
+
+    // Activate arrow + packet
+    if (s.arr) {
+      const arrEl = document.getElementById(s.arr);
+      if (arrEl) arrEl.classList.add('lit');
+      const pktEl = document.getElementById(s.pkt);
+      if (pktEl) { pktEl.style.display = 'block'; await sleep(1200); pktEl.style.display = 'none'; }
+    }
+
+    alog(s.msg, s.cls);
+
+    await sleep(400);
+    if (nodeEl) { nodeEl.classList.remove('active'); nodeEl.classList.add('done'); }
   }
+
+  alog('✓ Pipeline complete — all settled on Solana', 'alog-ok');
+  btn.classList.remove('loading'); btn.disabled = false;
+  btn.textContent = '↺  Run Again';
+  visRunning = false;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+
+/* ─── Auth ─── */
+function checkAuth() {
+  const loggedIn = isLoggedIn();
+  document.getElementById('auth-gate').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('demo-panel').style.display = loggedIn ? 'flex' : 'none';
   updateNavWallet && updateNavWallet();
 }
 
@@ -459,20 +920,14 @@ async function doLogin() {
   const errEl = document.getElementById('auth-error');
   const btn = document.getElementById('login-btn');
   errEl.textContent = '';
-
   if (!walletOrEmail || !password) { errEl.textContent = 'Fill in both fields'; return; }
-
   btn.classList.add('loading'); btn.disabled = true;
   try {
     const res = await fetch('/api/v1/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ wallet_address: walletOrEmail, password }),
     });
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({}));
-      throw new Error(d.detail || `Error ${res.status}`);
-    }
+    if (!res.ok) { const d = await res.json().catch(()=>({})); throw new Error(d.detail || `Error ${res.status}`); }
     const data = await res.json();
     setToken(data.access_token);
     checkAuth();
@@ -482,200 +937,125 @@ async function doLogin() {
     btn.classList.remove('loading'); btn.disabled = false;
   }
 }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('auth-gate').style.display !== 'none') doLogin();
+});
 
-/* ─── Workflow stepper ─── */
-function setStep(idx) {
-  for (let i = 0; i < 4; i++) {
-    const el = document.getElementById(`wf-${i}`);
-    el.classList.remove('active','done');
-    if (i < idx) el.classList.add('done');
-    else if (i === idx) el.classList.add('active');
-  }
-}
 
 /* ─── Preset tasks ─── */
-function setTask(btn) {
-  document.getElementById('task-input').value = btn.textContent.trim();
-}
+function setTask(btn) { document.getElementById('task-input').value = btn.textContent.trim(); }
 
-/* ─── Log helpers ─── */
-let logEl;
-function appendLog(line) {
-  if (!logEl) return;
-  const cls = line.startsWith('[system]') ? 'log-system'
-             : line.startsWith('[error]') ? 'log-error'
-             : line === '__DONE__' ? 'log-done'
-             : '';
+
+/* ─── Live demo runner ─── */
+let execLog;
+function appendExecLog(line) {
+  if (!execLog) return;
+  const cls = line.startsWith('[system]') ? 'ls' : line.startsWith('[error]') ? 'le' : line === '__DONE__' ? 'ld' : '';
   const div = document.createElement('div');
   if (cls) div.className = cls;
-  div.textContent = line === '__DONE__' ? '✓ Execution complete' : line;
-  logEl.appendChild(div);
-  logEl.scrollTop = logEl.scrollHeight;
+  div.textContent = line === '__DONE__' ? '✓ All agents completed' : line;
+  execLog.appendChild(div);
+  execLog.scrollTop = execLog.scrollHeight;
 }
 
-/* ─── Poll execution ─── */
-async function pollExecution(execId) {
+async function pollExec(id) {
   for (let i = 0; i < 120; i++) {
-    await new Promise(r => setTimeout(r, 1500));
-    const ex = await apiFetch('GET', `/api/v1/executions/${execId}`);
-    if (ex.status === 'done' || ex.status === 'failed') return ex;
+    await sleep(1500);
+    const d = await apiFetch('GET', `/api/v1/executions/${id}`);
+    if (d.status === 'done' || d.status === 'failed') return d;
   }
   throw new Error('Execution timed out');
 }
 
-/* ─── Build result card ─── */
-function buildResultCard(slug, execution) {
-  const score = execution.ai_quality_score;
-  const scoreBadge = score != null
-    ? `<span class="score-badge ${score >= 70 ? 'high' : 'low'}">AI Score ${score}/100</span>`
-    : '';
-
-  const txHash = execution.complete_tx_hash || execution.on_chain_tx_hash;
-  const onchainLink = txHash
-    ? `<a class="onchain-link" href="https://explorer.solana.com/tx/${esc(txHash)}?cluster=devnet" target="_blank">
-        ⛓ Explorer ↗
-       </a>`
-    : '';
-
-  const outputStr = execution.output
-    ? JSON.stringify(execution.output, null, 2)
-    : execution.error || 'No output';
-
-  const reasoning = execution.ai_reasoning
-    ? `<div class="result-reasoning">🤖 ${esc(execution.ai_reasoning)}</div>`
-    : '';
-
-  return `
-    <div class="result-card">
-      <div class="result-header">
-        <div class="result-agent">${esc(slug)}</div>
-        <div class="result-meta">
-          ${scoreBadge}
-          ${onchainLink}
-          <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${execution.duration_ms ? execution.duration_ms+'ms' : ''}</span>
-        </div>
-      </div>
-      <div class="result-body">
-        <div class="result-output">${esc(outputStr)}</div>
-        ${reasoning}
-      </div>
-    </div>`;
+function buildResult(slug, ex) {
+  const score = ex.ai_quality_score;
+  const scoreBadge = score != null ? `<span class="score-pill ${score>=70?'hi':'lo'}">AI Score ${score}/100</span>` : '';
+  const tx = ex.complete_tx_hash || ex.on_chain_tx_hash;
+  const txLink = tx ? `<a class="tx-link" href="https://explorer.solana.com/tx/${esc(tx)}?cluster=devnet" target="_blank">⛓ Explorer ↗</a>` : '';
+  const out = ex.output ? JSON.stringify(ex.output, null, 2) : (ex.error || 'No output');
+  const reason = ex.ai_reasoning ? `<div class="res-ai">🤖 ${esc(ex.ai_reasoning)}</div>` : '';
+  return `<div class="res-card">
+    <div class="res-head">
+      <div class="res-slug">${esc(slug)}</div>
+      <div class="res-meta">${scoreBadge}${txLink}<span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${ex.duration_ms?ex.duration_ms+'ms':''}</span></div>
+    </div>
+    <div class="res-body"><div class="res-out">${esc(out)}</div>${reason}</div>
+  </div>`;
 }
 
-/* ─── Main demo runner ─── */
 async function runDemo() {
   const task = document.getElementById('task-input').value.trim();
-  if (!task) { showError('Please enter a task'); return; }
-
+  if (!task) { showErr('Please enter a task'); return; }
   const btn = document.getElementById('run-btn');
-  const errEl = document.getElementById('demo-error');
+  const errEl = document.getElementById('demo-err');
   errEl.style.display = 'none';
   btn.classList.add('loading'); btn.disabled = true;
 
-  // Reset UI
-  document.getElementById('plan-section').style.display = 'none';
-  document.getElementById('exec-section').style.display = 'none';
-  document.getElementById('results-section').style.display = 'none';
+  ['plan-sec','exec-sec','res-sec'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('plan-calls').innerHTML = '';
-  document.getElementById('results-list').innerHTML = '';
+  document.getElementById('res-list').innerHTML = '';
 
   try {
-    // Step 1 → Step 2: AI routing
-    setStep(1);
     const routeRes = await apiFetch('POST', '/api/v1/hub/ai-route', { task });
     const calls = routeRes.calls || [];
-    if (!calls.length) throw new Error('No agents selected by AI. Try a different task or seed demo agents first.');
+    if (!calls.length) throw new Error('No agents found for this task. Make sure demo agents are seeded.');
 
-    // Show plan
-    document.getElementById('plan-section').style.display = 'block';
-    document.getElementById('plan-reasoning').textContent = routeRes.reasoning || 'Claude selected the following agents:';
-
-    const callsEl = document.getElementById('plan-calls');
+    document.getElementById('plan-sec').style.display = 'block';
+    document.getElementById('plan-reason').textContent = routeRes.reasoning || 'Claude selected the following agents:';
     calls.forEach((c, i) => {
-      callsEl.innerHTML += `
-        <div class="agent-call-card" id="call-card-${i}">
-          <div class="agent-num">${i+1}</div>
-          <div>
-            <div class="agent-call-slug">${esc(c.slug)}</div>
-            <div class="agent-call-reason">${esc(c.reason || '')}</div>
-          </div>
-          <div class="agent-call-status" id="call-status-${i}">queued</div>
+      document.getElementById('plan-calls').innerHTML += `
+        <div class="plan-call">
+          <div class="plan-num">${i+1}</div>
+          <div><div class="plan-slug">${esc(c.slug)}</div><div class="plan-reason">${esc(c.reason||'')}</div></div>
+          <div class="plan-status" id="cs-${i}">queued</div>
         </div>`;
     });
 
-    // Step 3: Execute agents
-    setStep(2);
-    document.getElementById('exec-section').style.display = 'block';
-    logEl = document.getElementById('exec-log');
-    logEl.innerHTML = '';
-    appendLog('[system] Starting execution pipeline...');
+    document.getElementById('exec-sec').style.display = 'block';
+    execLog = document.getElementById('exec-log');
+    execLog.innerHTML = '';
+    appendExecLog('[system] Pipeline started...');
 
-    const allResults = [];
+    const results = [];
     for (let i = 0; i < calls.length; i++) {
       const call = calls[i];
-      document.getElementById(`call-status-${i}`).className = 'agent-call-status running';
-      document.getElementById(`call-status-${i}`).textContent = 'running';
-      appendLog(`[system] Executing ${call.slug}...`);
-
+      document.getElementById(`cs-${i}`).className = 'plan-status running';
+      document.getElementById(`cs-${i}`).textContent = 'running';
+      appendExecLog(`[system] Executing ${call.slug}...`);
       try {
-        const execRes = await apiFetch('POST', '/api/v1/execute', {
-          agent_slug: call.slug,
-          input: call.input || {},
-        });
-        const execId = execRes.id || execRes.execution_id;
-        const execution = await pollExecution(execId);
-        appendLog(execution.status === 'done'
-          ? `[system] ${call.slug} → done (${execution.duration_ms}ms)`
-          : `[error] ${call.slug} → ${execution.error || 'failed'}`);
-
-        document.getElementById(`call-status-${i}`).className = `agent-call-status ${execution.status === 'done' ? 'done' : 'failed'}`;
-        document.getElementById(`call-status-${i}`).textContent = execution.status;
-        allResults.push({ slug: call.slug, execution });
+        const er = await apiFetch('POST', '/api/v1/execute', { agent_slug: call.slug, input: call.input || {} });
+        const ex = await pollExec(er.id || er.execution_id);
+        appendExecLog(ex.status === 'done' ? `[system] ${call.slug} → done (${ex.duration_ms}ms)` : `[error] ${call.slug} → ${ex.error||'failed'}`);
+        document.getElementById(`cs-${i}`).className = `plan-status ${ex.status==='done'?'done':'failed'}`;
+        document.getElementById(`cs-${i}`).textContent = ex.status;
+        results.push({ slug: call.slug, execution: ex });
       } catch(e) {
-        appendLog(`[error] ${call.slug} → ${e.message}`);
-        document.getElementById(`call-status-${i}`).className = 'agent-call-status failed';
-        document.getElementById(`call-status-${i}`).textContent = 'failed';
-        allResults.push({ slug: call.slug, execution: { status: 'failed', error: e.message } });
+        appendExecLog(`[error] ${call.slug} → ${e.message}`);
+        document.getElementById(`cs-${i}`).className = 'plan-status failed';
+        document.getElementById(`cs-${i}`).textContent = 'failed';
+        results.push({ slug: call.slug, execution: { status:'failed', error:e.message } });
       }
     }
-    appendLog('__DONE__');
+    appendExecLog('__DONE__');
 
-    // Step 4: Results + on-chain
-    setStep(3);
-    document.getElementById('results-section').style.display = 'block';
-    const resultsEl = document.getElementById('results-list');
-    allResults.forEach(({ slug, execution }) => {
-      resultsEl.innerHTML += buildResultCard(slug, execution);
-    });
-
-    // Scroll to results
-    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('res-sec').style.display = 'block';
+    const resList = document.getElementById('res-list');
+    results.forEach(({ slug, execution }) => { resList.innerHTML += buildResult(slug, execution); });
+    document.getElementById('res-sec').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch(e) {
-    errEl.textContent = e.message;
-    errEl.style.display = 'block';
-    setStep(0);
+    showErr(e.message);
   } finally {
     btn.classList.remove('loading'); btn.disabled = false;
   }
 }
 
-function showError(msg) {
-  const errEl = document.getElementById('demo-error');
-  errEl.textContent = msg; errEl.style.display = 'block';
-}
+function showErr(msg) { const e = document.getElementById('demo-err'); e.textContent = msg; e.style.display = 'block'; }
 
 /* ─── Init ─── */
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   initHexBackground && initHexBackground();
-});
-
-// Login on Enter
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('auth-gate').style.display !== 'none') {
-    doLogin();
-  }
 });
 </script>
 </body>

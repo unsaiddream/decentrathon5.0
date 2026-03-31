@@ -1,191 +1,134 @@
-# AgentsHub
+<div align="center">
 
-**Decentralized AI Agent Marketplace on Solana**
+<img src="https://img.shields.io/badge/Solana-Devnet-9945FF?style=for-the-badge&logo=solana&logoColor=white" />
+<img src="https://img.shields.io/badge/Anchor-0.30-blue?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Claude-AI%20Coordinator-D97706?style=for-the-badge&logo=anthropic&logoColor=white" />
+<img src="https://img.shields.io/badge/FastAPI-Python%203.11-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+<img src="https://img.shields.io/badge/Docker-Deployed-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
 
-Developers publish AI agents → users and other agents call them → an AI coordinator makes routing and quality decisions → every decision changes smart contract state on Solana → authors earn SOL automatically.
+<br/><br/>
 
-> National Solana Hackathon by Decentrathon 5.0 — **Case 2: AI + Blockchain: Autonomous Smart Contracts**
+```
+██╗  ██╗██╗██╗   ██╗███████╗███╗   ███╗██╗███╗   ██╗██████╗
+██║  ██║██║██║   ██║██╔════╝████╗ ████║██║████╗  ██║██╔══██╗
+███████║██║██║   ██║█████╗  ██╔████╔██║██║██╔██╗ ██║██║  ██║
+██╔══██║██║╚██╗ ██╔╝██╔══╝  ██║╚██╔╝██║██║██║╚██╗██║██║  ██║
+██║  ██║██║ ╚████╔╝ ███████╗██║ ╚═╝ ██║██║██║ ╚████║██████╔╝
+╚═╝  ╚═╝╚═╝  ╚═══╝  ╚══════╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝
+```
+
+### **Decentralized AI Agent Marketplace on Solana**
+*Claude decides. Blockchain records. Agents get paid.*
+
+**[🌐 Live Demo](https://hivemind.cv/demo)** · **[📖 Docs](docs/)** · **[🔗 Solana Explorer](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet)**
+
+> **Decentrathon 5.0 — Case 2: AI + Blockchain: Autonomous Smart Contracts**
+
+</div>
 
 ---
 
-## How It Works
+## What is HiveMind?
 
-### For Users
+HiveMind is an open marketplace where developers publish AI agents, and users (or other agents) call them. Every execution flows through an autonomous pipeline:
 
 ```
-You want: "Translate this PDF to Russian and make a summary"
-                          │
-                          ▼
-        Open AgentsHub, connect Phantom wallet
-        Type your task in the Hub
-        Phantom asks you to sign a transaction — click OK
-        (SOL is locked in the Solana smart contract)
-                          │
-                          ▼
-        🤖 AI Coordinator (Claude) decides:
-        "Need two agents: pdf-reader + translator"
-        → Calls both automatically
-                          │
-                          ▼
-        ⚙️  Agents are working (you see the progress)
-        pdf-reader: extracting text...
-        translator: translating...
-                          │
-                          ▼
-        🤖 Claude evaluates the result:
-        "Quality 88/100 — good" → agents get paid
-        (smart contract releases SOL to agent authors)
-                          │
-                          ▼
-        ✅ You get the result
-        + a link to Solana Explorer — see all transactions
-        (full transparency: who did what and for how much)
+User submits task
+      │
+      ▼
+🤖  Claude AI analyzes the task
+      │  selects agents  │  evaluates output quality
+      ▼                  ▼
+⚙️  Agents execute    📊 Score 0–100
+      │                  │
+      ▼                  ▼
+⛓️  Anchor smart contract settles on-chain
+      ├── score ≥ 70 → complete_execution → SOL to agent owner
+      └── score < 70 → refund_execution  → SOL back to caller
 ```
 
-You come in with a task and SOL — you get the result. Everything else is automatic.
+**The key innovation:** Claude AI makes binding financial decisions. Its quality score is stored on Solana — fully transparent, verifiable by anyone.
 
 ---
 
-### For Agent Developers
+## Hackathon Compliance — Case 2
+
+| Criterion | Points | Implementation |
+|-----------|--------|----------------|
+| **Technical Implementation** | 25 | Anchor program + FastAPI backend + Celery workers + Supabase |
+| **Product & Idea** | 20 | Live marketplace with real SOL payments, agent reputation system |
+| **Use of Solana** | 15 | 5 Anchor instructions: `register_agent`, `initiate_execution`, `complete_execution`, `refund_execution`, `update_reputation` |
+| **Innovation** | 15 | Claude AI coordinator controls on-chain state — AI makes real economic decisions |
+| **UX & Product Thinking** | 10 | Full frontend: marketplace, hub, dashboard, agent upload, live demo page |
+| **Demo & Presentation** | 10 | [hivemind.cv/demo](https://hivemind.cv/demo) — interactive pipeline with real agents |
+| **Documentation** | 5 | This README + CLAUDE.md + API docs |
+
+---
+
+## The On-Chain AI Decision Chain
 
 ```
-You built a great AI agent in Python
-                │
-                ▼
-        ┌────── PUBLISH ──────┐
-        │                     │
-        │  1. zip your agent  │
-        │  2. add manifest.json│
-        │  3. set your price  │
-        │     (e.g. 0.001 SOL)│
-        │  4. deploy to Hub   │
-        └──────────┬──────────┘
-                   │
-                   ▼
-        manifest.json — your agent's contract
-        {
-          "name": "pdf-summarizer",
-          "price_per_call": 0.001,
-          "input_schema":  { "pdf_url": "string" },
-          "output_schema": { "summary": "string" },
-          "uses_agents": []   ← can call other agents
-        }
-                   │
-                   ▼
-        Solana: register_agent on-chain
-        Your agent appears in the marketplace
-        It gets an on-chain address + reputation score
-                   │
-          ┌────────┴─────────┐
-          │  WHEN CALLED     │
-          ▼                  ▼
-    User called you    Another agent called you (A2A)
-          │                  │
-          └────────┬─────────┘
-                   │
-                   ▼
-        Automatically:
-        1. SOL is locked in the smart contract (escrow)
-        2. Your agent receives input via sandbox
-        3. It executes the task, returns output
-        4. Claude evaluates quality (0–100)
-        5. SOL (90%) → your wallet
-           SOL (10%) → platform
+                    ┌─────────────────────────────────────────────┐
+                    │           SOLANA DEVNET                      │
+                    │                                              │
+  User / External   │   initiate_execution                        │
+  Agent sends task ─┼──▶ ExecutionAccount PDA created             │
+                    │   amount_locked = agent.price_per_call      │
+                    │   status = Pending                           │
+                    │                                              │
+  Claude evaluates  │   complete_execution (score ≥ 70)           │
+  output quality ───┼──▶ 90% SOL → agent owner                    │
+  (0–100 score)     │   10% SOL → platform                        │
+                    │   status = Completed                         │
+                    │   ai_quality_score stored on-chain ✓         │
+                    │                                              │
+  OR low quality    │   refund_execution (score < 70)             │
+  ──────────────────┼──▶ 100% SOL → caller                        │
+                    │   status = Refunded                          │
+                    │                                              │
+                    │   update_reputation                          │
+                    │   AgentAccount.reputation_score updated      │
+                    │   (rolling average, 0–10000 scale)          │
+                    └─────────────────────────────────────────────┘
 ```
 
-Your agent just uses a simple HTTP call — billing and blockchain are handled automatically:
+**Program ID:** `2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G` · [View on Explorer ↗](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet)
+
+---
+
+## External Agent Integration
+
+Any agent — Claude, GPT, LangChain, AutoGen, or a custom script — can use HiveMind as infrastructure:
 
 ```python
-result = call_agent("@username/web-scraper", {"url": "..."})
-# AgentsHub charges SOL and records everything on-chain
-```
+import httpx, asyncio
 
----
+async def call_hivemind(slug: str, input_data: dict) -> dict:
+    async with httpx.AsyncClient() as client:
+        # 1. Start execution
+        r = await client.post("https://hivemind.cv/api/v1/execute",
+            headers={"Authorization": "Bearer hm_your_api_key"},
+            json={"agent_slug": slug, "input": input_data})
+        exec_id = r.json()["id"]
 
-### Agent-to-Agent (A2A)
+        # 2. Poll until done
+        for _ in range(30):
+            await asyncio.sleep(2)
+            status = await client.get(f"https://hivemind.cv/api/v1/executions/{exec_id}",
+                headers={"Authorization": "Bearer hm_your_api_key"})
+            data = status.json()
+            if data["status"] in ("done", "failed"):
+                return data
 
-The most powerful feature. An agent can hire other agents to complete subtasks:
+# Your agent calling our agent
+result = asyncio.run(call_hivemind(
+    "@demo/text-summarizer",
+    {"text": "HiveMind is a decentralized AI marketplace on Solana..."}
+))
 
-```
-Your "research-assistant" agent receives a task
-           │
-           ├──→ calls "web-scraper"     (0.0005 SOL)
-           │         └── returns scraped data
-           │
-           ├──→ calls "data-analyzer"   (0.001 SOL)
-           │         └── returns analysis
-           │
-           └──→ combines results → returns final report
-
-Every call = a separate on-chain transaction
-```
-
----
-
-### Open to the World — External Agents
-
-Any external agent — from any platform, any framework — can call AgentsHub agents via REST API. No custom protocol required.
-
-```
-Claude Agent (Anthropic)      ──→  calls "krisha-scraper"    on AgentsHub
-GPT Agent (OpenAI)            ──→  calls "ru-translator"     on AgentsHub
-LangChain / AutoGen agent     ──→  calls "data-analyzer"     on AgentsHub
-Your custom Python script     ──→  calls any agent pipeline  on AgentsHub
-```
-
-All they need is an API key and SOL balance. One HTTP call does everything:
-
-```bash
-curl -X POST https://agentshub.io/api/v1/execute \
-  -H "Authorization: Bearer <API_KEY>" \
-  -d '{"agent_slug": "@username/pdf-summarizer", "input": {"pdf_url": "..."}}'
-```
-
-AgentsHub becomes **infrastructure** — a universal marketplace any AI agent in the world can plug into, pay with SOL, and get results. Fully autonomous, no human in the loop.
-
----
-
-### The On-Chain AI Decision Chain
-
-This is the core innovation — every AI decision is recorded on Solana:
-
-```
-User (or external agent) submits task
-        │
-        ▼
-Claude analyzes task → selects agents
-        │
-        ▼
-Anchor: initiate_execution
-→ SOL locked in PDA (visible on Solana Explorer)
-        │
-        ▼
-Agents execute off-chain
-        │
-        ▼
-Claude evaluates output quality (0–100)
-        │
-        ├── score ≥ 70 → Anchor: complete_execution
-        │                → SOL released to agent owner
-        │                → Anchor: update_reputation (on-chain)
-        │
-        └── score < 70 → Anchor: refund_execution
-                         → SOL returned to caller
-```
-
-The AI quality score is stored **on-chain** in the ExecutionAccount — full transparency into every decision.
-
----
-
-### Payments
-
-```
-Caller pays 0.001 SOL per agent call
-    │
-    ├── 0.0009 SOL (90%) → agent author
-    └── 0.0001 SOL (10%) → AgentsHub platform
-
-All payments flow through the Solana smart contract — no intermediaries.
+print(result["output"]["summary"])          # Agent result
+print(result["ai_quality_score"])           # Claude's score (0–100)
+print(result["complete_tx_hash"])           # Solana TX — verify on Explorer
 ```
 
 ---
@@ -193,43 +136,45 @@ All payments flow through the Solana smart contract — no intermediaries.
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                EXTERNAL AGENTS (any platform)                    │
-│     Claude / GPT / LangChain / AutoGen / custom scripts          │
-└──────────────────────────────┬───────────────────────────────────┘
-                               │ REST API + API Key
-┌──────────────────────────────▼───────────────────────────────────┐
-│                        FRONTEND                                  │
-│           Vanilla JS + HTML/CSS + Phantom Wallet                 │
-│           marketplace / hub / dashboard / upload                 │
-└──────────────────────────────┬───────────────────────────────────┘
-                               │ REST API
-┌──────────────────────────────▼───────────────────────────────────┐
-│                      BACKEND (FastAPI)                           │
+┌─────────────────────────────────────────────────────────────────┐
+│              EXTERNAL AGENTS (any platform)                      │
+│   Claude Agent · GPT Agent · LangChain · AutoGen · curl         │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ REST API + API Key
+┌──────────────────────────▼──────────────────────────────────────┐
+│                       FRONTEND                                   │
+│   Vanilla JS + HTML/CSS · Phantom Wallet · Solana web3.js       │
+│   /marketplace · /hub · /dashboard · /upload · /demo            │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────────┐
+│                    BACKEND (FastAPI)                             │
 │                                                                  │
-│  ┌──────────────────┐     ┌─────────────────────────────────┐   │
-│  │  AI Coordinator  │     │           Routers               │   │
-│  │  (Claude API)    │     │  auth / agents / executions     │   │
-│  │                  │     │  payments / hub / a2a / keys    │   │
-│  │  - route_task()  │     └────────────────┬────────────────┘   │
-│  │  - evaluate()    │                      │                    │
-│  └────────┬─────────┘                      │                    │
-│           │ on-chain calls                 │                    │
-└───────────┼────────────────────────────────┼────────────────────┘
-            │                                │
-┌───────────▼─────────────┐   ┌──────────────▼─────────────────────┐
-│    SOLANA (Devnet)       │   │         INFRASTRUCTURE             │
-│                          │   │                                    │
-│  Anchor: agent_escrow    │   │  Supabase (Postgres + Storage)     │
-│                          │   │  Celery + Redis (task queue)       │
-│  - AgentAccount (PDA)    │   │  Docker                            │
-│  - ExecutionAccount      │   └────────────────────────────────────┘
-│  - register_agent        │
-│  - initiate_execution    │
-│  - complete_execution    │
-│  - refund_execution      │
-│  - update_reputation     │
-└──────────────────────────┘
+│  ┌────────────────────┐   ┌──────────────────────────────────┐  │
+│  │  AI Coordinator    │   │  Routers                         │  │
+│  │  (Claude API)      │   │  auth / agents / executions      │  │
+│  │                    │   │  hub / a2a / keys / payments     │  │
+│  │  route_task()      │   └──────────────────┬───────────────┘  │
+│  │  evaluate_output() │                      │                  │
+│  └────────┬───────────┘                      │                  │
+│           │                    ┌─────────────▼──────────────┐  │
+│           │                    │  Celery + Redis             │  │
+│           │                    │  Agent sandbox (subprocess) │  │
+│           │                    └────────────────────────────┘  │
+└───────────┼─────────────────────────────────────────────────────┘
+            │ on-chain calls (solders)
+┌───────────▼───────────────┐   ┌──────────────────────────────┐
+│    SOLANA (Devnet)         │   │      INFRASTRUCTURE          │
+│                            │   │                              │
+│  Anchor: agent_escrow      │   │  Supabase (Postgres)         │
+│  ├── AgentAccount (PDA)    │   │  Redis (task queue)          │
+│  ├── ExecutionAccount      │   │  Docker Compose              │
+│  ├── register_agent        │   │  Nginx + SSL                 │
+│  ├── initiate_execution    │   └──────────────────────────────┘
+│  ├── complete_execution    │
+│  ├── refund_execution      │
+│  └── update_reputation     │
+└────────────────────────────┘
 ```
 
 ---
@@ -239,44 +184,28 @@ All payments flow through the Solana smart contract — no intermediaries.
 | Layer | Technology |
 |-------|-----------|
 | Smart Contract | Anchor 0.30 (Rust) on Solana Devnet |
-| Backend | FastAPI + Python 3.11 |
-| AI Coordinator | Claude API (claude-sonnet-4-6) |
+| Backend | FastAPI + Python 3.11, async SQLAlchemy |
+| AI Coordinator | Claude API (`claude-sonnet-4-6`) |
 | Database | Supabase (Postgres + Storage) |
 | Task Queue | Celery + Redis |
 | Frontend | Vanilla JS + HTML/CSS |
 | Solana Client | solders (Python) + @solana/web3.js |
-| Auth | JWT + Phantom Wallet |
-
----
-
-## Hackathon Compliance
-
-**Case 2: AI + Blockchain — Autonomous Smart Contracts**
-
-| Requirement | How We Meet It |
-|-------------|---------------|
-| AI takes part in decision-making | Claude routes tasks and evaluates output quality |
-| Decisions lead to on-chain state change | Quality score triggers complete/refund Anchor instructions |
-| System operates autonomously | A2A chains + AI coordinator run without manual intervention |
-| Deployed smart contract | Anchor `agent_escrow` program on Solana Devnet |
-| Real-world scenario (bonus) | Live economic marketplace with real SOL payments |
-| Open infrastructure (bonus) | Any external AI agent can plug in via REST API |
+| Auth | JWT + Phantom Wallet (Ed25519) |
+| Deploy | Docker Compose + Nginx + DigitalOcean |
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
-
 - Docker + Docker Compose
-- Node.js 18+ (for Anchor tests)
-- Phantom wallet with devnet SOL (`https://faucet.solana.com`)
+- Phantom wallet with devnet SOL ([faucet](https://faucet.solana.com))
 - Supabase project (free tier)
 
-### 1. Clone and configure
+### 1. Clone & configure
 
 ```bash
-git clone <repo>
+git clone https://github.com/unsaiddream/decentrathon5.0.git
 cd decentrathon5.0
 cp .env.example .env   # fill in your values
 ```
@@ -284,84 +213,87 @@ cp .env.example .env   # fill in your values
 Key `.env` values:
 
 ```env
-# Supabase
-SUPABASE_URL=https://PROJECT_REF.supabase.co
-SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_KEY=eyJ...
 DATABASE_URL=postgresql+asyncpg://...
-
-# Solana (Devnet)
 SOLANA_RPC_URL=https://api.devnet.solana.com
 PLATFORM_WALLET_PRIVATE_KEY=<base58 private key>
 ANCHOR_PROGRAM_ID=2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G
-
-# AI Coordinator
 ANTHROPIC_API_KEY=sk-ant-...
-
-# Auth
 JWT_SECRET=<random 32+ chars>
+REDIS_URL=redis://redis:6379/0
 ```
 
-### 2. Run database migrations
+### 2. Run migrations & start
 
 ```bash
-cd backend
-alembic upgrade head
+docker compose up -d
+docker compose exec api alembic upgrade head
 ```
 
-### 3. Start the stack
+### 3. Seed demo agents
 
 ```bash
-docker-compose up -d
-```
-
-Services:
-- `http://localhost:8000` — API + Frontend
-- `http://localhost:5555` — Celery Flower (task monitor)
-
-### 4. Seed demo agents (optional)
-
-```bash
-# Get your JWT token first (login via /api/v1/auth/login)
+# Get JWT token from POST /api/v1/auth/login first
 python backend/scripts/seed_demo.py \
   --base-url http://localhost:8000 \
   --token <your_jwt_token>
 ```
 
-### 5. Run tests
+### 4. Open
 
-```bash
-cd backend
-pytest tests/ -v
+- `http://localhost:8000` — Frontend
+- `http://localhost:8000/demo` — Interactive demo
+- `http://localhost:5555` — Celery Flower
+
+---
+
+## Smart Contract Instructions
+
+```rust
+// Register an agent on-chain
+register_agent(slug: String, price_per_call: u64)
+// → creates AgentAccount PDA, reputation_score = 5000 (50.00)
+
+// Lock SOL in escrow before execution
+initiate_execution(execution_id: [u8; 16])
+// → creates ExecutionAccount PDA, status = Pending
+
+// Release payment after successful AI evaluation (score ≥ 70)
+complete_execution(ai_quality_score: u8)
+// → 90% SOL → agent owner, 10% → platform, score stored on-chain
+
+// Refund when AI evaluation fails (score < 70)
+refund_execution()
+// → 100% SOL → caller
+
+// Update agent reputation (rolling average)
+update_reputation(new_score_contribution: u32)
+// → AgentAccount.reputation_score updated (0–10000 scale)
 ```
 
 ---
 
-## Smart Contract
-
-The Anchor program is deployed on Solana Devnet:
-
-- **Program ID:** `2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G`
-- **Explorer:** https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet
-
-To redeploy:
+## Running Tests
 
 ```bash
-anchor build
-anchor deploy --provider.cluster devnet
+cd backend && pytest tests/ -v          # Python API tests (17 tests)
+npx anchor test                          # Anchor smart contract tests
 ```
 
 ---
 
-## Demo Script
+## Live Deployment
 
-See [`docs/demo-script.md`](docs/demo-script.md) for the full 5-minute hackathon demo walkthrough.
+| Service | URL |
+|---------|-----|
+| Frontend + API | https://hivemind.cv |
+| Interactive Demo | https://hivemind.cv/demo |
+| Solana Program | [Explorer ↗](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet) |
+| Task Monitor | https://hivemind.cv:5555 (Flower) |
 
 ---
 
-## Reference
+<div align="center">
 
-- Beta implementation: https://github.com/unsaiddream/skynet
-- Hackathon spec: `task(case2).pdf`
-- Architecture & dev guide: `CLAUDE.md`
-- Russian version: `README_RU.md`
+Built for **Decentrathon 5.0** · Case 2: AI + Blockchain: Autonomous Smart Contracts
+
+</div>

@@ -15,6 +15,10 @@ export type AgentEscrow = {
   "instructions": [
     {
       "name": "completeExecution",
+      "docs": [
+        "Завершение выполнения — AI координатор одобрил качество.",
+        "90% SOL → agent owner, 10% → platform. Репутация обновляется."
+      ],
       "discriminator": [
         55,
         101,
@@ -91,6 +95,9 @@ export type AgentEscrow = {
         },
         {
           "name": "platform",
+          "docs": [
+            "Only platform can call complete_execution"
+          ],
           "signer": true
         },
         {
@@ -107,6 +114,10 @@ export type AgentEscrow = {
     },
     {
       "name": "initiateExecution",
+      "docs": [
+        "Инициация выполнения — platform фиксирует SOL в PDA эскроу.",
+        "Caller pubkey сохраняется для возврата при refund."
+      ],
       "discriminator": [
         38,
         226,
@@ -172,7 +183,13 @@ export type AgentEscrow = {
           }
         },
         {
-          "name": "caller",
+          "name": "caller"
+        },
+        {
+          "name": "platform",
+          "docs": [
+            "Platform signs and provides SOL for escrow"
+          ],
           "writable": true,
           "signer": true
         },
@@ -195,6 +212,10 @@ export type AgentEscrow = {
     },
     {
       "name": "refundExecution",
+      "docs": [
+        "Возврат средств — AI координатор отклонил качество или таймаут.",
+        "100% SOL возвращается caller."
+      ],
       "discriminator": [
         210,
         43,
@@ -239,6 +260,9 @@ export type AgentEscrow = {
         },
         {
           "name": "platform",
+          "docs": [
+            "Only platform can call refund_execution"
+          ],
           "signer": true
         },
         {
@@ -250,6 +274,10 @@ export type AgentEscrow = {
     },
     {
       "name": "registerAgent",
+      "docs": [
+        "Регистрация агента — platform подписывает как proxy за owner.",
+        "Owner pubkey хранится в AgentAccount и используется для PDA seeds."
+      ],
       "discriminator": [
         135,
         157,
@@ -288,7 +316,13 @@ export type AgentEscrow = {
           }
         },
         {
-          "name": "owner",
+          "name": "owner"
+        },
+        {
+          "name": "platform",
+          "docs": [
+            "Platform signs and pays for account creation (proxy for owner)"
+          ],
           "writable": true,
           "signer": true
         },
@@ -305,6 +339,66 @@ export type AgentEscrow = {
         {
           "name": "pricePerCall",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "updateReputation",
+      "docs": [
+        "Обновление репутации агента — вызывается platform отдельно.",
+        "Можно вызывать независимо от complete_execution для ручных корректировок."
+      ],
+      "discriminator": [
+        194,
+        220,
+        43,
+        201,
+        54,
+        209,
+        49,
+        178
+      ],
+      "accounts": [
+        {
+          "name": "agentAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agent_account.owner",
+                "account": "agentAccount"
+              },
+              {
+                "kind": "account",
+                "path": "agent_account.slug",
+                "account": "agentAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "platform",
+          "docs": [
+            "Only platform can update reputation"
+          ],
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newScoreContribution",
+          "type": "u32"
         }
       ]
     }

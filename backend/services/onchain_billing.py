@@ -120,8 +120,8 @@ async def initiate_execution_onchain(
 ) -> str:
     """
     Вызывает initiate_execution в Anchor программе.
-    В MVP подписывается platform keypair как proxy.
-    Реальный флоу с подписью пользователя — через frontend (Phase 4).
+    Platform подписывает как proxy за caller (backend не имеет ключа пользователя).
+    Адрес caller_address сохраняется в ExecutionAccount для маршрутизации refund.
     Возвращает tx signature.
     """
     program_id = settings.ANCHOR_PROGRAM_ID
@@ -132,10 +132,12 @@ async def initiate_execution_onchain(
     exec_bytes = execution_id_to_bytes(execution_id)
     ix_data = _discriminator("initiate_execution") + exec_bytes
 
+    # Platform подписывает как caller (proxy) — реальная подпись пользователя
+    # происходит во frontend через Phantom wallet при production-деплое.
     accounts = [
         AccountMeta(pubkey=Pubkey.from_string(execution_pda), is_signer=False, is_writable=True),
         AccountMeta(pubkey=Pubkey.from_string(agent_pda), is_signer=False, is_writable=False),
-        AccountMeta(pubkey=Pubkey.from_string(caller_address), is_signer=True, is_writable=True),
+        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=True),
         AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
 
@@ -254,7 +256,9 @@ async def register_agent_onchain(
 ) -> tuple[str, str]:
     """
     Вызывает register_agent в Anchor программе от имени platform (proxy).
-    В production owner подписывает через frontend (Phase 4).
+    Platform используется как owner для PDA и как signer — позволяет работать
+    без приватного ключа реального owner'а (demo/backend-driven flow).
+    В production owner подписывает через Phantom frontend.
     Если ANCHOR_PROGRAM_ID не задан — пропускает (graceful degradation).
     Возвращает (agent_pda_address, tx_signature).
     """
@@ -263,8 +267,11 @@ async def register_agent_onchain(
         log.warning("ANCHOR_PROGRAM_ID not set — skipping on-chain registration")
         return "", ""
 
-    agent_pda, _ = get_agent_pda(owner_address, slug, program_id)
     platform_kp = _get_platform_keypair()
+
+    # PDA использует platform pubkey как owner — platform подписывает всё
+    platform_owner = str(platform_kp.pubkey())
+    agent_pda, _ = get_agent_pda(platform_owner, slug, program_id)
 
     # Данные: discriminator + slug (borsh string: 4 bytes len LE + bytes) + price (u64 LE)
     slug_bytes = slug.encode()
@@ -275,14 +282,9 @@ async def register_agent_onchain(
         + struct.pack("<Q", price_per_call_lamports)
     )
 
-    # Примечание: Anchor требует подпись owner для register_agent.
-    # Backend не имеет приватного ключа owner — реальная подпись происходит
-    # через Phantom wallet во frontend (Phase 4/5).
-    # Здесь platform подписывает как payer; owner помечен is_signer=False —
-    # вызов будет отклонён Anchor'ом, но ошибка поймается в agents.py gracefully.
     accounts = [
         AccountMeta(pubkey=Pubkey.from_string(agent_pda), is_signer=False, is_writable=True),
-        AccountMeta(pubkey=Pubkey.from_string(owner_address), is_signer=False, is_writable=True),
+        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=True),
         AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
 
@@ -303,3 +305,46 @@ async def register_agent_onchain(
     sig = await _send_transaction(tx)
     log.info("register_agent_tx", sig=sig, pda=agent_pda, slug=slug)
     return agent_pda, sig
+
+
+async def update_reputation_onchain(
+    agent_pda: str,
+    new_score_contribution: int,
+) -> str:
+    """
+    Вызывает update_reputation в Anchor программе.
+    new_score_contribution: 0–10000 (score * 100, масштаб reputation_score).
+    Доступно только после редеплоя контракта с новой инструкцией update_reputation.
+    Возвращает tx signature.
+    """
+    program_id = settings.ANCHOR_PROGRAM_ID
+    if not program_id:
+        return ""
+
+    platform_kp = _get_platform_keypair()
+
+    # Данные: discriminator + new_score_contribution (u32 LE)
+    ix_data = _discriminator("update_reputation") + struct.pack("<I", new_score_contribution)
+
+    accounts = [
+        AccountMeta(pubkey=Pubkey.from_string(agent_pda), is_signer=False, is_writable=True),
+        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=False),
+    ]
+
+    instruction = Instruction(
+        program_id=Pubkey.from_string(program_id),
+        accounts=accounts,
+        data=ix_data,
+    )
+
+    blockhash = await _get_recent_blockhash()
+    tx = Transaction.new_signed_with_payer(
+        instructions=[instruction],
+        payer=platform_kp.pubkey(),
+        signing_keypairs=[platform_kp],
+        recent_blockhash=Hash.from_string(blockhash),
+    )
+
+    sig = await _send_transaction(tx)
+    log.info("update_reputation_tx", sig=sig, pda=agent_pda, score=new_score_contribution)
+    return sig

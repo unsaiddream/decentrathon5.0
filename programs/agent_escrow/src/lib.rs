@@ -25,7 +25,7 @@ impl AgentAccount {
 #[derive(Default)]
 pub struct ExecutionAccount {
     pub execution_id: [u8; 16],   // 16 bytes — UUID bytes
-    pub caller: Pubkey,           // 32 bytes — who initiated
+    pub caller: Pubkey,           // 32 bytes — who initiated (stored for refund)
     pub agent: Pubkey,            // 32 bytes — AgentAccount pubkey
     pub amount_locked: u64,       // 8 bytes — SOL in escrow (lamports)
     pub status: ExecutionStatus,  // 1 byte
@@ -67,6 +67,8 @@ pub enum AgentHubError {
 pub mod agent_escrow {
     use super::*;
 
+    /// Регистрация агента — platform подписывает как proxy за owner.
+    /// Owner pubkey хранится в AgentAccount и используется для PDA seeds.
     pub fn register_agent(
         ctx: Context<RegisterAgent>,
         slug: String,
@@ -87,6 +89,8 @@ pub mod agent_escrow {
         Ok(())
     }
 
+    /// Инициация выполнения — platform фиксирует SOL в PDA эскроу.
+    /// Caller pubkey сохраняется для возврата при refund.
     pub fn initiate_execution(
         ctx: Context<InitiateExecution>,
         execution_id: [u8; 16],
@@ -96,16 +100,16 @@ pub mod agent_escrow {
 
         let amount = agent.price_per_call;
 
-        // Перевести SOL из кошелька вызывающего в PDA аккаунт
+        // Platform переводит SOL в execution PDA (эскроу)
         let ix = anchor_lang::solana_program::system_instruction::transfer(
-            &ctx.accounts.caller.key(),
+            &ctx.accounts.platform.key(),
             &ctx.accounts.execution_account.key(),
             amount,
         );
         anchor_lang::solana_program::program::invoke(
             &ix,
             &[
-                ctx.accounts.caller.to_account_info(),
+                ctx.accounts.platform.to_account_info(),
                 ctx.accounts.execution_account.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
@@ -124,6 +128,8 @@ pub mod agent_escrow {
         Ok(())
     }
 
+    /// Завершение выполнения — AI координатор одобрил качество.
+    /// 90% SOL → agent owner, 10% → platform. Репутация обновляется.
     pub fn complete_execution(
         ctx: Context<CompleteExecution>,
         ai_quality_score: u8,
@@ -151,11 +157,10 @@ pub mod agent_escrow {
         execution.status = ExecutionStatus::Completed;
         execution.ai_quality_score = ai_quality_score;
 
-        // Обновить репутацию агента: скользящее среднее
+        // Обновить репутацию агента: скользящее среднее (0–10000)
         let agent = &mut ctx.accounts.agent_account;
         agent.total_calls += 1;
-        let score_contribution = ai_quality_score as u32 * 100; // масштаб 0–10000
-        // reputation = (old_rep * (calls-1) + new_score) / calls
+        let score_contribution = ai_quality_score as u32 * 100;
         agent.reputation_score = (
             agent.reputation_score * (agent.total_calls as u32 - 1) + score_contribution
         ) / agent.total_calls as u32;
@@ -163,6 +168,8 @@ pub mod agent_escrow {
         Ok(())
     }
 
+    /// Возврат средств — AI координатор отклонил качество или таймаут.
+    /// 100% SOL возвращается caller.
     pub fn refund_execution(ctx: Context<RefundExecution>) -> Result<()> {
         let execution = &mut ctx.accounts.execution_account;
         require!(
@@ -172,7 +179,6 @@ pub mod agent_escrow {
 
         let amount = execution.amount_locked;
 
-        // Вернуть 100% SOL вызывающему
         **execution.to_account_info().try_borrow_mut_lamports()? -= amount;
         **ctx.accounts.caller.try_borrow_mut_lamports()? += amount;
 
@@ -180,24 +186,44 @@ pub mod agent_escrow {
 
         Ok(())
     }
+
+    /// Обновление репутации агента — вызывается platform отдельно.
+    /// Можно вызывать независимо от complete_execution для ручных корректировок.
+    pub fn update_reputation(
+        ctx: Context<UpdateReputation>,
+        new_score_contribution: u32,
+    ) -> Result<()> {
+        let agent = &mut ctx.accounts.agent_account;
+        agent.total_calls += 1;
+        let calls = agent.total_calls as u32;
+        // Скользящее среднее: (old * (n-1) + new) / n
+        agent.reputation_score = (
+            agent.reputation_score * (calls - 1) + new_score_contribution
+        ) / calls;
+        Ok(())
+    }
 }
 
-// ─── Context structs (empty for now) ─────────────────────────
+// ─── Context structs ──────────────────────────────────────────
 
 #[derive(Accounts)]
 #[instruction(slug: String)]
 pub struct RegisterAgent<'info> {
     #[account(
         init,
-        payer = owner,
+        payer = platform,
         space = AgentAccount::LEN,
         seeds = [b"agent", owner.key().as_ref(), slug.as_bytes()],
         bump
     )]
     pub agent_account: Account<'info, AgentAccount>,
 
+    /// CHECK: agent owner wallet — stored in AgentAccount, PDA derived from this key
+    pub owner: UncheckedAccount<'info>,
+
+    /// Platform signs and pays for account creation (proxy for owner)
     #[account(mut)]
-    pub owner: Signer<'info>,
+    pub platform: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -207,7 +233,7 @@ pub struct RegisterAgent<'info> {
 pub struct InitiateExecution<'info> {
     #[account(
         init,
-        payer = caller,
+        payer = platform,
         space = ExecutionAccount::LEN,
         seeds = [b"execution", execution_id.as_ref()],
         bump
@@ -220,8 +246,12 @@ pub struct InitiateExecution<'info> {
     )]
     pub agent_account: Account<'info, AgentAccount>,
 
+    /// CHECK: caller wallet stored in ExecutionAccount for refund routing
+    pub caller: UncheckedAccount<'info>,
+
+    /// Platform signs and provides SOL for escrow
     #[account(mut)]
-    pub caller: Signer<'info>,
+    pub platform: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -250,7 +280,7 @@ pub struct CompleteExecution<'info> {
     #[account(mut)]
     pub platform_wallet: UncheckedAccount<'info>,
 
-    // Только platform может вызвать complete_execution
+    /// Only platform can call complete_execution
     pub platform: Signer<'info>,
 
     pub system_program: Program<'info, System>,
@@ -265,12 +295,25 @@ pub struct RefundExecution<'info> {
     )]
     pub execution_account: Account<'info, ExecutionAccount>,
 
-    /// CHECK: validated as original caller
+    /// CHECK: validated as original caller via execution_account.caller
     #[account(mut, address = execution_account.caller)]
     pub caller: UncheckedAccount<'info>,
 
-    // Только platform может вызвать refund
+    /// Only platform can call refund_execution
     pub platform: Signer<'info>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateReputation<'info> {
+    #[account(
+        mut,
+        seeds = [b"agent", agent_account.owner.as_ref(), agent_account.slug.as_bytes()],
+        bump = agent_account.bump
+    )]
+    pub agent_account: Account<'info, AgentAccount>,
+
+    /// Only platform can update reputation
+    pub platform: Signer<'info>,
 }

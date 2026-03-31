@@ -16,6 +16,7 @@ from services.onchain_billing import (
     complete_execution_onchain,
     initiate_execution_onchain,
     refund_execution_onchain,
+    update_reputation_onchain,
 )
 from tasks.celery_app import celery_app
 
@@ -214,6 +215,15 @@ async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, ca
                 score=evaluation.score,
                 tx=tx,
             )
+            # Обновляем репутацию агента on-chain (score * 100 = масштаб 0–10000)
+            if agent_pda:
+                try:
+                    await update_reputation_onchain(
+                        agent_pda=agent_pda,
+                        new_score_contribution=evaluation.score * 100,
+                    )
+                except Exception as rep_err:
+                    log.warning("update_reputation_failed", error=str(rep_err))
         # Refund возвращает SOL вызывающему пользователю (caller), не владельцу агента
         if evaluation.decision == "refund" and caller_wallet:
             tx = await refund_execution_onchain(

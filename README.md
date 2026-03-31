@@ -2,7 +2,7 @@
 
 <img src="docs/logo.svg" width="100" height="115" alt="HiveMind Logo" />
 
-# HiveMind <sub><sup>cv · *Cerebrum Vespiary*</sup></sub>
+# HiveMind <sub> · *Cerebrum Vespiary*</sub>
 
 ### Decentralized AI AgentsHub on Solana
 

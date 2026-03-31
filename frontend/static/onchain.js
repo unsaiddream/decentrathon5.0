@@ -56,9 +56,11 @@ function renderExecutionResult(execution) {
   if (execution.ai_quality_score !== null && execution.ai_quality_score !== undefined) {
     const score = execution.ai_quality_score;
     const scoreClass = score >= 70 ? "score-good" : "score-poor";
+    const reasoningHtml = execution.ai_reasoning
+      ? `<span class="reasoning"> — ${esc(execution.ai_reasoning)}</span>`
+      : "";
     html += `<div class="ai-score ${scoreClass}">
-      AI Quality Score: ${score}/100
-      ${execution.ai_reasoning ? `<span class="reasoning"> — ${execution.ai_reasoning}</span>` : ""}
+      AI Quality Score: ${score}/100${reasoningHtml}
     </div>`;
   }
 
@@ -74,11 +76,9 @@ function renderExecutionResult(execution) {
     html += explorerBadge(label, explorerTxLink(execution.complete_tx_hash));
   }
 
-  // Output JSON
+  // Output JSON — escaping prevents XSS from agent-controlled content
   if (execution.output) {
-    html += `<div class="output-data">
-      <pre>${JSON.stringify(execution.output, null, 2)}</pre>
-    </div>`;
+    html += `<div class="output-data"><pre>${esc(JSON.stringify(execution.output, null, 2))}</pre></div>`;
   }
 
   html += `</div>`;

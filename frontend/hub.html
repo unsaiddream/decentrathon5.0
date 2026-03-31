@@ -496,29 +496,42 @@ message("advisor", q2, conv)</pre>
 
   async function executeFromPlan() {
     if (!currentPlan || !currentPlan.calls?.length) return;
-    const firstCall = currentPlan.calls[0];
 
     document.getElementById('ai-plan-section').style.display = 'none';
     document.getElementById('ai-loading').style.display = 'block';
-    document.getElementById('ai-loading-text').textContent = 'Executing via smart contract...';
 
-    try {
-      const resp = await apiFetch('POST', '/api/v1/execute', {
-        agent_slug: firstCall.slug,
-        input: firstCall.input || {},
-      });
+    const allResults = [];
+    let hadError = false;
 
-      document.getElementById('ai-loading-text').textContent = 'Waiting for result...';
-      const execution = await pollExecution(resp.id || resp.execution_id);
-
-      document.getElementById('ai-results-content').innerHTML = renderExecutionResult(execution);
-      document.getElementById('ai-results-section').style.display = 'block';
-      toast('Execution complete!', 'success');
-    } catch (e) {
-      toast(e.message || 'Execution failed', 'error');
-    } finally {
-      document.getElementById('ai-loading').style.display = 'none';
+    for (const call of currentPlan.calls) {
+      document.getElementById('ai-loading-text').textContent = `Executing ${call.slug}...`;
+      try {
+        const resp = await apiFetch('POST', '/api/v1/execute', {
+          agent_slug: call.slug,
+          input: call.input || {},
+        });
+        document.getElementById('ai-loading-text').textContent = `Waiting for ${call.slug}...`;
+        const execution = await pollExecution(resp.id || resp.execution_id);
+        allResults.push({ call, execution });
+      } catch (e) {
+        allResults.push({ call, error: e.message || 'Execution failed' });
+        hadError = true;
+      }
     }
+
+    const html = allResults.map(({ call, execution, error }) => {
+      if (error) {
+        return `<div style="margin-bottom:16px"><div class="plan-agent-slug">${esc(call.slug)}</div>
+          <div style="color:#f87171;font-size:12px;margin-top:4px">Error: ${esc(error)}</div></div>`;
+      }
+      return `<div style="margin-bottom:16px"><div class="plan-agent-slug" style="margin-bottom:8px">${esc(call.slug)}</div>
+        ${renderExecutionResult(execution)}</div>`;
+    }).join('');
+
+    document.getElementById('ai-results-content').innerHTML = html;
+    document.getElementById('ai-results-section').style.display = 'block';
+    document.getElementById('ai-loading').style.display = 'none';
+    toast(hadError ? 'Some executions failed' : 'All executions complete!', hadError ? 'error' : 'success');
   }
 
   function cancelPlan() {

@@ -12,7 +12,11 @@ from models.agent import Agent
 from models.execution import Execution
 from schemas.coordinator import AgentInfo, CoordinatorError
 from services.agent_runner import run_agent_in_sandbox
-from services.onchain_billing import complete_execution_onchain, refund_execution_onchain
+from services.onchain_billing import (
+    complete_execution_onchain,
+    initiate_execution_onchain,
+    refund_execution_onchain,
+)
 from tasks.celery_app import celery_app
 
 log = structlog.get_logger()
@@ -162,6 +166,26 @@ async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, ca
     )
 
     try:
+        agent_pda = agent.on_chain_address or ""
+        caller_wallet = caller.wallet_address if caller else ""
+
+        # Создаём on-chain PDA перед выполнением evaluate/settle
+        if agent_pda and caller_wallet:
+            try:
+                initiate_tx = await initiate_execution_onchain(
+                    execution_id=str(execution.id),
+                    agent_pda=agent_pda,
+                    caller_address=caller_wallet,
+                )
+                execution.on_chain_tx_hash = initiate_tx
+                from services.onchain_billing import get_execution_pda
+                from config import settings as _settings
+                pda_address, _ = get_execution_pda(str(execution.id), _settings.ANCHOR_PROGRAM_ID)
+                execution.on_chain_execution_id = pda_address
+                log.info("onchain_initiated", execution_id=str(execution.id), tx=initiate_tx)
+            except Exception as e:
+                log.warning("onchain_initiate_failed", execution_id=str(execution.id), error=str(e))
+
         evaluation = await evaluate_output(
             agent=agent_info,
             input_data=execution.input or {},
@@ -174,7 +198,6 @@ async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, ca
         execution.ai_reasoning = evaluation.reasoning
 
         # On-chain settle на основе решения координатора
-        agent_pda = agent.on_chain_address or ""
         owner_wallet = owner.wallet_address or ""
 
         if evaluation.decision == "complete" and agent_pda and owner_wallet:
@@ -192,7 +215,6 @@ async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, ca
                 tx=tx,
             )
         # Refund возвращает SOL вызывающему пользователю (caller), не владельцу агента
-        caller_wallet = caller.wallet_address if caller else ""
         if evaluation.decision == "refund" and caller_wallet:
             tx = await refund_execution_onchain(
                 execution_id=str(execution.id),

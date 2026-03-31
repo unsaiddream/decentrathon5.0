@@ -816,6 +816,77 @@ async def agent_graph():
         return result_data
 
 
+# ─── POST /hub/ai-route ─────────────────────────────────────────────────────
+
+class AIRouteRequest(BaseModel):
+    task: str
+    agent_slugs: list[str] = []  # subset of slugs to consider (empty = all active)
+
+
+class AIRouteCallItem(BaseModel):
+    slug: str
+    input: dict[str, Any]
+    reason: str
+
+
+class AIRouteResponse(BaseModel):
+    calls: list[AIRouteCallItem]
+    reasoning: str
+
+
+@router.post("/ai-route", response_model=AIRouteResponse)
+async def ai_route(
+    body: AIRouteRequest,
+    authorization: str | None = Header(default=None),
+):
+    """
+    AI координатор выбирает агентов для задачи.
+    Возвращает упорядоченный список вызовов с объяснением.
+    """
+    bearer = authorization.removeprefix("Bearer ").strip() if authorization else None
+
+    async with AsyncSessionLocal() as db:
+        _, user = await _resolve_caller(db, None, bearer)
+        if not user:
+            raise HTTPException(status_code=403, detail="Not authorized")
+
+        query = select(Agent).where(Agent.is_active == True, Agent.is_public == True)
+        if body.agent_slugs:
+            query = query.where(Agent.slug.in_(body.agent_slugs))
+        result = await db.execute(query.order_by(Agent.call_count.desc()).limit(50))
+        agents = result.scalars().all()
+
+        if not agents:
+            raise HTTPException(status_code=404, detail="No agents available")
+
+        from schemas.coordinator import AgentInfo, CoordinatorError
+        from services.ai_coordinator import route_task
+
+        agent_infos = [
+            AgentInfo(
+                slug=a.slug,
+                name=a.name,
+                description=a.description or "",
+                capabilities=a.manifest.get("capabilities", []),
+                price_per_call=str(a.price_per_call),
+            )
+            for a in agents
+        ]
+
+        try:
+            calls = await route_task(body.task, agent_infos)
+        except CoordinatorError as e:
+            raise HTTPException(status_code=502, detail=f"AI coordinator error: {e}")
+
+        reasoning = "; ".join(c.reason for c in calls) if calls else "No agents selected"
+
+        log.info("ai_route_done", task_len=len(body.task), num_calls=len(calls))
+        return AIRouteResponse(
+            calls=[AIRouteCallItem(slug=c.slug, input=c.input, reason=c.reason) for c in calls],
+            reasoning=reasoning,
+        )
+
+
 # ─── GET /hub/stats ─────────────────────────────────────────────────────────
 
 @router.get("/stats")

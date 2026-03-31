@@ -16,32 +16,39 @@ async def ensure_storage_bucket() -> None:
     Создаёт bucket agent-bundles в Supabase Storage если он не существует.
     Вызывается при старте приложения в lifespan.
     409 = bucket уже существует — это нормально, не падаем.
+    Ошибки соединения не останавливают запуск приложения.
     """
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{SUPABASE_STORAGE_URL}/bucket",
-            headers={
-                "Authorization": f"Bearer {settings.SUPABASE_SERVICE_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "id": BUCKET,
-                "name": BUCKET,
-                "public": True,
-                "file_size_limit": settings.MAX_AGENT_BUNDLE_SIZE_MB * 1024 * 1024,
-                "allowed_mime_types": ["application/zip", "application/octet-stream"],
-            },
-        )
-        # Supabase Storage возвращает HTTP 400 с {"statusCode":"409"} если bucket уже существует
-        already_exists = resp.status_code == 409 or (
-            resp.status_code == 400 and "409" in resp.text
-        )
-        if resp.status_code not in (200, 201) and not already_exists:
-            raise RuntimeError(
-                f"Не удалось создать bucket '{BUCKET}': {resp.status_code} {resp.text}"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(
+                f"{SUPABASE_STORAGE_URL}/bucket",
+                headers={
+                    "Authorization": f"Bearer {settings.SUPABASE_SERVICE_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "id": BUCKET,
+                    "name": BUCKET,
+                    "public": True,
+                    "file_size_limit": settings.MAX_AGENT_BUNDLE_SIZE_MB * 1024 * 1024,
+                    "allowed_mime_types": ["application/zip", "application/octet-stream"],
+                },
             )
-
-    log.info("storage_bucket_ready", bucket=BUCKET)
+            # Supabase Storage возвращает HTTP 400 с {"statusCode":"409"} если bucket уже существует
+            already_exists = resp.status_code == 409 or (
+                resp.status_code == 400 and "409" in resp.text
+            )
+            if resp.status_code not in (200, 201) and not already_exists:
+                log.warning(
+                    "storage_bucket_create_failed",
+                    bucket=BUCKET,
+                    status=resp.status_code,
+                    body=resp.text[:200],
+                )
+                return
+        log.info("storage_bucket_ready", bucket=BUCKET)
+    except Exception as e:
+        log.warning("storage_bucket_unreachable", bucket=BUCKET, error=str(e))
 
 
 async def ensure_tables() -> None:

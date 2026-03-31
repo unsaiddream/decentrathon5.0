@@ -1,0 +1,14 @@
+/Users/33karaulov/Documents/decentrathon5.0/target/debug/deps/serde-4304f5b0cf12022e.d: /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/33karaulov/Documents/decentrathon5.0/target/debug/build/serde-bb2d61c666ce74f7/out/private.rs
+
+/Users/33karaulov/Documents/decentrathon5.0/target/debug/deps/libserde-4304f5b0cf12022e.rlib: /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/33karaulov/Documents/decentrathon5.0/target/debug/build/serde-bb2d61c666ce74f7/out/private.rs
+
+/Users/33karaulov/Documents/decentrathon5.0/target/debug/deps/libserde-4304f5b0cf12022e.rmeta: /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/33karaulov/Documents/decentrathon5.0/target/debug/build/serde-bb2d61c666ce74f7/out/private.rs
+
+/Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/33karaulov/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/33karaulov/Documents/decentrathon5.0/target/debug/build/serde-bb2d61c666ce74f7/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/33karaulov/Documents/decentrathon5.0/target/debug/build/serde-bb2d61c666ce74f7/out

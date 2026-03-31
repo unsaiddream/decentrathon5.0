@@ -1,0 +1,110 @@
+Streaming transaction logs mentioning 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G. Confirmed commitment
+Transaction executed in slot 5:
+  Signature: 2TcTrW9keGxYG1MeGaRZxk13bcPUPrryCAJ4GMaHYrKqxChiyUout12SQtdzVWEvkCmPqDBhinZG3rtwLrcYFNQc
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: RegisterAgent
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 7811 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 5:
+  Signature: 4nmT1Trbt2uXte37v9Jp7JBc1xruPfCSMRWv5Smb6ne2ZxvMrXd1RFFrxKEQ5tg2Vn88r3QS5EAXrd5Fnznk68Md
+  Status: Error processing Instruction 0: custom program error: 0x1774
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: RegisterAgent
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program log: AnchorError thrown in programs/agent_escrow/src/lib.rs:76. Error Code: InvalidPrice. Error Number: 6004. Error Message: Price must be greater than 0.
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 8807 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G failed: custom program error: 0x1774
+Transaction executed in slot 5:
+  Signature: 57WD4FdFKbFPgD68VsmzHTfmz9CiweP9QhrEfNWxQha9JQb4cCruvVyXvB1shJM7WgaPhGsWkZkhzdN8mWMug8uf
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: InitiateExecution
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 11545 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 6:
+  Signature: 57WD4FdFKbFPgD68VsmzHTfmz9CiweP9QhrEfNWxQha9JQb4cCruvVyXvB1shJM7WgaPhGsWkZkhzdN8mWMug8uf
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: InitiateExecution
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 11545 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 6:
+  Signature: 5acmGgi3w99TDzAjc6772do8Jc9HPjj7L78es1fsmpmjL9c6XQyUTJNGWjANmMiqguQKH9SaRVYTuATRMATxMJMH
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: InitiateExecution
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 11545 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 7:
+  Signature: 5acmGgi3w99TDzAjc6772do8Jc9HPjj7L78es1fsmpmjL9c6XQyUTJNGWjANmMiqguQKH9SaRVYTuATRMATxMJMH
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: InitiateExecution
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 11545 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 8:
+  Signature: 4zv9zmE4YiicGbvtam94ZTECPyZ6nwxpaF7hsRuj7kCqGTmySYud25yDg17iLC1JNHWscXCZpyZZ6Z73HWWLE6m
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: CompleteExecution
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 7342 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 8:
+  Signature: 241hY8mM7s3RY2bx3UKGopSFbj974nE5LkxUHNUBW9X7whKGFr823r9FYkVn6pXaYmZuuGNpeVinr5LJ96qewa2p
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: InitiateExecution
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 13045 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 9:
+  Signature: 241hY8mM7s3RY2bx3UKGopSFbj974nE5LkxUHNUBW9X7whKGFr823r9FYkVn6pXaYmZuuGNpeVinr5LJ96qewa2p
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: InitiateExecution
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 13045 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success
+Transaction executed in slot 9:
+  Signature: 5FxaKf8GwMbQDK6j6oJCRqeBidSu91xNnvwffeD6JzsrnBjG5oBsP94QRV9GejNxZASDkSzoDvNCsE48DLFqAYkB
+  Status: Ok
+  Log Messages:
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G invoke [1]
+    Program log: Instruction: RefundExecution
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G consumed 4145 of 200000 compute units
+    Program 2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G success

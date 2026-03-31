@@ -1,0 +1,1 @@
+{"rustc":12478736815798779245,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[5592355896800788390,"build_script_build",false,3035229044387010302]],"local":[{"Precalculated":"0.2.115"}],"rustflags":["--cfg","procmacro2_semver_exempt"],"config":0,"compile_kind":0}

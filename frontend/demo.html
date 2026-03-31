@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Demo — HiveMind AgentsHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+  <style>
+    /* ─── Demo-specific styles ─── */
+    .demo-hero {
+      text-align: center;
+      padding: 64px 24px 40px;
+    }
+    .demo-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 100px;
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .demo-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .demo-title {
+      font-family: 'Syne', sans-serif; font-size: clamp(36px, 6vw, 72px);
+      font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 16px;
+    }
+    .demo-title span { color: var(--primary); }
+    .demo-subtitle {
+      font-size: 18px; color: var(--text-muted); max-width: 560px; margin: 0 auto 40px;
+    }
+
+    /* ─── Auth gate ─── */
+    .auth-gate {
+      max-width: 480px; margin: 0 auto 40px;
+      background: var(--card); border: 1px solid var(--border-strong);
+      border-radius: var(--radius); padding: 28px;
+      text-align: center;
+    }
+    .auth-gate h3 { font-size: 16px; margin-bottom: 8px; }
+    .auth-gate p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .auth-gate-inputs { display: flex; flex-direction: column; gap: 10px; }
+    .auth-gate-inputs input {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      outline: none; transition: border-color var(--transition);
+    }
+    .auth-gate-inputs input:focus { border-color: var(--primary); }
+    .auth-gate-inputs input::placeholder { color: var(--text-dim); }
+    #auth-error { font-size: 12px; color: var(--error); margin-top: 6px; min-height: 16px; }
+
+    /* ─── Workflow steps ─── */
+    .workflow {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+      max-width: 900px; margin: 0 auto 48px; position: relative;
+    }
+    @media (max-width: 700px) { .workflow { grid-template-columns: 1fr 1fr; } }
+    .workflow::before {
+      content: ''; position: absolute; top: 28px; left: 12.5%; right: 12.5%;
+      height: 1px; background: var(--border); z-index: 0;
+    }
+    .wf-step {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      padding: 0 8px; position: relative; z-index: 1;
+      transition: all 0.3s ease;
+    }
+    .wf-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 22px; transition: all 0.4s ease;
+      position: relative;
+    }
+    .wf-step.active .wf-icon {
+      background: rgba(245,158,11,0.1); border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(245,158,11,0.25);
+    }
+    .wf-step.done .wf-icon {
+      background: rgba(16,185,129,0.1); border-color: var(--success);
+      box-shadow: 0 0 16px rgba(16,185,129,0.2);
+    }
+    .wf-step.active .wf-icon::after {
+      content: ''; position: absolute; inset: -4px; border-radius: 50%;
+      border: 2px solid rgba(245,158,11,0.3); animation: spin 2s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .wf-label {
+      font-size: 11px; font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
+      text-align: center; transition: color 0.3s;
+    }
+    .wf-step.active .wf-label { color: var(--primary); }
+    .wf-step.done .wf-label { color: var(--success); }
+
+    /* ─── Demo Panel ─── */
+    .demo-panel {
+      max-width: 800px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .demo-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .demo-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+    }
+    .demo-card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .demo-card-title .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim);
+    }
+    .demo-card-title .dot.amber { background: var(--primary); }
+    .demo-card-title .dot.green { background: var(--success); }
+    .demo-card-body { padding: 20px; }
+
+    /* Task input */
+    .task-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .preset-btn {
+      padding: 5px 12px; border-radius: 6px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); font-size: 12px; cursor: pointer;
+      transition: all var(--transition); font-family: 'Outfit', sans-serif;
+    }
+    .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+
+    #task-input {
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 16px; color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 15px;
+      outline: none; resize: vertical; min-height: 80px;
+      transition: border-color var(--transition);
+    }
+    #task-input:focus { border-color: var(--primary); }
+    #task-input::placeholder { color: var(--text-dim); }
+
+    .run-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 14px;
+      background: var(--primary); color: #000;
+      border: none; border-radius: 10px; font-weight: 600; font-size: 15px;
+      cursor: pointer; transition: all var(--transition); margin-top: 14px;
+      font-family: 'Outfit', sans-serif;
+    }
+    .run-btn:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .run-btn .spinner {
+      width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .run-btn.loading .spinner { display: block; }
+
+    /* AI Plan */
+    #plan-section { display: none; }
+    .agent-call-card {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+    }
+    .agent-call-card:last-child { border-bottom: none; }
+    .agent-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--primary-glow); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .agent-call-slug {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      color: var(--primary); margin-bottom: 4px;
+    }
+    .agent-call-reason { font-size: 13px; color: var(--text-muted); }
+    .agent-call-status {
+      margin-left: auto; font-size: 11px; padding: 3px 10px;
+      border-radius: 100px; font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--border); color: var(--text-dim); white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .agent-call-status.running { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+    .agent-call-status.done { border-color: var(--success); color: var(--success); background: rgba(16,185,129,0.08); }
+    .agent-call-status.failed { border-color: var(--error); color: var(--error); background: rgba(239,68,68,0.08); }
+
+    /* Execution log */
+    #exec-section { display: none; }
+    .log-terminal {
+      background: #050400; border-radius: 8px; padding: 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: #a8a090; max-height: 200px; overflow-y: auto;
+      line-height: 1.8;
+    }
+    .log-terminal .log-system { color: rgba(245,158,11,0.6); }
+    .log-terminal .log-error { color: var(--error); }
+    .log-terminal .log-done { color: var(--success); }
+
+    /* Results */
+    #results-section { display: none; }
+    .result-card {
+      border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px;
+    }
+    .result-card:last-child { margin-bottom: 0; }
+    .result-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 8px;
+    }
+    .result-agent { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); }
+    .result-meta { display: flex; align-items: center; gap: 8px; }
+    .score-badge {
+      padding: 3px 10px; border-radius: 100px; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace; font-weight: 600;
+    }
+    .score-badge.high { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+    .score-badge.low { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid rgba(239,68,68,0.3); }
+    .onchain-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 100px; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15);
+      color: var(--primary); text-decoration: none;
+      transition: all var(--transition);
+    }
+    .onchain-link:hover { background: rgba(245,158,11,0.12); }
+    .result-body { padding: 16px; }
+    .result-output {
+      background: #050400; border-radius: 8px; padding: 14px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: #c8c0a8; white-space: pre-wrap; overflow-x: auto; max-height: 200px; overflow-y: auto;
+    }
+    .result-reasoning {
+      margin-top: 10px; font-size: 12px; color: var(--text-muted);
+      padding: 10px 14px; background: rgba(245,158,11,0.04);
+      border-left: 2px solid rgba(245,158,11,0.3); border-radius: 0 6px 6px 0;
+    }
+
+    /* Error */
+    .demo-error {
+      padding: 14px 18px; border-radius: 8px;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      color: var(--error); font-size: 13px; margin-top: 12px;
+      display: none;
+    }
+
+    /* Program info bar */
+    .program-bar {
+      max-width: 800px; margin: 32px auto 0;
+      padding: 14px 20px;
+      background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .program-bar-label { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+    .program-bar-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary); }
+    .program-bar a { color: var(--primary); text-decoration: none; font-size: 11px; }
+    .program-bar a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<canvas id="hex-bg-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo">
+      <div class="logo-top">
+        <svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none">
+          <path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
+          <path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/>
+          <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
+        </svg>
+        Hive<span>Mind</span>
+      </div>
+      <div class="logo-sub">Cerebrum Vespiary</div>
+    </a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Agents</a>
+      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/demo.html" class="active">Demo</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container page">
+
+  <!-- Hero -->
+  <div class="demo-hero">
+    <div class="demo-badge">Live Interactive Demo</div>
+    <h1 class="demo-title">AI decides.<br><span>Blockchain records.</span></h1>
+    <p class="demo-subtitle">
+      Type a task — Claude routes it to agents, evaluates quality,
+      and every decision is recorded on Solana automatically.
+    </p>
+  </div>
+
+  <!-- Workflow Steps -->
+  <div class="workflow" id="workflow">
+    <div class="wf-step" id="wf-0">
+      <div class="wf-icon">📝</div>
+      <div class="wf-label">Task Input</div>
+    </div>
+    <div class="wf-step" id="wf-1">
+      <div class="wf-icon">🤖</div>
+      <div class="wf-label">AI Routes</div>
+    </div>
+    <div class="wf-step" id="wf-2">
+      <div class="wf-icon">⚙️</div>
+      <div class="wf-label">Agents Run</div>
+    </div>
+    <div class="wf-step" id="wf-3">
+      <div class="wf-icon">⛓️</div>
+      <div class="wf-label">On-chain</div>
+    </div>
+  </div>
+
+  <!-- Auth Gate (shown when not logged in) -->
+  <div class="auth-gate" id="auth-gate">
+    <h3>Sign in to run the live demo</h3>
+    <p>Connect your Phantom wallet or use email + password to try the full on-chain AI pipeline.</p>
+    <div class="auth-gate-inputs">
+      <input type="text" id="login-wallet" placeholder="Wallet address (or email)" autocomplete="off">
+      <input type="password" id="login-password" placeholder="Password">
+      <button class="run-btn" id="login-btn" onclick="doLogin()" style="margin-top:0">
+        <span class="spinner"></span>
+        Sign In
+      </button>
+      <div id="auth-error"></div>
+    </div>
+  </div>
+
+  <!-- Demo Panel (shown when logged in) -->
+  <div class="demo-panel" id="demo-panel" style="display:none">
+
+    <!-- Task Input Card -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <div class="demo-card-title">
+          <div class="dot amber"></div>
+          Task
+        </div>
+        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 1 / 4</span>
+      </div>
+      <div class="demo-card-body">
+        <div class="task-presets">
+          <button class="preset-btn" onclick="setTask(this)">Summarize &amp; analyze sentiment of a text</button>
+          <button class="preset-btn" onclick="setTask(this)">Translate this paragraph to Russian and summarize it</button>
+          <button class="preset-btn" onclick="setTask(this)">Analyze sentiment: AgentsHub is a revolutionary AI marketplace on Solana</button>
+        </div>
+        <textarea id="task-input" rows="3"
+          placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
+        <div class="demo-error" id="demo-error"></div>
+        <button class="run-btn" id="run-btn" onclick="runDemo()">
+          <span class="spinner"></span>
+          ▶ Run with AI
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Plan Card -->
+    <div class="demo-card" id="plan-section">
+      <div class="demo-card-header">
+        <div class="demo-card-title">
+          <div class="dot amber"></div>
+          Claude's Plan
+        </div>
+        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 2 / 4</span>
+      </div>
+      <div class="demo-card-body">
+        <div id="plan-reasoning" style="font-size:13px;color:var(--text-muted);margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)"></div>
+        <div id="plan-calls"></div>
+      </div>
+    </div>
+
+    <!-- Execution Log Card -->
+    <div class="demo-card" id="exec-section">
+      <div class="demo-card-header">
+        <div class="demo-card-title">
+          <div class="dot amber"></div>
+          Execution Log
+        </div>
+        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 3 / 4</span>
+      </div>
+      <div class="demo-card-body">
+        <div class="log-terminal" id="exec-log"></div>
+      </div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="demo-card" id="results-section">
+      <div class="demo-card-header">
+        <div class="demo-card-title">
+          <div class="dot green"></div>
+          Results &amp; On-chain Record
+        </div>
+        <span style="font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 4 / 4</span>
+      </div>
+      <div class="demo-card-body">
+        <div id="results-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /demo-panel -->
+
+  <!-- Program info bar -->
+  <div class="program-bar">
+    <div>
+      <div class="program-bar-label">Solana Program (Devnet)</div>
+      <div class="program-bar-value">2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G</div>
+    </div>
+    <a href="https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet" target="_blank">
+      View on Explorer ↗
+    </a>
+  </div>
+
+</div><!-- /container -->
+
+<script src="/ui/static/app.js"></script>
+<script>
+/* ─── Demo page logic ─────────────────────────────────────────────────────── */
+
+const PROGRAM_ID = '2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G';
+const EXPLORER = `https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`;
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+/* ─── Auth gate ─── */
+function checkAuth() {
+  if (isLoggedIn()) {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('demo-panel').style.display = 'flex';
+  } else {
+    document.getElementById('auth-gate').style.display = 'block';
+    document.getElementById('demo-panel').style.display = 'none';
+  }
+  updateNavWallet && updateNavWallet();
+}
+
+async function doLogin() {
+  const walletOrEmail = document.getElementById('login-wallet').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('auth-error');
+  const btn = document.getElementById('login-btn');
+  errEl.textContent = '';
+
+  if (!walletOrEmail || !password) { errEl.textContent = 'Fill in both fields'; return; }
+
+  btn.classList.add('loading'); btn.disabled = true;
+  try {
+    const res = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet_address: walletOrEmail, password }),
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(d.detail || `Error ${res.status}`);
+    }
+    const data = await res.json();
+    setToken(data.access_token);
+    checkAuth();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.classList.remove('loading'); btn.disabled = false;
+  }
+}
+
+/* ─── Workflow stepper ─── */
+function setStep(idx) {
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById(`wf-${i}`);
+    el.classList.remove('active','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('active');
+  }
+}
+
+/* ─── Preset tasks ─── */
+function setTask(btn) {
+  document.getElementById('task-input').value = btn.textContent.trim();
+}
+
+/* ─── Log helpers ─── */
+let logEl;
+function appendLog(line) {
+  if (!logEl) return;
+  const cls = line.startsWith('[system]') ? 'log-system'
+             : line.startsWith('[error]') ? 'log-error'
+             : line === '__DONE__' ? 'log-done'
+             : '';
+  const div = document.createElement('div');
+  if (cls) div.className = cls;
+  div.textContent = line === '__DONE__' ? '✓ Execution complete' : line;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+/* ─── Poll execution ─── */
+async function pollExecution(execId) {
+  for (let i = 0; i < 120; i++) {
+    await new Promise(r => setTimeout(r, 1500));
+    const ex = await apiFetch('GET', `/api/v1/executions/${execId}`);
+    if (ex.status === 'done' || ex.status === 'failed') return ex;
+  }
+  throw new Error('Execution timed out');
+}
+
+/* ─── Build result card ─── */
+function buildResultCard(slug, execution) {
+  const score = execution.ai_quality_score;
+  const scoreBadge = score != null
+    ? `<span class="score-badge ${score >= 70 ? 'high' : 'low'}">AI Score ${score}/100</span>`
+    : '';
+
+  const txHash = execution.complete_tx_hash || execution.on_chain_tx_hash;
+  const onchainLink = txHash
+    ? `<a class="onchain-link" href="https://explorer.solana.com/tx/${esc(txHash)}?cluster=devnet" target="_blank">
+        ⛓ Explorer ↗
+       </a>`
+    : '';
+
+  const outputStr = execution.output
+    ? JSON.stringify(execution.output, null, 2)
+    : execution.error || 'No output';
+
+  const reasoning = execution.ai_reasoning
+    ? `<div class="result-reasoning">🤖 ${esc(execution.ai_reasoning)}</div>`
+    : '';
+
+  return `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-agent">${esc(slug)}</div>
+        <div class="result-meta">
+          ${scoreBadge}
+          ${onchainLink}
+          <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${execution.duration_ms ? execution.duration_ms+'ms' : ''}</span>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="result-output">${esc(outputStr)}</div>
+        ${reasoning}
+      </div>
+    </div>`;
+}
+
+/* ─── Main demo runner ─── */
+async function runDemo() {
+  const task = document.getElementById('task-input').value.trim();
+  if (!task) { showError('Please enter a task'); return; }
+
+  const btn = document.getElementById('run-btn');
+  const errEl = document.getElementById('demo-error');
+  errEl.style.display = 'none';
+  btn.classList.add('loading'); btn.disabled = true;
+
+  // Reset UI
+  document.getElementById('plan-section').style.display = 'none';
+  document.getElementById('exec-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('plan-calls').innerHTML = '';
+  document.getElementById('results-list').innerHTML = '';
+
+  try {
+    // Step 1 → Step 2: AI routing
+    setStep(1);
+    const routeRes = await apiFetch('POST', '/api/v1/hub/ai-route', { task });
+    const calls = routeRes.calls || [];
+    if (!calls.length) throw new Error('No agents selected by AI. Try a different task or seed demo agents first.');
+
+    // Show plan
+    document.getElementById('plan-section').style.display = 'block';
+    document.getElementById('plan-reasoning').textContent = routeRes.reasoning || 'Claude selected the following agents:';
+
+    const callsEl = document.getElementById('plan-calls');
+    calls.forEach((c, i) => {
+      callsEl.innerHTML += `
+        <div class="agent-call-card" id="call-card-${i}">
+          <div class="agent-num">${i+1}</div>
+          <div>
+            <div class="agent-call-slug">${esc(c.slug)}</div>
+            <div class="agent-call-reason">${esc(c.reason || '')}</div>
+          </div>
+          <div class="agent-call-status" id="call-status-${i}">queued</div>
+        </div>`;
+    });
+
+    // Step 3: Execute agents
+    setStep(2);
+    document.getElementById('exec-section').style.display = 'block';
+    logEl = document.getElementById('exec-log');
+    logEl.innerHTML = '';
+    appendLog('[system] Starting execution pipeline...');
+
+    const allResults = [];
+    for (let i = 0; i < calls.length; i++) {
+      const call = calls[i];
+      document.getElementById(`call-status-${i}`).className = 'agent-call-status running';
+      document.getElementById(`call-status-${i}`).textContent = 'running';
+      appendLog(`[system] Executing ${call.slug}...`);
+
+      try {
+        const execRes = await apiFetch('POST', '/api/v1/execute', {
+          agent_slug: call.slug,
+          input: call.input || {},
+        });
+        const execId = execRes.id || execRes.execution_id;
+        const execution = await pollExecution(execId);
+        appendLog(execution.status === 'done'
+          ? `[system] ${call.slug} → done (${execution.duration_ms}ms)`
+          : `[error] ${call.slug} → ${execution.error || 'failed'}`);
+
+        document.getElementById(`call-status-${i}`).className = `agent-call-status ${execution.status === 'done' ? 'done' : 'failed'}`;
+        document.getElementById(`call-status-${i}`).textContent = execution.status;
+        allResults.push({ slug: call.slug, execution });
+      } catch(e) {
+        appendLog(`[error] ${call.slug} → ${e.message}`);
+        document.getElementById(`call-status-${i}`).className = 'agent-call-status failed';
+        document.getElementById(`call-status-${i}`).textContent = 'failed';
+        allResults.push({ slug: call.slug, execution: { status: 'failed', error: e.message } });
+      }
+    }
+    appendLog('__DONE__');
+
+    // Step 4: Results + on-chain
+    setStep(3);
+    document.getElementById('results-section').style.display = 'block';
+    const resultsEl = document.getElementById('results-list');
+    allResults.forEach(({ slug, execution }) => {
+      resultsEl.innerHTML += buildResultCard(slug, execution);
+    });
+
+    // Scroll to results
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+    setStep(0);
+  } finally {
+    btn.classList.remove('loading'); btn.disabled = false;
+  }
+}
+
+function showError(msg) {
+  const errEl = document.getElementById('demo-error');
+  errEl.textContent = msg; errEl.style.display = 'block';
+}
+
+/* ─── Init ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuth();
+  initHexBackground && initHexBackground();
+});
+
+// Login on Enter
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('auth-gate').style.display !== 'none') {
+    doLogin();
+  }
+});
+</script>
+</body>
+</html>

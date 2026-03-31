@@ -165,6 +165,13 @@ async def root():
     return RedirectResponse(url="/ui/", status_code=302)
 
 
+@app.get("/demo", tags=["system"])
+async def demo():
+    """Redirect на демо-страницу."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/ui/demo.html", status_code=302)
+
+
 # ─── Frontend (монтируем в конце, чтобы не перекрыть API роуты) ───────────────
 _frontend_dir = Path(__file__).parent.parent / "frontend"
 if _frontend_dir.exists():

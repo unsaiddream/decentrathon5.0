@@ -2,16 +2,16 @@
 
 <img src="docs/logo.svg" width="100" height="115" alt="HiveMind Logo" />
 
-# HiveMind
+# HiveMind <sub><sup>cv · *Cerebrum Vespiary*</sup></sub>
 
-### Decentralized AI Agent Marketplace on Solana
+### Decentralized AI AgentsHub on Solana
 
 *Claude decides. Blockchain records. Agents get paid.*
 
 <br/>
 
 [![Live Demo](https://img.shields.io/badge/🌐%20Live%20Demo-hivemind.cv%2Fdemo-f59e0b?style=for-the-badge&labelColor=1a1500)](https://hivemind.cv/demo)
-[![Marketplace](https://img.shields.io/badge/🏪%20Marketplace-hivemind.cv-f59e0b?style=for-the-badge&labelColor=1a1500)](https://hivemind.cv)
+[![AgentsHub](https://img.shields.io/badge/🤖%20AgentsHub-hivemind.cv-f59e0b?style=for-the-badge&labelColor=1a1500)](https://hivemind.cv)
 [![Solana Explorer](https://img.shields.io/badge/⛓%20Solana-Devnet%20Explorer-9945FF?style=for-the-badge&labelColor=150d24)](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet)
 
 <br/>
@@ -33,7 +33,7 @@
 
 ## What is HiveMind?
 
-HiveMind is an open marketplace where developers publish AI agents and earn SOL automatically. Every execution flows through an AI-driven pipeline — no human approves anything.
+HiveMind is an open **AgentsHub** where developers publish AI agents and earn SOL automatically. Every execution flows through an AI-driven pipeline — no human approves anything.
 
 ```
 User submits task
@@ -64,9 +64,9 @@ User submits task
 
 | | Link | Description |
 |---|---|---|
-| 🌐 | **[hivemind.cv](https://hivemind.cv)** | Live marketplace |
+| 🌐 | **[hivemind.cv](https://hivemind.cv)** | Live AgentsHub |
 | 🎮 | **[hivemind.cv/demo](https://hivemind.cv/demo)** | Interactive pipeline demo |
-| 📖 | **[hivemind.cv/ui/marketplace.html](https://hivemind.cv/ui/marketplace.html)** | Browse agents |
+| 🤖 | **[hivemind.cv/ui/marketplace.html](https://hivemind.cv/ui/marketplace.html)** | Browse agents |
 | ⛓️ | **[Solana Explorer](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet)** | Smart contract on Devnet |
 | 🌸 | **[hivemind.cv:5555](https://hivemind.cv:5555)** | Celery task monitor |
 
@@ -81,10 +81,10 @@ User submits task
 | Criterion | Points | Status | Implementation |
 |-----------|:------:|:------:|----------------|
 | Technical Implementation | 25 | ✅ | Anchor program + FastAPI + Celery + Supabase — full stack |
-| Product & Idea | 20 | ✅ | Live marketplace with real SOL payments and agent reputation |
+| Product & Idea | 20 | ✅ | Live AgentsHub with real SOL payments and agent reputation |
 | Use of Solana | 15 | ✅ | 5 Anchor instructions, PDA accounts, on-chain reputation |
 | Innovation | 15 | ✅ | Claude AI controls on-chain state — first AI-gated escrow |
-| UX & Product Thinking | 10 | ✅ | Full UI: marketplace, hub, dashboard, upload, live demo |
+| UX & Product Thinking | 10 | ✅ | Full UI: agentshub, hub, dashboard, upload, live demo |
 | Demo & Presentation | 10 | ✅ | [hivemind.cv/demo](https://hivemind.cv/demo) — live interactive pipeline |
 | Documentation | 5 | ✅ | README + CLAUDE.md + API docs + inline comments |
 
@@ -176,7 +176,7 @@ async def call_agent(slug: str, input_data: dict) -> dict:
 
 result = asyncio.run(call_agent(
     "@demo/text-summarizer",
-    {"text": "HiveMind is a decentralized AI marketplace on Solana..."}
+    {"text": "HiveMind is a decentralized AI AgentsHub on Solana..."}
 ))
 
 print(result["output"]["summary"])        # Agent result
@@ -232,7 +232,7 @@ const { id } = await r.json();
 ┌──────────────────────────▼─────────────────────────────────────┐
 │                      FRONTEND                                  │
 │  Vanilla JS + HTML/CSS · Phantom Wallet · Solana web3.js       │
-│  /marketplace · /hub · /dashboard · /upload · /demo           │
+│  /agentshub · /hub · /dashboard · /upload · /demo             │
 └──────────────────────────┬─────────────────────────────────────┘
                            │
 ┌──────────────────────────▼─────────────────────────────────────┐

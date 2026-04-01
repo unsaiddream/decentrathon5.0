@@ -10,404 +10,391 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
   <style>
 /* ═══════════════════════════════════════════════════════
-   DEMO PAGE STYLES
+   DEMO PAGE — REDESIGNED
 ═══════════════════════════════════════════════════════ */
 
+/* ─── Hero ─── */
 .demo-hero {
-  text-align: center; padding: 64px 24px 48px;
+  text-align: center;
+  padding: 56px 24px 40px;
 }
 .live-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 18px; border-radius: 100px;
+  padding: 5px 16px; border-radius: 100px;
   background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
   font-family: 'JetBrains Mono', monospace; font-size: 11px;
   color: var(--primary); letter-spacing: 0.12em; text-transform: uppercase;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); animation: blink 1.4s ease-in-out infinite; }
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
-
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 .demo-title {
-  font-family: 'Syne', sans-serif; font-size: clamp(40px, 7vw, 80px);
+  font-family: 'Syne', sans-serif; font-size: clamp(36px, 6vw, 72px);
   font-weight: 800; line-height: 1.0; letter-spacing: -0.03em;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .demo-title span { color: var(--primary); }
-.demo-subtitle { font-size: 18px; color: var(--text-muted); max-width: 600px; margin: 0 auto 48px; line-height: 1.65; }
+.demo-sub { font-size: 16px; color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.65; }
 
-/* ─── Section titles ─── */
-.sec-title {
-  font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700;
-  margin-bottom: 8px;
-}
-.sec-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; }
+/* ─── Section label ─── */
 .sec-label {
   font-family: 'JetBrains Mono', monospace; font-size: 11px;
   color: var(--primary); text-transform: uppercase; letter-spacing: 0.12em;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+}
+.sec-title {
+  font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.sec-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+
+/* ═══════════════════════════════════════════════════════
+   LIVE DEMO — MAIN SECTION (vertical, single column)
+═══════════════════════════════════════════════════════ */
+.demo-flow {
+  max-width: 720px;
+  margin: 0 auto 72px;
+}
+
+/* step wrapper */
+.demo-step {
+  position: relative;
+  margin-bottom: 0;
+}
+/* connector line between steps */
+.demo-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 52px;
+  width: 1px;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(245,158,11,0.3), rgba(245,158,11,0.05));
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  cursor: default;
+}
+.step-num {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
+  flex-shrink: 0; position: relative; z-index: 1;
+  transition: all 0.3s;
+}
+.step-num.idle   { background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-dim); }
+.step-num.active { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.5); color: var(--primary); }
+.step-num.done   { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.4); color: #34d399; }
+.step-label { font-size: 14px; font-weight: 500; }
+.step-sub { font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+.step-body {
+  margin-left: 54px;
+  margin-right: 0;
+  padding: 0 0 28px;
+}
+
+/* ─── Step 1: Auth gate / task input ─── */
+.auth-card, .input-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px;
+}
+.auth-card h3 { font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 8px; }
+.auth-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.auth-input {
+  width: 100%; padding: 11px 14px; margin-bottom: 12px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.auth-input:focus { outline: none; border-color: rgba(245,158,11,0.4); }
+.auth-err { font-size: 13px; color: #f87171; margin-top: 8px; }
+
+.preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.preset {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+  font-family: inherit;
+}
+.preset:hover { border-color: rgba(245,158,11,0.3); color: var(--primary); background: rgba(245,158,11,0.06); }
+
+.task-textarea {
+  width: 100%; min-height: 90px; padding: 12px 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 14px; font-family: inherit;
+  resize: vertical; box-sizing: border-box; line-height: 1.6;
+  transition: border-color 0.2s;
+}
+.task-textarea:focus { outline: none; border-color: rgba(245,158,11,0.4); }
+
+.demo-err {
+  font-size: 13px; color: #f87171; margin: 8px 0;
+  display: none;
+}
+
+.run-btn {
+  width: 100%; padding: 13px; border-radius: 10px;
+  background: var(--primary); border: none; color: #000;
+  font-size: 14px; font-weight: 700; font-family: 'Syne', sans-serif;
+  cursor: pointer; transition: all 0.2s; margin-top: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.run-btn:hover { filter: brightness(1.1); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.run-btn.loading .run-spinner { display: block; }
+.run-spinner {
+  display: none; width: 15px; height: 15px; border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.3); border-top-color: #000;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Step 2: AI Plan ─── */
+.plan-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px; display: none;
+}
+.plan-reason-text {
+  font-size: 13px; color: var(--text-muted); line-height: 1.6;
+  padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border);
+}
+.plan-call {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.plan-call:last-child { border-bottom: none; }
+.plan-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);
+  flex-shrink: 0;
+}
+.plan-slug { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); }
+.plan-why { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.plan-status {
+  margin-left: auto; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  padding: 3px 10px; border-radius: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-dim);
+}
+.plan-status.running { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--primary); }
+.plan-status.done    { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34d399; }
+.plan-status.failed  { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3); color: #f87171; }
+
+/* ─── Step 3: Exec log ─── */
+.exec-card {
+  background: #050400; border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 20px; display: none;
+}
+.exec-log-inner {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7;
+  max-height: 160px; overflow-y: auto;
+}
+.exec-log-inner .ls { color: rgba(250,247,237,0.4); }
+.exec-log-inner .le { color: #f87171; }
+.exec-log-inner .ld { color: #34d399; font-weight: 600; }
+
+/* ─── Step 4: Results ─── */
+.res-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; display: none;
+}
+.res-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.res-slug { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); }
+.res-meta { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.score-pill {
+  padding: 3px 10px; border-radius: 10px; font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.score-pill.hi { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+.score-pill.lo { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: #f87171; }
+.tx-link {
+  font-size: 11px; color: #a78bfa; text-decoration: none; font-family: 'JetBrains Mono', monospace;
+  padding: 3px 10px; border-radius: 10px;
+  background: rgba(153,69,255,0.1); border: 1px solid rgba(153,69,255,0.2);
+}
+.res-body { padding: 16px 18px; }
+.res-out {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);
+  white-space: pre-wrap; word-break: break-word; line-height: 1.7;
+  max-height: 200px; overflow-y: auto;
+}
+.res-ai {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-dim); line-height: 1.65;
 }
 
 /* ═══════════════════════════════════════════════════════
-   PIPELINE VISUALIZER
+   PIPELINE VISUALIZATION — compact vertical list
 ═══════════════════════════════════════════════════════ */
 .pipeline-wrap {
-  position: relative; overflow: hidden;
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 40px 32px 48px; margin-bottom: 64px;
+  border-radius: 20px; overflow: hidden; margin-bottom: 64px;
 }
-.pipeline-bg-grid {
-  position: absolute; inset: 0; opacity: 0.04;
-  background-image: linear-gradient(var(--primary) 1px, transparent 1px),
-    linear-gradient(90deg, var(--primary) 1px, transparent 1px);
-  background-size: 40px 40px;
+.pipeline-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 28px; border-bottom: 1px solid var(--border);
 }
-
-/* Stage columns */
-.pipeline-stages {
-  display: grid; grid-template-columns: 1fr 20px 1fr 20px 1fr 20px 1fr;
-  gap: 0; align-items: start; position: relative; z-index: 1;
+.pipeline-header h3 {
+  font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin: 0;
 }
-@media(max-width:900px){ .pipeline-stages { grid-template-columns: 1fr; } .pipeline-arrow{ display:none; } }
-
-.stage { display: flex; flex-direction: column; gap: 0; }
-.stage-header {
-  display: flex; align-items: center; gap: 10px;
-  padding-bottom: 16px; margin-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-.stage-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-}
-.stage-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-
-/* Stage colors */
-.stage-external .stage-icon  { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); }
-.stage-ai       .stage-icon  { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); }
-.stage-exec     .stage-icon  { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); }
-.stage-chain    .stage-icon  { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); }
-
-/* Node boxes */
-.node {
-  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-  border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
-  font-size: 13px; position: relative; transition: all 0.35s ease;
-}
-.node-icon { font-size: 15px; margin-right: 8px; }
-.node-title { font-weight: 500; }
-.node-sub { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
-
-.node.active {
-  border-color: var(--primary); background: rgba(245,158,11,0.06);
-  box-shadow: 0 0 0 1px rgba(245,158,11,0.2), 0 4px 20px rgba(245,158,11,0.12);
-}
-.node.done   { border-color: var(--success); background: rgba(16,185,129,0.05); }
-.node.active .node-title { color: var(--primary); }
-.node.done   .node-title { color: var(--success); }
-
-/* Arrow connector */
-.pipeline-arrow {
-  display: flex; align-items: flex-start; justify-content: center;
-  padding-top: 42px;
-}
-.arrow-line {
-  width: 20px; height: 2px; background: var(--border);
-  position: relative; overflow: visible;
-}
-.arrow-line::after {
-  content: '▶'; position: absolute; right: -8px; top: -7px;
-  color: var(--border); font-size: 10px;
-}
-.arrow-line.lit { background: var(--primary); }
-.arrow-line.lit::after { color: var(--primary); }
-
-/* Data packet animation */
-@keyframes packet {
-  0%   { left: -6px; opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { left: calc(100% + 4px); opacity: 0; }
-}
-.packet {
-  position: absolute; top: -4px;
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--primary); box-shadow: 0 0 8px var(--primary);
-  animation: packet 1.2s ease-in-out infinite;
-}
-
-/* Action log */
-.action-log {
-  margin-top: 28px; background: #050400; border-radius: 10px;
-  padding: 16px; max-height: 140px; overflow-y: auto; position: relative; z-index: 1;
-}
-.action-log-title {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em;
-  margin-bottom: 10px;
-}
-.alog-line {
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
-  line-height: 1.9; display: flex; align-items: baseline; gap: 10px;
-  opacity: 0; animation: fadein 0.4s ease forwards;
-}
-@keyframes fadein { to { opacity: 1; } }
-.alog-ts { color: rgba(245,158,11,0.4); flex-shrink: 0; }
-.alog-sys  { color: rgba(245,158,11,0.75); }
-.alog-ok   { color: var(--success); }
-.alog-err  { color: var(--error); }
-.alog-info { color: var(--text-muted); }
-.alog-chain{ color: #9945ff; }
-
-/* Run button */
 .vis-run-btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 14px 36px; border-radius: 10px;
-  background: var(--primary); color: #000;
-  border: none; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600;
-  cursor: pointer; transition: all var(--transition); margin: 28px auto 0;
-  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 8px;
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+  color: var(--primary); font-size: 13px; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; transition: all 0.2s;
 }
-.vis-run-btn:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,158,11,0.3); }
-.vis-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.vis-spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+.vis-run-btn:hover { background: rgba(245,158,11,0.18); }
+.vis-run-btn.loading { opacity: 0.6; cursor: not-allowed; }
+.vis-spinner {
+  display: none; width: 13px; height: 13px; border-radius: 50%;
+  border: 2px solid rgba(245,158,11,0.3); border-top-color: var(--primary);
+  animation: spin 0.7s linear infinite;
+}
 .vis-run-btn.loading .vis-spinner { display: block; }
+
+.pipeline-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+@media(max-width:640px) { .pipeline-body { grid-template-columns: 1fr; } }
+
+/* Left: flow steps */
+.pipeline-steps { padding: 24px 28px; border-right: 1px solid var(--border); }
+.pip-step {
+  display: flex; align-items: flex-start; gap: 14px; padding: 10px 0;
+  position: relative;
+}
+.pip-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 16px; top: 38px;
+  width: 1px; height: calc(100% - 12px);
+  background: var(--border);
+}
+.pip-icon {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  position: relative; z-index: 1; transition: all 0.35s;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+}
+.pip-icon.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.1); box-shadow: 0 0 12px rgba(245,158,11,0.2); }
+.pip-icon.done   { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+.pip-info { flex: 1; padding-top: 5px; }
+.pip-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; transition: color 0.3s; }
+.pip-name.active { color: var(--primary); }
+.pip-name.done   { color: #34d399; }
+.pip-desc { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+
+/* Right: action log */
+.pipeline-log { padding: 24px 28px; }
+.alog-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.alog-title::before {
+  content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--primary);
+  animation: blink 1.4s ease-in-out infinite;
+}
+.alog-inner {
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.75;
+  height: 280px; overflow-y: auto;
+}
+.alog-line { display: flex; gap: 10px; }
+.alog-ts { color: rgba(250,247,237,0.2); flex-shrink: 0; }
+.alog-info  { color: rgba(250,247,237,0.55); }
+.alog-sys   { color: var(--primary); }
+.alog-chain { color: #a78bfa; }
+.alog-ok    { color: #34d399; }
 
 /* ═══════════════════════════════════════════════════════
    FEATURES GRID
 ═══════════════════════════════════════════════════════ */
 .features-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
   margin-bottom: 64px;
 }
+@media(max-width:900px){ .features-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:560px){ .features-grid { grid-template-columns: 1fr; } }
+
 .feat-card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 28px; position: relative; overflow: hidden;
-  transition: border-color 0.25s, transform 0.25s;
+  border-radius: 14px; padding: 22px 20px;
+  transition: border-color 0.25s;
 }
-.feat-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-.feat-card::before {
-  content: ''; position: absolute; inset: 0; opacity: 0;
-  background: radial-gradient(circle at 60% 0%, rgba(245,158,11,0.06) 0%, transparent 70%);
-  transition: opacity 0.3s;
-}
-.feat-card:hover::before { opacity: 1; }
-.feat-icon { font-size: 28px; margin-bottom: 16px; }
-.feat-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.feat-desc { font-size: 14px; color: var(--text-muted); line-height: 1.65; margin-bottom: 14px; }
+.feat-card:hover { border-color: rgba(245,158,11,0.25); }
+.feat-icon { font-size: 24px; margin-bottom: 12px; }
+.feat-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.feat-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 12px; }
+.feat-desc code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--primary); background: rgba(245,158,11,0.08); padding: 1px 5px; border-radius: 3px; }
 .feat-badge {
-  display: inline-block; padding: 3px 10px; border-radius: 100px;
-  font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--primary);
-  letter-spacing: 0.06em; text-transform: uppercase;
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  padding: 3px 10px; border-radius: 6px;
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--primary);
 }
-.feat-badge.green { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.2); color: var(--success); }
-.feat-badge.purple { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
+.feat-badge.purple { background: rgba(153,69,255,0.1); border-color: rgba(153,69,255,0.2); color: #a78bfa; }
+.feat-badge.green  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: #34d399; }
 
 /* ═══════════════════════════════════════════════════════
-   CODE SNIPPET
+   CODE SECTION
 ═══════════════════════════════════════════════════════ */
 .code-section { margin-bottom: 64px; }
-.code-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.code-tabs { display: flex; border-bottom: 1px solid var(--border); }
 .code-tab {
-  padding: 10px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
-  color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent;
-  transition: all var(--transition); background: transparent; border-top: none; border-left: none; border-right: none;
+  padding: 10px 18px; font-size: 13px; font-family: 'JetBrains Mono', monospace;
+  background: transparent; border: none; color: var(--text-dim);
+  cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
 }
 .code-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-.code-wrap {
-  background: #050400; border: 1px solid var(--border); border-top: none;
-  border-radius: 0 0 12px 12px; overflow: hidden; position: relative;
-}
-.code-wrap pre {
-  padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
-  line-height: 1.8; color: #c8c0a8; overflow-x: auto; margin: 0;
-  tab-size: 2;
-}
+.code-wrap { position: relative; }
 .code-copy-btn {
   position: absolute; top: 12px; right: 12px;
   padding: 5px 12px; border-radius: 6px;
   background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-  color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px;
-  cursor: pointer; transition: all var(--transition);
+  color: var(--text-dim); font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; transition: all 0.2s;
 }
-.code-copy-btn:hover { color: var(--text); background: rgba(255,255,255,0.1); }
-
-/* syntax */
-.kw  { color: #f59e0b; }
-.fn  { color: #60a5fa; }
-.str { color: #86efac; }
-.cm  { color: rgba(250,247,237,0.3); font-style: italic; }
-.num { color: #f9a8d4; }
-.var { color: #c8c0a8; }
+.code-copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+pre#code-pre {
+  padding: 24px 20px; margin: 0; overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.75;
+}
+.kw  { color: #a78bfa; }
+.fn  { color: var(--primary); }
+.str { color: #34d399; }
+.cm  { color: rgba(250,247,237,0.3); }
+.num { color: #f87171; }
 
 /* ═══════════════════════════════════════════════════════
-   LIVE DEMO PANEL
+   PROGRAM BAR
 ═══════════════════════════════════════════════════════ */
-.live-panel { max-width: 800px; margin: 0 auto 80px; }
-.demo-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden; margin-bottom: 16px;
-}
-.demo-card-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px; border-bottom: 1px solid var(--border);
-  background: rgba(0,0,0,0.2);
-}
-.demo-card-hl {
-  font-family: 'JetBrains Mono', monospace; font-size: 11px;
-  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
-  display: flex; align-items: center; gap: 8px;
-}
-.dot-sm { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
-.dot-sm.amber { background: var(--primary); animation: blink 1.5s infinite; }
-.dot-sm.green { background: var(--success); }
-.demo-card-body { padding: 20px; }
-
-/* Auth gate */
-.auth-gate {
-  max-width: 440px; margin: 0 auto 32px;
-  background: var(--card); border: 1px solid var(--border-strong);
-  border-radius: 16px; padding: 32px; text-align: center;
-}
-.auth-gate h3 { font-size: 17px; margin-bottom: 8px; }
-.auth-gate p { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
-.auth-input {
-  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-  border-radius: 8px; padding: 11px 14px; color: var(--text);
-  font-family: 'JetBrains Mono', monospace; font-size: 13px;
-  outline: none; transition: border-color var(--transition); margin-bottom: 10px;
-}
-.auth-input:focus { border-color: var(--primary); }
-.auth-input::placeholder { color: var(--text-dim); }
-#auth-error { font-size: 12px; color: var(--error); min-height: 16px; margin-top: 4px; }
-
-/* preset tasks */
-.preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.preset {
-  padding: 6px 14px; border-radius: 8px;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--text-muted); font-size: 12px; cursor: pointer;
-  transition: all var(--transition); font-family: 'Outfit', sans-serif;
-}
-.preset:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-
-#task-input {
-  width: 100%; background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border); border-radius: 10px;
-  padding: 14px 16px; color: var(--text);
-  font-family: 'Outfit', sans-serif; font-size: 15px;
-  outline: none; resize: vertical; min-height: 80px;
-  transition: border-color var(--transition);
-}
-#task-input:focus { border-color: var(--primary); }
-#task-input::placeholder { color: var(--text-dim); }
-
-.run-btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; padding: 14px;
-  background: var(--primary); color: #000;
-  border: none; border-radius: 10px; font-weight: 600; font-size: 15px;
-  cursor: pointer; transition: all var(--transition); margin-top: 14px;
-  font-family: 'Outfit', sans-serif;
-}
-.run-btn:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); }
-.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.run-spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-.run-btn.loading .run-spinner { display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* plan */
-.plan-call {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-}
-.plan-call:last-child { border-bottom: none; }
-.plan-num {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--primary-glow); border: 1px solid var(--border-strong);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);
-  flex-shrink: 0; margin-top: 2px;
-}
-.plan-slug { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); margin-bottom: 4px; }
-.plan-reason { font-size: 13px; color: var(--text-muted); }
-.plan-status {
-  margin-left: auto; font-size: 11px; padding: 3px 10px;
-  border-radius: 100px; font-family: 'JetBrains Mono', monospace;
-  border: 1px solid var(--border); color: var(--text-dim); white-space: nowrap; flex-shrink: 0;
-}
-.plan-status.running { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
-.plan-status.done    { border-color: var(--success); color: var(--success); background: rgba(16,185,129,0.08); }
-.plan-status.failed  { border-color: var(--error);   color: var(--error);   background: rgba(239,68,68,0.08); }
-
-/* exec log */
-.exec-log {
-  background: #050400; border-radius: 8px; padding: 16px;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
-  color: #a8a090; max-height: 180px; overflow-y: auto; line-height: 1.85;
-}
-.exec-log .ls { color: rgba(245,158,11,0.65); }
-.exec-log .le { color: var(--error); }
-.exec-log .ld { color: var(--success); }
-
-/* result */
-.res-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
-.res-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
-  flex-wrap: wrap; gap: 8px;
-}
-.res-slug { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--primary); }
-.res-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.score-pill {
-  padding: 3px 10px; border-radius: 100px; font-size: 11px;
-  font-family: 'JetBrains Mono', monospace; font-weight: 600;
-}
-.score-pill.hi { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
-.score-pill.lo { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid rgba(239,68,68,0.3); }
-.tx-link {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 100px; font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
-  background: rgba(153,69,255,0.08); border: 1px solid rgba(153,69,255,0.25);
-  color: #a78bfa; text-decoration: none; transition: all var(--transition);
-}
-.tx-link:hover { background: rgba(153,69,255,0.14); }
-.res-body { padding: 16px; }
-.res-out {
-  background: #050400; border-radius: 8px; padding: 14px;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
-  color: #c8c0a8; white-space: pre-wrap; overflow-x: auto; max-height: 180px; overflow-y: auto;
-}
-.res-ai {
-  margin-top: 10px; font-size: 12px; color: var(--text-muted);
-  padding: 10px 14px; background: rgba(245,158,11,0.04);
-  border-left: 2px solid rgba(245,158,11,0.3); border-radius: 0 6px 6px 0;
-}
-.demo-err {
-  padding: 12px 16px; border-radius: 8px;
-  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
-  color: var(--error); font-size: 13px; margin-top: 12px; display: none;
-}
-
-/* ─── Program bar ─── */
 .program-bar {
-  max-width: 800px; margin: 0 auto 80px;
-  padding: 16px 22px;
-  background: rgba(153,69,255,0.04); border: 1px solid rgba(153,69,255,0.15);
-  border-radius: 12px;
   display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px;
+  flex-wrap: wrap; gap: 14px;
+  padding: 18px 24px; border-radius: 12px;
+  background: var(--card); border: 1px solid rgba(153,69,255,0.2);
+  margin-bottom: 64px;
 }
 .program-bar-lbl { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-.program-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #a78bfa; }
+.program-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #a78bfa; word-break: break-all; }
 .program-bar a {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
   padding: 8px 16px; border-radius: 8px;
   background: rgba(153,69,255,0.1); border: 1px solid rgba(153,69,255,0.2);
-  color: #a78bfa; text-decoration: none; font-size: 13px;
-  transition: all var(--transition);
+  color: #a78bfa; text-decoration: none; font-size: 13px; transition: all 0.2s;
 }
 .program-bar a:hover { background: rgba(153,69,255,0.18); }
   </style>
@@ -443,181 +430,266 @@
 
 <div class="container page">
 
-<!-- ═══════════════════════════════════ HERO ═══════════════════════ -->
+<!-- ═══════════ HERO ════════════════════════════════════ -->
 <div class="demo-hero">
   <div class="live-badge"><div class="live-dot"></div>Live Interactive Demo</div>
   <h1 class="demo-title">AI decides.<br><span>Blockchain records.</span></h1>
-  <p class="demo-subtitle">
+  <p class="demo-sub">
     Type a task — Claude routes it to agents, evaluates quality,
     and every decision is permanently recorded on Solana.
-    No humans. No middlemen. Fully autonomous.
   </p>
 </div>
 
-<!-- ═══════════════════════════════ PIPELINE VIS ═══════════════════ -->
-<div style="margin-bottom:20px">
-  <div class="sec-label">How it works</div>
-  <h2 class="sec-title">Full Pipeline Visualization</h2>
-  <p class="sec-sub">Watch the data flow in real time — from external agent request to on-chain settlement.</p>
+
+<!-- ═══════════ LIVE DEMO ════════════════════════════════ -->
+<div style="margin-bottom:24px">
+  <div class="sec-label">Try it yourself</div>
+  <h2 class="sec-title">Live Demo</h2>
+  <p class="sec-sub">Execute the real pipeline — Claude routes your task, agents run, Solana settles.</p>
 </div>
 
-<div class="pipeline-wrap" id="pipeline-wrap">
-  <div class="pipeline-bg-grid"></div>
+<div class="demo-flow">
 
-  <div class="pipeline-stages">
+  <!-- Step 1: Sign in / Task input -->
+  <div class="demo-step" id="step1">
+    <div class="step-header">
+      <div class="step-num idle" id="sn1">1</div>
+      <div>
+        <div class="step-label">Task Input</div>
+        <div class="step-sub">What do you need?</div>
+      </div>
+    </div>
+    <div class="step-body">
 
-    <!-- Stage 1: External Agents -->
-    <div class="stage stage-external">
-      <div class="stage-header">
-        <div class="stage-icon">🌐</div>
-        <div>
-          <div class="stage-name">External Agents</div>
+      <!-- Auth gate (shown if not logged in) -->
+      <div class="auth-card" id="auth-gate">
+        <h3>Sign in to run the demo</h3>
+        <p>Use your wallet address and password to run the full on-chain AI pipeline.</p>
+        <input class="auth-input" type="text" id="login-wallet" placeholder="Wallet address" autocomplete="off">
+        <input class="auth-input" type="password" id="login-password" placeholder="Password">
+        <button class="run-btn" id="login-btn" onclick="doLogin()">
+          <span class="run-spinner"></span>Sign In
+        </button>
+        <div class="auth-err" id="auth-error"></div>
+      </div>
+
+      <!-- Task panel (shown when logged in) -->
+      <div class="input-card" id="demo-panel" style="display:none">
+        <div class="preset-row">
+          <button class="preset" onclick="setTask(this)">Summarize &amp; analyze sentiment</button>
+          <button class="preset" onclick="setTask(this)">Analyze: HiveMind is a revolutionary AI marketplace on Solana</button>
+          <button class="preset" onclick="setTask(this)">Summarize and give sentiment: The Decentrathon 5.0 hackathon was an amazing experience</button>
         </div>
+        <textarea class="task-textarea" id="task-input" placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
+        <div class="demo-err" id="demo-err"></div>
+        <button class="run-btn" id="run-btn" onclick="runDemo()">
+          <span class="run-spinner"></span>▶ &nbsp;Run with AI
+        </button>
       </div>
-      <div class="node" id="n-claude"><span class="node-icon">🤖</span><span class="node-title">Claude Agent</span><div class="node-sub">Anthropic SDK</div></div>
-      <div class="node" id="n-gpt"><span class="node-icon">💬</span><span class="node-title">GPT Agent</span><div class="node-sub">OpenAI API</div></div>
-      <div class="node" id="n-custom"><span class="node-icon">🐍</span><span class="node-title">Python Script</span><div class="node-sub">httpx / requests</div></div>
-      <div class="node" id="n-langchain"><span class="node-icon">🔗</span><span class="node-title">LangChain</span><div class="node-sub">AutoGen / CrewAI</div></div>
+
     </div>
-
-    <!-- Arrow 1 -->
-    <div class="pipeline-arrow">
-      <div class="arrow-line" id="arr-1"><div class="packet" id="pkt-1" style="display:none"></div></div>
-    </div>
-
-    <!-- Stage 2: HiveMind Hub + AI -->
-    <div class="stage stage-ai">
-      <div class="stage-header">
-        <div class="stage-icon">🧠</div>
-        <div><div class="stage-name">AI Coordinator</div></div>
-      </div>
-      <div class="node" id="n-api"><span class="node-icon">🔑</span><span class="node-title">REST API</span><div class="node-sub">POST /api/v1/execute</div></div>
-      <div class="node" id="n-route"><span class="node-icon">🗺️</span><span class="node-title">route_task()</span><div class="node-sub">Claude selects agents</div></div>
-      <div class="node" id="n-eval"><span class="node-icon">📊</span><span class="node-title">evaluate_output()</span><div class="node-sub">Claude scores 0–100</div></div>
-      <div class="node" id="n-decision"><span class="node-icon">⚖️</span><span class="node-title">Decision</span><div class="node-sub">score ≥ 70 → pay / refund</div></div>
-    </div>
-
-    <!-- Arrow 2 -->
-    <div class="pipeline-arrow">
-      <div class="arrow-line" id="arr-2"><div class="packet" id="pkt-2" style="display:none"></div></div>
-    </div>
-
-    <!-- Stage 3: Agent Execution -->
-    <div class="stage stage-exec">
-      <div class="stage-header">
-        <div class="stage-icon">⚙️</div>
-        <div><div class="stage-name">Agent Execution</div></div>
-      </div>
-      <div class="node" id="n-queue"><span class="node-icon">📥</span><span class="node-title">Celery Queue</span><div class="node-sub">Redis task broker</div></div>
-      <div class="node" id="n-sandbox"><span class="node-icon">📦</span><span class="node-title">Sandbox</span><div class="node-sub">subprocess isolation</div></div>
-      <div class="node" id="n-agent1"><span class="node-icon">📝</span><span class="node-title">text-summarizer</span><div class="node-sub">agent.py running</div></div>
-      <div class="node" id="n-agent2"><span class="node-icon">💡</span><span class="node-title">sentiment-analyzer</span><div class="node-sub">agent.py running</div></div>
-    </div>
-
-    <!-- Arrow 3 -->
-    <div class="pipeline-arrow">
-      <div class="arrow-line" id="arr-3"><div class="packet" id="pkt-3" style="display:none"></div></div>
-    </div>
-
-    <!-- Stage 4: Solana -->
-    <div class="stage stage-chain">
-      <div class="stage-header">
-        <div class="stage-icon">⛓️</div>
-        <div><div class="stage-name">Solana On-chain</div></div>
-      </div>
-      <div class="node" id="n-initiate"><span class="node-icon">🔒</span><span class="node-title">initiate_execution</span><div class="node-sub">SOL locked in PDA</div></div>
-      <div class="node" id="n-escrow"><span class="node-icon">💰</span><span class="node-title">ExecutionAccount</span><div class="node-sub">status = Pending</div></div>
-      <div class="node" id="n-complete"><span class="node-icon">✅</span><span class="node-title">complete_execution</span><div class="node-sub">90% → owner, 10% → platform</div></div>
-      <div class="node" id="n-reputation"><span class="node-icon">⭐</span><span class="node-title">update_reputation</span><div class="node-sub">score stored on-chain</div></div>
-    </div>
-
-  </div><!-- /pipeline-stages -->
-
-  <!-- Action log -->
-  <div class="action-log">
-    <div class="action-log-title">● Pipeline Log</div>
-    <div id="alog"></div>
   </div>
 
-  <button class="vis-run-btn" id="vis-btn" onclick="runVisualization()">
-    <span class="vis-spinner"></span>
-    ▶ &nbsp;Animate Pipeline
-  </button>
+  <!-- Step 2: Claude's Plan -->
+  <div class="demo-step" id="step2">
+    <div class="step-header">
+      <div class="step-num idle" id="sn2">2</div>
+      <div>
+        <div class="step-label">Claude's Plan</div>
+        <div class="step-sub">AI routing decision</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="plan-card" id="plan-sec">
+        <div class="plan-reason-text" id="plan-reason"></div>
+        <div id="plan-calls"></div>
+      </div>
+    </div>
+  </div>
 
-</div><!-- /pipeline-wrap -->
+  <!-- Step 3: Execution log -->
+  <div class="demo-step" id="step3">
+    <div class="step-header">
+      <div class="step-num idle" id="sn3">3</div>
+      <div>
+        <div class="step-label">Execution Log</div>
+        <div class="step-sub">Agents running</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="exec-card" id="exec-sec">
+        <div class="exec-log-inner" id="exec-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Results -->
+  <div class="demo-step" id="step4">
+    <div class="step-header">
+      <div class="step-num idle" id="sn4">4</div>
+      <div>
+        <div class="step-label">Results &amp; On-chain Record</div>
+        <div class="step-sub">Settled on Solana</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div id="res-list"></div>
+    </div>
+  </div>
+
+</div><!-- /demo-flow -->
 
 
-<!-- ═══════════════════════════════ FEATURES ═══════════════════════ -->
+<!-- ═══════════ PIPELINE VISUALIZATION ══════════════════ -->
+<div style="margin-bottom:24px">
+  <div class="sec-label">How it works</div>
+  <h2 class="sec-title">Full Pipeline Visualization</h2>
+  <p class="sec-sub">Animate the data flow — from external agent request to on-chain settlement.</p>
+</div>
+
+<div class="pipeline-wrap">
+  <div class="pipeline-header">
+    <h3>AI → Blockchain Pipeline</h3>
+    <button class="vis-run-btn" id="vis-btn" onclick="runVisualization()">
+      <span class="vis-spinner"></span>▶ Animate
+    </button>
+  </div>
+  <div class="pipeline-body">
+
+    <!-- Left: steps -->
+    <div class="pipeline-steps">
+      <div class="pip-step">
+        <div class="pip-icon" id="n-external">🌐</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-external">External Agent</div>
+          <div class="pip-desc">Claude / GPT / Python / LangChain</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-api">🔑</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-api">POST /api/v1/execute</div>
+          <div class="pip-desc">REST API call with API key</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-route">🧠</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-route">route_task()</div>
+          <div class="pip-desc">Claude selects agents</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-initiate">🔒</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-initiate">initiate_execution</div>
+          <div class="pip-desc">SOL locked in PDA escrow</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-sandbox">⚙️</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-sandbox">Agent Sandbox</div>
+          <div class="pip-desc">subprocess isolation · Celery</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-eval">📊</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-eval">evaluate_output()</div>
+          <div class="pip-desc">Claude scores 0–100</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-complete">✅</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-complete">complete_execution</div>
+          <div class="pip-desc">90% → owner · 10% → platform</div>
+        </div>
+      </div>
+      <div class="pip-step">
+        <div class="pip-icon" id="n-reputation">⭐</div>
+        <div class="pip-info">
+          <div class="pip-name" id="nn-reputation">update_reputation</div>
+          <div class="pip-desc">score stored on-chain forever</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: log -->
+    <div class="pipeline-log">
+      <div class="alog-title">Pipeline Log</div>
+      <div class="alog-inner" id="alog"></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════ FEATURES ═════════════════════════════════ -->
 <div style="margin-bottom:28px">
   <div class="sec-label">Hackathon Case 2: AI + Blockchain</div>
   <h2 class="sec-title">Every Feature, Explained</h2>
-  <p class="sec-sub">All six hackathon criteria — fully implemented and live.</p>
+  <p class="sec-sub">All six criteria — fully implemented and live on Devnet.</p>
 </div>
 
 <div class="features-grid">
-
   <div class="feat-card">
     <div class="feat-icon">🤖</div>
     <div class="feat-title">AI Makes Real Decisions</div>
     <div class="feat-desc">
-      Claude <code>claude-sonnet-4-6</code> analyzes every task and selects which agents to call. Then it evaluates the output quality (0–100). These aren't suggestions — they trigger real financial transactions on Solana.
+      <code>claude-sonnet-4-6</code> analyzes every task, selects agents, then evaluates output quality (0–100). These decisions trigger real SOL transactions on Solana.
     </div>
     <span class="feat-badge">route_task() + evaluate_output()</span>
   </div>
-
   <div class="feat-card">
     <div class="feat-icon">⛓️</div>
-    <div class="feat-title">Every Decision is On-chain</div>
+    <div class="feat-title">Every Decision On-chain</div>
     <div class="feat-desc">
-      The AI quality score is stored in <code>ExecutionAccount.ai_quality_score</code> on Solana. Every payment and refund is a verifiable transaction. Anyone can check Solana Explorer — the AI's judgment is public and immutable.
+      AI quality score stored in <code>ExecutionAccount.ai_quality_score</code>. Every payment is a verifiable Solana TX — the AI's judgment is public and immutable.
     </div>
     <span class="feat-badge">ExecutionAccount PDA</span>
   </div>
-
   <div class="feat-card">
     <div class="feat-icon">🔄</div>
     <div class="feat-title">Fully Autonomous</div>
     <div class="feat-desc">
-      No human approves payments. The pipeline runs end-to-end: task input → AI routing → agent execution → quality evaluation → on-chain settlement. Agents can also call other agents (A2A), creating autonomous multi-agent chains.
+      No humans approve payments. Task input → AI routing → execution → quality eval → on-chain settlement. Agents can call other agents via A2A protocol.
     </div>
     <span class="feat-badge">A2A Protocol</span>
   </div>
-
   <div class="feat-card">
     <div class="feat-icon">📋</div>
     <div class="feat-title">Deployed Smart Contract</div>
     <div class="feat-desc">
-      Anchor program <code>agent_escrow</code> is live on Solana Devnet with 5 instructions: <code>register_agent</code>, <code>initiate_execution</code>, <code>complete_execution</code>, <code>refund_execution</code>, <code>update_reputation</code>. Agents have PDA addresses and on-chain reputation scores.
+      Anchor program <code>agent_escrow</code> live on Solana Devnet with 5 instructions: register, initiate, complete, refund, update_reputation.
     </div>
-    <span class="feat-badge purple">2qP9Gp...C4G</span>
+    <span class="feat-badge purple">2qP9Gp…C4G</span>
   </div>
-
   <div class="feat-card">
     <div class="feat-icon">💸</div>
     <div class="feat-title">Real Economic Model</div>
     <div class="feat-desc">
-      Callers pay SOL per agent call. On successful execution: 90% goes to the agent developer, 10% to the platform — automatically via smart contract, no intermediaries. On poor quality: 100% refunded. Agents build on-chain reputation over time.
+      Callers pay SOL per call. Score ≥ 70: 90% to developer, 10% platform — via smart contract. Poor quality: 100% refunded. On-chain reputation grows over time.
     </div>
     <span class="feat-badge green">90% owner · 10% platform</span>
   </div>
-
   <div class="feat-card">
     <div class="feat-icon">🌍</div>
     <div class="feat-title">Open to Any AI Agent</div>
     <div class="feat-desc">
-      Any external agent — Claude, GPT, LangChain, AutoGen, a custom Python script — can call HiveMind agents via a single REST API call with an API key. HiveMind becomes infrastructure that any AI in the world can use.
+      Any external agent — Claude, GPT, LangChain, AutoGen, Python script — can call HiveMind via one REST API call. HiveMind becomes AI infrastructure.
     </div>
     <span class="feat-badge purple">REST API + API Keys</span>
   </div>
-
 </div>
 
 
-<!-- ═══════════════════════════════ CODE ══════════════════════════ -->
+<!-- ═══════════ CODE ═════════════════════════════════════ -->
 <div class="code-section">
   <div class="sec-label">External Agent Integration</div>
   <h2 class="sec-title">One HTTP call. Full pipeline.</h2>
-  <p class="sec-sub">Any AI agent can use HiveMind as infrastructure — no blockchain knowledge required.</p>
+  <p class="sec-sub">Any AI can use HiveMind as infrastructure — no blockchain knowledge required.</p>
 
   <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
     <div class="code-tabs">
@@ -633,86 +705,7 @@
 </div>
 
 
-<!-- ═══════════════════════════════ LIVE DEMO ══════════════════════ -->
-<div style="margin-bottom:28px;max-width:800px;margin-left:auto;margin-right:auto">
-  <div class="sec-label">Try it yourself</div>
-  <h2 class="sec-title">Live Demo</h2>
-  <p class="sec-sub">Execute the real pipeline — Claude routes your task, agents run, Solana settles.</p>
-</div>
-
-<!-- Auth gate -->
-<div class="auth-gate" id="auth-gate">
-  <h3>Sign in to run the live demo</h3>
-  <p>Use your wallet address + password to authenticate and run the full on-chain AI pipeline.</p>
-  <input class="auth-input" type="text" id="login-wallet" placeholder="Wallet address (or email)" autocomplete="off">
-  <input class="auth-input" type="password" id="login-password" placeholder="Password">
-  <button class="run-btn" id="login-btn" onclick="doLogin()" style="margin-top:4px">
-    <span class="run-spinner"></span>Sign In
-  </button>
-  <div id="auth-error"></div>
-</div>
-
-<!-- Demo panel -->
-<div class="live-panel" id="demo-panel" style="display:none">
-
-  <!-- Input -->
-  <div class="demo-card">
-    <div class="demo-card-head">
-      <div class="demo-card-hl"><div class="dot-sm amber"></div>Task Input</div>
-      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 1 — What do you need?</span>
-    </div>
-    <div class="demo-card-body">
-      <div class="preset-row">
-        <button class="preset" onclick="setTask(this)">Summarize &amp; analyze sentiment</button>
-        <button class="preset" onclick="setTask(this)">Translate to Russian and summarize</button>
-        <button class="preset" onclick="setTask(this)">Analyze sentiment: HiveMind is a revolutionary AI marketplace on Solana built for the Decentrathon 5.0 hackathon</button>
-      </div>
-      <textarea id="task-input" placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
-      <div class="demo-err" id="demo-err"></div>
-      <button class="run-btn" id="run-btn" onclick="runDemo()">
-        <span class="run-spinner"></span>▶ &nbsp;Run with AI
-      </button>
-    </div>
-  </div>
-
-  <!-- Plan -->
-  <div class="demo-card" id="plan-sec" style="display:none">
-    <div class="demo-card-head">
-      <div class="demo-card-hl"><div class="dot-sm amber"></div>Claude's Plan</div>
-      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 2 — AI Routing Decision</span>
-    </div>
-    <div class="demo-card-body">
-      <div id="plan-reason" style="font-size:13px;color:var(--text-muted);padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)"></div>
-      <div id="plan-calls"></div>
-    </div>
-  </div>
-
-  <!-- Exec log -->
-  <div class="demo-card" id="exec-sec" style="display:none">
-    <div class="demo-card-head">
-      <div class="demo-card-hl"><div class="dot-sm amber"></div>Execution Log</div>
-      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 3 — Agents Running</span>
-    </div>
-    <div class="demo-card-body">
-      <div class="exec-log" id="exec-log"></div>
-    </div>
-  </div>
-
-  <!-- Results -->
-  <div class="demo-card" id="res-sec" style="display:none">
-    <div class="demo-card-head">
-      <div class="demo-card-hl"><div class="dot-sm green"></div>Results &amp; On-chain Record</div>
-      <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">Step 4 — Settled on Solana</span>
-    </div>
-    <div class="demo-card-body">
-      <div id="res-list"></div>
-    </div>
-  </div>
-
-</div><!-- /live-panel -->
-
-
-<!-- ═══════════════════════════════ PROGRAM BAR ════════════════════ -->
+<!-- ═══════════ PROGRAM BAR ══════════════════════════════ -->
 <div class="program-bar">
   <div>
     <div class="program-bar-lbl">Anchor Program · Solana Devnet</div>
@@ -725,11 +718,12 @@
 
 </div><!-- /container -->
 
-<!-- ════════════════════════════════ SCRIPTS ═══════════════════════ -->
+<!-- ════════════════ SCRIPTS ══════════════════════════════ -->
 <script src="/ui/static/app.js"></script>
 <script>
 const PROGRAM_ID = '2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G';
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
 /* ─── Code tabs ─── */
 const CODE = {
@@ -741,49 +735,44 @@ KEY = <span class="str">"hm_your_api_key"</span>
 <span class="kw">async def</span> <span class="fn">call_agent</span>(slug, input_data):
     headers = {<span class="str">"Authorization"</span>: <span class="str">f"Bearer {KEY}"</span>}
     <span class="kw">async with</span> httpx.AsyncClient() <span class="kw">as</span> c:
-
         <span class="cm"># 1. Start execution — AI coordinator routes the task</span>
-        r = <span class="kw">await</span> c.post(<span class="str">f"{API}/execute"</span>,
-            headers=headers,
+        r = <span class="kw">await</span> c.post(<span class="str">f"{API}/execute"</span>, headers=headers,
             json={<span class="str">"agent_slug"</span>: slug, <span class="str">"input"</span>: input_data})
         exec_id = r.json()[<span class="str">"id"</span>]
 
         <span class="cm"># 2. Poll until done (Claude evaluates quality async)</span>
-        <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="num">30</span>):
+        <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="num">40</span>):
             <span class="kw">await</span> asyncio.sleep(<span class="num">2</span>)
             d = (<span class="kw">await</span> c.get(<span class="str">f"{API}/executions/{exec_id}"</span>, headers=headers)).json()
             <span class="kw">if</span> d[<span class="str">"status"</span>] <span class="kw">in</span> (<span class="str">"done"</span>, <span class="str">"failed"</span>):
                 <span class="kw">return</span> d
 
 result = asyncio.run(<span class="fn">call_agent</span>(
-    <span class="str">"@demo/text-summarizer"</span>,
+    <span class="str">"2qtxr7zo/text-summarizer"</span>,
     {<span class="str">"text"</span>: <span class="str">"HiveMind is a decentralized AI marketplace..."</span>}
 ))
 
-print(result[<span class="str">"output"</span>][<span class="str">"summary"</span>])          <span class="cm"># Agent output</span>
-print(result[<span class="str">"ai_quality_score"</span>])           <span class="cm"># Claude's score 0–100</span>
-print(result[<span class="str">"complete_tx_hash"</span>])           <span class="cm"># Solana TX — immutable proof</span>`,
+print(result[<span class="str">"output"</span>][<span class="str">"summary"</span>])       <span class="cm"># Agent output</span>
+print(result[<span class="str">"ai_quality_score"</span>])        <span class="cm"># Claude's score 0–100</span>
+print(result[<span class="str">"complete_tx_hash"</span>])        <span class="cm"># Solana TX — immutable proof</span>`,
 
   curl: `<span class="cm"># Step 1: Start execution</span>
 curl -X POST https://hivemind.cv/api/v1/execute <span class="kw">\\</span>
   -H <span class="str">"Authorization: Bearer hm_your_api_key"</span> <span class="kw">\\</span>
   -H <span class="str">"Content-Type: application/json"</span> <span class="kw">\\</span>
-  -d <span class="str">'{"agent_slug":"@demo/text-summarizer","input":{"text":"..."}}'</span>
+  -d <span class="str">'{"agent_slug":"2qtxr7zo/text-summarizer","input":{"text":"..."}}'</span>
 
 <span class="cm"># Response: {"id":"550e8400-...","status":"pending"}</span>
 
-<span class="cm"># Step 2: Check result (poll until status = "done")</span>
+<span class="cm"># Step 2: Check result</span>
 curl https://hivemind.cv/api/v1/executions/550e8400-... <span class="kw">\\</span>
   -H <span class="str">"Authorization: Bearer hm_your_api_key"</span>
 
-<span class="cm"># Response:</span>
 <span class="cm"># {</span>
 <span class="cm">#   "status": "done",</span>
 <span class="cm">#   "output": {"summary": "...", "word_count": 42},</span>
-<span class="cm">#   "ai_quality_score": 87,                  ← Claude's verdict</span>
-<span class="cm">#   "ai_reasoning": "Clear and accurate...",  ← why</span>
-<span class="cm">#   "complete_tx_hash": "5KtPn1x...",         ← Solana TX</span>
-<span class="cm">#   "on_chain_execution_id": "7xKw3..."        ← PDA address</span>
+<span class="cm">#   "ai_quality_score": 87,       ← Claude's verdict</span>
+<span class="cm">#   "complete_tx_hash": "5KtPn1x..." ← Solana TX</span>
 <span class="cm"># }</span>`,
 
   js: `<span class="kw">const</span> API = <span class="str">'https://hivemind.cv/api/v1'</span>;
@@ -791,27 +780,26 @@ curl https://hivemind.cv/api/v1/executions/550e8400-... <span class="kw">\\</spa
 <span class="kw">const</span> headers = { <span class="str">'Authorization'</span>: <span class="str">\`Bearer \${KEY}\`</span>, <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> };
 
 <span class="kw">async function</span> <span class="fn">callAgent</span>(slug, input) {
-  <span class="cm">// 1. Trigger execution — Claude selects agents automatically</span>
+  <span class="cm">// 1. Trigger — Claude selects agents automatically</span>
   <span class="kw">const</span> { id } = <span class="kw">await</span> fetch(<span class="str">\`\${API}/execute\`</span>, {
     method: <span class="str">'POST'</span>, headers,
     body: JSON.stringify({ agent_slug: slug, input })
   }).then(r => r.json());
 
   <span class="cm">// 2. Poll for result</span>
-  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">30</span>; i++) {
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">40</span>; i++) {
     <span class="kw">await new</span> Promise(r => setTimeout(r, <span class="num">2000</span>));
-    <span class="kw">const</span> data = <span class="kw">await</span> fetch(<span class="str">\`\${API}/executions/\${id}\`</span>, { headers }).then(r => r.json());
-    <span class="kw">if</span> ([<span class="str">'done'</span>, <span class="str">'failed'</span>].includes(data.status)) <span class="kw">return</span> data;
+    <span class="kw">const</span> d = <span class="kw">await</span> fetch(<span class="str">\`\${API}/executions/\${id}\`</span>, { headers }).then(r => r.json());
+    <span class="kw">if</span> ([<span class="str">'done'</span>, <span class="str">'failed'</span>].includes(d.status)) <span class="kw">return</span> d;
   }
 }
 
-<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">callAgent</span>(<span class="str">'@demo/text-summarizer'</span>, {
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">callAgent</span>(<span class="str">'2qtxr7zo/text-summarizer'</span>, {
   text: <span class="str">'HiveMind is a decentralized AI marketplace on Solana...'</span>
 });
-
-console.log(result.output.summary);          <span class="cm">// Agent result</span>
-console.log(result.ai_quality_score);        <span class="cm">// 0–100 from Claude</span>
-console.log(result.complete_tx_hash);        <span class="cm">// Solana TX hash</span>`
+console.log(result.output.summary);     <span class="cm">// Agent result</span>
+console.log(result.ai_quality_score);   <span class="cm">// 0–100 from Claude</span>
+console.log(result.complete_tx_hash);   <span class="cm">// Solana TX hash</span>`
 };
 
 let activeTab = 'py';
@@ -822,8 +810,7 @@ function switchTab(btn, tab) {
   document.getElementById('code-pre').innerHTML = CODE[tab];
 }
 function copyCode() {
-  const text = document.getElementById('code-pre').textContent;
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(document.getElementById('code-pre').textContent).then(() => {
     const btn = document.querySelector('.code-copy-btn');
     btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
   });
@@ -832,33 +819,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('code-pre').innerHTML = CODE.py;
 });
 
+
 /* ─── Pipeline visualization ─── */
 let visRunning = false;
-const VIS_STEPS = [
-  { node: 'n-claude',     arr: null,  pkt: null,  msg: 'External agent sends task via REST API', cls: 'alog-info' },
-  { node: 'n-gpt',        arr: null,  pkt: null,  msg: 'Multiple agents can use HiveMind simultaneously', cls: 'alog-info' },
-  { node: 'n-api',        arr: 'arr-1', pkt: 'pkt-1', msg: 'Request received at POST /api/v1/execute', cls: 'alog-sys' },
-  { node: 'n-route',      arr: null,  pkt: null,  msg: 'Claude analyzes task → selects optimal agents', cls: 'alog-sys' },
-  { node: 'n-queue',      arr: 'arr-2', pkt: 'pkt-2', msg: 'Celery enqueues execution tasks', cls: 'alog-info' },
-  { node: 'n-initiate',   arr: 'arr-3', pkt: 'pkt-3', msg: 'initiate_execution → SOL locked in PDA escrow', cls: 'alog-chain' },
-  { node: 'n-escrow',     arr: null,  pkt: null,  msg: 'ExecutionAccount PDA created (status = Pending)', cls: 'alog-chain' },
-  { node: 'n-sandbox',    arr: null,  pkt: null,  msg: 'Agent subprocess spawned in sandbox', cls: 'alog-info' },
-  { node: 'n-agent1',     arr: null,  pkt: null,  msg: 'text-summarizer running agent.py...', cls: 'alog-info' },
-  { node: 'n-agent2',     arr: null,  pkt: null,  msg: 'sentiment-analyzer running agent.py...', cls: 'alog-info' },
-  { node: 'n-eval',       arr: null,  pkt: null,  msg: 'Claude evaluates output quality → score 88/100', cls: 'alog-sys' },
-  { node: 'n-decision',   arr: null,  pkt: null,  msg: 'Decision: score ≥ 70 → complete_execution', cls: 'alog-sys' },
-  { node: 'n-complete',   arr: null,  pkt: null,  msg: 'complete_execution TX → 90% SOL to owner, 10% platform', cls: 'alog-ok' },
-  { node: 'n-reputation', arr: null,  pkt: null,  msg: 'update_reputation → score 88 stored on-chain', cls: 'alog-ok' },
+const VIS_NODES = [
+  { id: 'n-external', msg: 'External agent sends task via REST API', cls: 'alog-info' },
+  { id: 'n-api',      msg: 'Request received at POST /api/v1/execute', cls: 'alog-sys' },
+  { id: 'n-route',    msg: 'Claude analyzes task → selects optimal agents', cls: 'alog-sys' },
+  { id: 'n-initiate', msg: 'initiate_execution → SOL locked in PDA escrow', cls: 'alog-chain' },
+  { id: 'n-sandbox',  msg: 'Agent subprocess spawned · running agent.py...', cls: 'alog-info' },
+  { id: 'n-eval',     msg: 'Claude evaluates output quality → score 88/100', cls: 'alog-sys' },
+  { id: 'n-complete', msg: 'complete_execution TX → 90% SOL to owner, 10% platform', cls: 'alog-ok' },
+  { id: 'n-reputation', msg: 'update_reputation → score 88 stored on-chain', cls: 'alog-ok' },
 ];
 
 function alog(msg, cls='alog-info') {
-  const alogEl = document.getElementById('alog');
+  const el = document.getElementById('alog');
   const now = new Date().toISOString().slice(11,19);
   const div = document.createElement('div');
   div.className = `alog-line ${cls}`;
   div.innerHTML = `<span class="alog-ts">${now}</span><span>${esc(msg)}</span>`;
-  alogEl.appendChild(div);
-  alogEl.scrollTop = alogEl.scrollHeight;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
 }
 
 async function runVisualization() {
@@ -867,51 +849,50 @@ async function runVisualization() {
   const btn = document.getElementById('vis-btn');
   btn.classList.add('loading'); btn.disabled = true;
 
-  // Reset all nodes
-  document.querySelectorAll('.node').forEach(n => n.classList.remove('active','done'));
-  document.querySelectorAll('.arrow-line').forEach(a => a.classList.remove('lit'));
-  document.querySelectorAll('.packet').forEach(p => p.style.display='none');
+  // Reset
+  VIS_NODES.forEach(s => {
+    const ic = document.getElementById(s.id);
+    const nm = document.getElementById(s.id.replace('n-','nn-'));
+    if (ic) ic.className = 'pip-icon';
+    if (nm) nm.className = 'pip-name';
+  });
   document.getElementById('alog').innerHTML = '';
-
   alog('Pipeline started', 'alog-sys');
 
-  for (let i = 0; i < VIS_STEPS.length; i++) {
-    const s = VIS_STEPS[i];
-    await sleep(600);
-
-    // Activate node
-    const nodeEl = document.getElementById(s.node);
-    if (nodeEl) { nodeEl.classList.add('active'); }
-
-    // Activate arrow + packet
-    if (s.arr) {
-      const arrEl = document.getElementById(s.arr);
-      if (arrEl) arrEl.classList.add('lit');
-      const pktEl = document.getElementById(s.pkt);
-      if (pktEl) { pktEl.style.display = 'block'; await sleep(1200); pktEl.style.display = 'none'; }
-    }
-
+  for (const s of VIS_NODES) {
+    await sleep(700);
+    const ic = document.getElementById(s.id);
+    const nm = document.getElementById(s.id.replace('n-','nn-'));
+    if (ic) ic.className = 'pip-icon active';
+    if (nm) nm.className = 'pip-name active';
     alog(s.msg, s.cls);
-
-    await sleep(400);
-    if (nodeEl) { nodeEl.classList.remove('active'); nodeEl.classList.add('done'); }
+    await sleep(500);
+    if (ic) ic.className = 'pip-icon done';
+    if (nm) nm.className = 'pip-name done';
   }
 
   alog('✓ Pipeline complete — all settled on Solana', 'alog-ok');
   btn.classList.remove('loading'); btn.disabled = false;
-  btn.textContent = '↺  Run Again';
+  btn.innerHTML = '<span class="vis-spinner"></span>↺ Again';
   visRunning = false;
 }
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 
 /* ─── Auth ─── */
 function checkAuth() {
   const loggedIn = isLoggedIn();
-  document.getElementById('auth-gate').style.display = loggedIn ? 'none' : 'block';
-  document.getElementById('demo-panel').style.display = loggedIn ? 'flex' : 'none';
+  document.getElementById('auth-gate').style.display   = loggedIn ? 'none' : 'block';
+  document.getElementById('demo-panel').style.display  = loggedIn ? 'block' : 'none';
+  if (loggedIn) {
+    setStepState(1, 'active');
+  }
   updateNavWallet && updateNavWallet();
+}
+
+function setStepState(n, state) {
+  const el = document.getElementById('sn' + n);
+  if (!el) return;
+  el.className = 'step-num ' + state;
 }
 
 async function doLogin() {
@@ -941,8 +922,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('auth-gate').style.display !== 'none') doLogin();
 });
 
-
-/* ─── Preset tasks ─── */
 function setTask(btn) { document.getElementById('task-input').value = btn.textContent.trim(); }
 
 
@@ -959,12 +938,12 @@ function appendExecLog(line) {
 }
 
 async function pollExec(id) {
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 150; i++) {
     await sleep(1500);
     const d = await apiFetch('GET', `/api/v1/executions/${id}`);
     if (d.status === 'done' || d.status === 'failed') return d;
   }
-  throw new Error('Execution timed out');
+  throw new Error('Polling timed out — check execution manually');
 }
 
 function buildResult(slug, ex) {
@@ -974,10 +953,11 @@ function buildResult(slug, ex) {
   const txLink = tx ? `<a class="tx-link" href="https://explorer.solana.com/tx/${esc(tx)}?cluster=devnet" target="_blank">⛓ Explorer ↗</a>` : '';
   const out = ex.output ? JSON.stringify(ex.output, null, 2) : (ex.error || 'No output');
   const reason = ex.ai_reasoning ? `<div class="res-ai">🤖 ${esc(ex.ai_reasoning)}</div>` : '';
-  return `<div class="res-card">
+  const dur = ex.duration_ms ? `<span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${ex.duration_ms}ms</span>` : '';
+  return `<div class="res-card" style="margin-bottom:12px">
     <div class="res-head">
       <div class="res-slug">${esc(slug)}</div>
-      <div class="res-meta">${scoreBadge}${txLink}<span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${ex.duration_ms?ex.duration_ms+'ms':''}</span></div>
+      <div class="res-meta">${scoreBadge}${txLink}${dur}</div>
     </div>
     <div class="res-body"><div class="res-out">${esc(out)}</div>${reason}</div>
   </div>`;
@@ -991,14 +971,20 @@ async function runDemo() {
   errEl.style.display = 'none';
   btn.classList.add('loading'); btn.disabled = true;
 
-  ['plan-sec','exec-sec','res-sec'].forEach(id => document.getElementById(id).style.display='none');
+  // Reset steps 2-4
+  [2,3,4].forEach(n => setStepState(n, 'idle'));
+  document.getElementById('plan-sec').style.display = 'none';
+  document.getElementById('exec-sec').style.display = 'none';
+  document.querySelectorAll('#res-list .res-card').forEach(e=>e.remove());
   document.getElementById('plan-calls').innerHTML = '';
-  document.getElementById('res-list').innerHTML = '';
+  setStepState(1, 'active');
 
   try {
+    // Step 2: AI routing
+    setStepState(2, 'active');
     const routeRes = await apiFetch('POST', '/api/v1/hub/ai-route', { task });
     const calls = routeRes.calls || [];
-    if (!calls.length) throw new Error('No agents found for this task. Make sure demo agents are seeded.');
+    if (!calls.length) throw new Error('No agents found. Make sure demo agents are seeded.');
 
     document.getElementById('plan-sec').style.display = 'block';
     document.getElementById('plan-reason').textContent = routeRes.reasoning || 'Claude selected the following agents:';
@@ -1006,11 +992,14 @@ async function runDemo() {
       document.getElementById('plan-calls').innerHTML += `
         <div class="plan-call">
           <div class="plan-num">${i+1}</div>
-          <div><div class="plan-slug">${esc(c.slug)}</div><div class="plan-reason">${esc(c.reason||'')}</div></div>
+          <div style="flex:1"><div class="plan-slug">${esc(c.slug)}</div><div class="plan-why">${esc(c.reason||'')}</div></div>
           <div class="plan-status" id="cs-${i}">queued</div>
         </div>`;
     });
+    setStepState(2, 'done');
 
+    // Step 3: Execute
+    setStepState(3, 'active');
     document.getElementById('exec-sec').style.display = 'block';
     execLog = document.getElementById('exec-log');
     execLog.innerHTML = '';
@@ -1019,38 +1008,48 @@ async function runDemo() {
     const results = [];
     for (let i = 0; i < calls.length; i++) {
       const call = calls[i];
-      document.getElementById(`cs-${i}`).className = 'plan-status running';
-      document.getElementById(`cs-${i}`).textContent = 'running';
+      const csEl = document.getElementById(`cs-${i}`);
+      csEl.className = 'plan-status running'; csEl.textContent = 'running';
       appendExecLog(`[system] Executing ${call.slug}...`);
       try {
         const er = await apiFetch('POST', '/api/v1/execute', { agent_slug: call.slug, input: call.input || {} });
         const ex = await pollExec(er.id || er.execution_id);
-        appendExecLog(ex.status === 'done' ? `[system] ${call.slug} → done (${ex.duration_ms}ms)` : `[error] ${call.slug} → ${ex.error||'failed'}`);
-        document.getElementById(`cs-${i}`).className = `plan-status ${ex.status==='done'?'done':'failed'}`;
-        document.getElementById(`cs-${i}`).textContent = ex.status;
+        appendExecLog(ex.status === 'done'
+          ? `[system] ${call.slug} → done (${ex.duration_ms}ms)`
+          : `[error] ${call.slug} → ${ex.error||'failed'}`);
+        csEl.className = `plan-status ${ex.status==='done'?'done':'failed'}`;
+        csEl.textContent = ex.status;
         results.push({ slug: call.slug, execution: ex });
       } catch(e) {
         appendExecLog(`[error] ${call.slug} → ${e.message}`);
-        document.getElementById(`cs-${i}`).className = 'plan-status failed';
-        document.getElementById(`cs-${i}`).textContent = 'failed';
-        results.push({ slug: call.slug, execution: { status:'failed', error:e.message } });
+        csEl.className = 'plan-status failed'; csEl.textContent = 'failed';
+        results.push({ slug: call.slug, execution: { status:'failed', error: e.message } });
       }
     }
     appendExecLog('__DONE__');
+    setStepState(3, 'done');
 
-    document.getElementById('res-sec').style.display = 'block';
+    // Step 4: Results
+    setStepState(4, 'active');
     const resList = document.getElementById('res-list');
     results.forEach(({ slug, execution }) => { resList.innerHTML += buildResult(slug, execution); });
-    document.getElementById('res-sec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setStepState(4, 'done');
+    setStepState(1, 'done');
+
+    document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch(e) {
     showErr(e.message);
+    setStepState(1, 'active');
   } finally {
     btn.classList.remove('loading'); btn.disabled = false;
   }
 }
 
-function showErr(msg) { const e = document.getElementById('demo-err'); e.textContent = msg; e.style.display = 'block'; }
+function showErr(msg) {
+  const e = document.getElementById('demo-err'); e.textContent = msg; e.style.display = 'block';
+}
+
 
 /* ─── Init ─── */
 document.addEventListener('DOMContentLoaded', () => {

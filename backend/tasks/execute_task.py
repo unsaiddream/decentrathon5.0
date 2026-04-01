@@ -26,10 +26,22 @@ log = structlog.get_logger()
 @celery_app.task(name="tasks.execute_task.run_execution", bind=True, max_retries=0)
 def run_execution(self, execution_id: str):
     """Celery task: выполняет агента в sandbox и стримит логи через Redis pub/sub."""
-    asyncio.run(_run_execution_async(UUID(execution_id)))
+    import database
+    # Forked Celery worker — старый asyncpg пул привязан к другому event loop.
+    # Создаём новый движок с NullPool чтобы избежать "Future attached to a different loop".
+    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+    from sqlalchemy.pool import NullPool
+    from config import settings as _s
+
+    worker_engine = create_async_engine(_s.DATABASE_URL, poolclass=NullPool)
+    worker_session = async_sessionmaker(worker_engine, class_=AsyncSession, expire_on_commit=False)
+
+    asyncio.run(_run_execution_async(UUID(execution_id), worker_session))
 
 
-async def _run_execution_async(execution_id: UUID):
+async def _run_execution_async(execution_id: UUID, AsyncSessionLocal=None):
+    if AsyncSessionLocal is None:
+        from database import AsyncSessionLocal  # fallback
     redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
     channel = f"exec:{execution_id}:logs"
     all_logs: list[str] = []

@@ -207,7 +207,6 @@ async def _upsert_agent(
     # Регистрируем агента on-chain (graceful — не блокирует если ANCHOR_PROGRAM_ID не задан)
     if current_user.wallet_address and settings.ANCHOR_PROGRAM_ID:
         try:
-            from decimal import Decimal
             from services.onchain_billing import register_agent_onchain
             price_lamports = int(Decimal(str(agent.price_per_call)) * 1_000_000_000)
             agent_pda, register_tx = await register_agent_onchain(

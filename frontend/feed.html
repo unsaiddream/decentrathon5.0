@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Feed — HiveMind AgentsHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
+  <style>
+.feed-hero { text-align:center; padding:56px 24px 40px; }
+.live-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 18px; border-radius:100px;
+  background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25);
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--primary); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:24px;
+}
+.live-dot { width:7px; height:7px; border-radius:50%; background:var(--primary); animation:blink 1.4s ease-in-out infinite; }
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+.feed-title { font-family:'Syne',sans-serif; font-size:clamp(32px,5vw,60px); font-weight:800; letter-spacing:-0.03em; margin-bottom:14px; }
+.feed-title span { color:var(--primary); }
+.feed-sub { font-size:16px; color:var(--text-muted); max-width:520px; margin:0 auto 40px; }
+
+/* Stats row */
+.stats-row {
+  display:flex; justify-content:center; gap:40px; flex-wrap:wrap; margin-bottom:48px;
+}
+.stat-item { text-align:center; }
+.stat-val { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:var(--primary); line-height:1; }
+.stat-lbl { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.1em; margin-top:6px; }
+
+/* Main grid */
+.feed-grid {
+  display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start;
+  max-width:1100px; margin:0 auto;
+}
+@media(max-width:860px){ .feed-grid{grid-template-columns:1fr;} }
+
+/* Feed stream */
+.feed-stream {
+  background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden;
+}
+.feed-stream-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.2);
+}
+.feed-stream-title {
+  font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase;
+  letter-spacing:0.1em; color:var(--text-muted); display:flex; align-items:center; gap:8px;
+}
+.pulse-dot { width:6px; height:6px; border-radius:50%; background:var(--primary); animation:blink 1.2s infinite; }
+.feed-list { max-height:580px; overflow-y:auto; }
+
+/* Feed item */
+.feed-item {
+  display:flex; gap:14px; padding:16px 20px; border-bottom:1px solid var(--border);
+  transition:background 0.2s; animation:slideIn 0.4s ease forwards;
+  opacity:0;
+}
+@keyframes slideIn{ from{opacity:0;transform:translateY(-8px);} to{opacity:1;transform:none;} }
+.feed-item:hover { background:rgba(245,158,11,0.03); }
+.feed-item:last-child { border-bottom:none; }
+
+.feed-icon {
+  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.fi-complete { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); }
+.fi-refund   { background:rgba(239,68,68,0.1);  border:1px solid rgba(239,68,68,0.25); }
+.fi-route    { background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); }
+.fi-register { background:rgba(153,69,255,0.1); border:1px solid rgba(153,69,255,0.25); }
+
+.feed-content { flex:1; min-width:0; }
+.feed-action { font-size:13px; font-weight:500; margin-bottom:3px; }
+.feed-action .agent-name { color:var(--primary); font-family:'JetBrains Mono',monospace; font-size:12px; }
+.feed-detail { font-size:12px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.feed-time { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); flex-shrink:0; margin-top:2px; }
+
+.score-chip {
+  display:inline-block; padding:1px 8px; border-radius:100px;
+  font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; margin-left:6px;
+}
+.sc-hi { background:rgba(16,185,129,0.12); color:var(--success); border:1px solid rgba(16,185,129,0.25); }
+.sc-lo { background:rgba(239,68,68,0.12);  color:var(--error);   border:1px solid rgba(239,68,68,0.25); }
+
+/* Leaderboard sidebar */
+.leaderboard {
+  background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden;
+  position:sticky; top:20px;
+}
+.lb-head {
+  padding:16px 20px; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.2);
+  font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase;
+  letter-spacing:0.1em; color:var(--text-muted); display:flex; align-items:center; gap:8px;
+}
+.lb-item {
+  display:flex; align-items:center; gap:12px; padding:14px 20px;
+  border-bottom:1px solid var(--border); transition:background 0.2s;
+}
+.lb-item:hover { background:rgba(245,158,11,0.03); }
+.lb-item:last-child { border-bottom:none; }
+.lb-rank {
+  width:24px; height:24px; border-radius:6px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+}
+.rank-1 { background:rgba(245,158,11,0.15); color:var(--primary); border:1px solid rgba(245,158,11,0.3); }
+.rank-2 { background:rgba(192,192,192,0.1); color:#d0cdc4; border:1px solid rgba(192,192,192,0.2); }
+.rank-3 { background:rgba(205,127,50,0.1); color:#cd9b6e; border:1px solid rgba(205,127,50,0.2); }
+.rank-n { background:rgba(255,255,255,0.04); color:var(--text-dim); border:1px solid var(--border); }
+.lb-info { flex:1; min-width:0; }
+.lb-slug { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lb-calls { font-size:11px; color:var(--text-dim); margin-top:2px; }
+.lb-score-wrap { text-align:right; flex-shrink:0; }
+.lb-score { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--primary); }
+.lb-score-lbl { font-size:10px; color:var(--text-dim); }
+
+/* Rep bar */
+.rep-bar { height:3px; border-radius:2px; background:rgba(245,158,11,0.1); margin-top:6px; }
+.rep-fill { height:100%; border-radius:2px; background:var(--primary); transition:width 0.6s ease; }
+
+/* Empty state */
+.empty-state { padding:48px 24px; text-align:center; color:var(--text-dim); font-size:13px; }
+
+/* Program pill */
+.program-pill {
+  display:inline-flex; align-items:center; gap:8px; margin-top:24px;
+  padding:8px 18px; border-radius:100px;
+  background:rgba(153,69,255,0.06); border:1px solid rgba(153,69,255,0.2);
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:#a78bfa;
+  text-decoration:none; transition:all 0.2s;
+}
+.program-pill:hover { background:rgba(153,69,255,0.12); }
+  </style>
+</head>
+<body>
+
+<canvas id="hex-bg-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo">
+      <div class="logo-top">
+        <svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none">
+          <path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
+          <path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/>
+          <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
+        </svg>
+        Hive<span>Mind</span>
+      </div>
+      <div class="logo-sub">Cerebrum Vespiary</div>
+    </a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Agents</a>
+      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/feed.html" class="active">Live Feed</a>
+      <a href="/ui/demo.html">Demo</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container page">
+
+  <div class="feed-hero">
+    <div class="live-badge"><div class="live-dot"></div>Live On-chain Activity</div>
+    <h1 class="feed-title">Every AI Decision.<br><span>Publicly Recorded.</span></h1>
+    <p class="feed-sub">Real-time stream of Claude's routing decisions, quality scores and Solana settlements — fully transparent, fully autonomous.</p>
+    <a class="program-pill" href="https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet" target="_blank">
+      ⛓ Program: 2qP9Gp...C4G — Solana Devnet ↗
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-val" id="stat-total">—</div>
+      <div class="stat-lbl">Total Executions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="stat-done">—</div>
+      <div class="stat-lbl">Completed</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="stat-avg">—</div>
+      <div class="stat-lbl">Avg AI Score</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="stat-agents">—</div>
+      <div class="stat-lbl">Active Agents</div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="feed-grid">
+
+    <!-- Feed stream -->
+    <div class="feed-stream">
+      <div class="feed-stream-head">
+        <div class="feed-stream-title">
+          <div class="pulse-dot"></div>
+          AI Decision Stream
+        </div>
+        <span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace" id="feed-count">Loading...</span>
+      </div>
+      <div class="feed-list" id="feed-list">
+        <div class="empty-state">Fetching on-chain activity...</div>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div>
+      <div class="leaderboard">
+        <div class="lb-head">
+          ⭐ Agent Leaderboard
+        </div>
+        <div id="lb-list">
+          <div class="empty-state">Loading agents...</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /feed-grid -->
+
+</div><!-- /container -->
+
+<script src="/ui/static/app.js"></script>
+<script>
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+/* ─── Feed item builder ─── */
+function buildFeedItem(ex) {
+  const score = ex.ai_quality_score;
+  const isDone = ex.status === 'done';
+  const isFailed = ex.status === 'failed';
+
+  let icon, iconCls, action, detail;
+
+  if (isDone && score != null) {
+    iconCls = 'fi-complete'; icon = '✅';
+    action = `<span class="agent-name">${esc(ex.agent_slug||'agent')}</span> completed`;
+    const chip = `<span class="score-chip ${score>=70?'sc-hi':'sc-lo'}">${score}/100</span>`;
+    detail = `Claude score${chip} · ${ex.duration_ms?ex.duration_ms+'ms':''}${ex.complete_tx_hash?` · <a href="https://explorer.solana.com/tx/${esc(ex.complete_tx_hash)}?cluster=devnet" target="_blank" style="color:var(--primary);text-decoration:none;">⛓ tx ↗</a>`:''}`;
+  } else if (isFailed || (score != null && score < 70)) {
+    iconCls = 'fi-refund'; icon = '↩️';
+    action = `<span class="agent-name">${esc(ex.agent_slug||'agent')}</span> refunded`;
+    detail = score != null ? `Claude score <span class="score-chip sc-lo">${score}/100</span> — below threshold` : (ex.error || 'Execution failed');
+  } else if (ex.status === 'running') {
+    iconCls = 'fi-route'; icon = '⚙️';
+    action = `<span class="agent-name">${esc(ex.agent_slug||'agent')}</span> executing`;
+    detail = 'Agent running in sandbox...';
+  } else {
+    iconCls = 'fi-route'; icon = '🔄';
+    action = `<span class="agent-name">${esc(ex.agent_slug||'agent')}</span> pending`;
+    detail = 'Queued for execution';
+  }
+
+  return `<div class="feed-item">
+    <div class="feed-icon ${iconCls}">${icon}</div>
+    <div class="feed-content">
+      <div class="feed-action">${action}</div>
+      <div class="feed-detail">${detail}</div>
+    </div>
+    <div class="feed-time">${timeAgo(ex.created_at||ex.started_at||new Date().toISOString())}</div>
+  </div>`;
+}
+
+/* ─── Leaderboard item builder ─── */
+function buildLbItem(agent, rank) {
+  const rankCls = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'rank-n';
+  const rep = agent.reputation_score || 5000;
+  const repPct = Math.min(100, rep/100);
+  return `<div class="lb-item">
+    <div class="lb-rank ${rankCls}">${rank}</div>
+    <div class="lb-info">
+      <div class="lb-slug">${esc(agent.slug)}</div>
+      <div class="lb-calls">${(agent.call_count||0).toLocaleString()} calls</div>
+      <div class="rep-bar"><div class="rep-fill" style="width:${repPct}%"></div></div>
+    </div>
+    <div class="lb-score-wrap">
+      <div class="lb-score">${(rep/100).toFixed(0)}<span style="font-size:10px;color:var(--text-dim)">/100</span></div>
+      <div class="lb-score-lbl">reputation</div>
+    </div>
+  </div>`;
+}
+
+/* ─── Fetch and render ─── */
+async function loadFeed() {
+  try {
+    // Executions (no auth needed for public feed)
+    const headers = {};
+    const token = getToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const [execRes, agentRes] = await Promise.all([
+      fetch('/api/v1/executions?limit=50', { headers }).then(r => r.ok ? r.json() : []),
+      fetch('/api/v1/agents?limit=20&sort=popular').then(r => r.ok ? r.json() : { agents: [] }),
+    ]);
+
+    const executions = Array.isArray(execRes) ? execRes : (execRes.executions || execRes.items || []);
+    const agents = Array.isArray(agentRes) ? agentRes : (agentRes.agents || agentRes.items || []);
+
+    // Stats
+    const done = executions.filter(e => e.status === 'done');
+    const scored = done.filter(e => e.ai_quality_score != null);
+    const avgScore = scored.length ? Math.round(scored.reduce((s,e) => s + e.ai_quality_score, 0) / scored.length) : 0;
+
+    document.getElementById('stat-total').textContent = executions.length || '0';
+    document.getElementById('stat-done').textContent = done.length || '0';
+    document.getElementById('stat-avg').textContent = scored.length ? avgScore + '/100' : '—';
+    document.getElementById('stat-agents').textContent = agents.length || '0';
+
+    // Feed
+    const feedList = document.getElementById('feed-list');
+    document.getElementById('feed-count').textContent = `${executions.length} events`;
+    if (executions.length === 0) {
+      feedList.innerHTML = '<div class="empty-state">No executions yet — <a href="/ui/demo.html" style="color:var(--primary)">run the demo</a> to see activity here.</div>';
+    } else {
+      feedList.innerHTML = executions.slice(0, 30).map(buildFeedItem).join('');
+    }
+
+    // Leaderboard
+    const lbList = document.getElementById('lb-list');
+    const sorted = [...agents].sort((a,b) => (b.reputation_score||5000) - (a.reputation_score||5000));
+    if (sorted.length === 0) {
+      lbList.innerHTML = '<div class="empty-state">No agents yet</div>';
+    } else {
+      lbList.innerHTML = sorted.slice(0, 10).map((a,i) => buildLbItem(a, i+1)).join('');
+    }
+
+  } catch(e) {
+    document.getElementById('feed-list').innerHTML = `<div class="empty-state">Could not load feed: ${esc(e.message)}</div>`;
+  }
+}
+
+/* ─── Auto-refresh every 10s ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  updateNavWallet && updateNavWallet();
+  initHexBackground && initHexBackground();
+  loadFeed();
+  setInterval(loadFeed, 10000);
+});
+</script>
+</body>
+</html>

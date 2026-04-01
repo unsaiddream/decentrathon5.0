@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="bg" cx="30%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1a1200"/>
+      <stop offset="100%" stop-color="#070600"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Glow blob -->
+  <ellipse cx="220" cy="315" rx="300" ry="300" fill="url(#glow)" filter="url(#blur)"/>
+
+  <!-- Hex grid dots (decorative) -->
+  <g opacity="0.06" fill="#f59e0b">
+    <circle cx="900" cy="100" r="2"/><circle cx="950" cy="130" r="2"/><circle cx="1000" cy="100" r="2"/>
+    <circle cx="1050" cy="130" r="2"/><circle cx="1100" cy="100" r="2"/><circle cx="1150" cy="130" r="2"/>
+    <circle cx="900" cy="160" r="2"/><circle cx="950" cy="190" r="2"/><circle cx="1000" cy="160" r="2"/>
+    <circle cx="1050" cy="190" r="2"/><circle cx="1100" cy="160" r="2"/><circle cx="1150" cy="190" r="2"/>
+    <circle cx="900" cy="220" r="2"/><circle cx="950" cy="250" r="2"/><circle cx="1000" cy="220" r="2"/>
+    <circle cx="1050" cy="250" r="2"/><circle cx="1100" cy="220" r="2"/><circle cx="1150" cy="250" r="2"/>
+    <circle cx="900" cy="280" r="2"/><circle cx="950" cy="310" r="2"/><circle cx="1000" cy="280" r="2"/>
+    <circle cx="1050" cy="310" r="2"/><circle cx="1100" cy="280" r="2"/><circle cx="1150" cy="310" r="2"/>
+    <circle cx="900" cy="340" r="2"/><circle cx="950" cy="370" r="2"/><circle cx="1000" cy="340" r="2"/>
+    <circle cx="1050" cy="370" r="2"/><circle cx="1100" cy="340" r="2"/><circle cx="1150" cy="370" r="2"/>
+    <circle cx="900" cy="400" r="2"/><circle cx="950" cy="430" r="2"/><circle cx="1000" cy="400" r="2"/>
+    <circle cx="1050" cy="430" r="2"/><circle cx="1100" cy="400" r="2"/><circle cx="1150" cy="430" r="2"/>
+    <circle cx="900" cy="460" r="2"/><circle cx="950" cy="490" r="2"/><circle cx="1000" cy="460" r="2"/>
+    <circle cx="1050" cy="490" r="2"/><circle cx="1100" cy="460" r="2"/><circle cx="1150" cy="490" r="2"/>
+    <circle cx="900" cy="520" r="2"/><circle cx="950" cy="550" r="2"/><circle cx="1000" cy="520" r="2"/>
+  </g>
+
+  <!-- Logo hexagon -->
+  <g transform="translate(80, 220)">
+    <polygon points="60,0 120,35 120,105 60,140 0,105 0,35" fill="none" stroke="#f59e0b" stroke-width="3" opacity="0.9"/>
+    <polygon points="60,28 100,51 100,96 60,119 20,96 20,51" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="60" cy="70" r="12" fill="#f59e0b"/>
+  </g>
+
+  <!-- Brand name -->
+  <text x="220" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#faf7ed" letter-spacing="-2">HiveMind</text>
+  <text x="222" y="332" font-family="system-ui, sans-serif" font-size="22" fill="rgba(250,247,237,0.45)" letter-spacing="1">cv · Cerebrum Vespiary</text>
+
+  <!-- Tagline -->
+  <text x="220" y="400" font-family="system-ui, sans-serif" font-size="28" fill="rgba(250,247,237,0.8)" font-weight="300">Decentralized AI AgentsHub on Solana</text>
+
+  <!-- Feature pills -->
+  <g transform="translate(220, 440)">
+    <rect x="0" y="0" width="160" height="36" rx="18" fill="rgba(245,158,11,0.12)" stroke="rgba(245,158,11,0.4)" stroke-width="1"/>
+    <text x="80" y="23" text-anchor="middle" font-family="monospace" font-size="13" fill="#f59e0b">🤖 Claude AI</text>
+
+    <rect x="174" y="0" width="160" height="36" rx="18" fill="rgba(153,69,255,0.12)" stroke="rgba(153,69,255,0.4)" stroke-width="1"/>
+    <text x="254" y="23" text-anchor="middle" font-family="monospace" font-size="13" fill="#a78bfa">⛓ Solana</text>
+
+    <rect x="348" y="0" width="160" height="36" rx="18" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.4)" stroke-width="1"/>
+    <text x="428" y="23" text-anchor="middle" font-family="monospace" font-size="13" fill="#34d399">⚡ Autonomous</text>
+  </g>
+
+  <!-- URL -->
+  <text x="220" y="568" font-family="monospace" font-size="18" fill="rgba(245,158,11,0.6)">hivemind.cv</text>
+
+  <!-- Right side: flow diagram -->
+  <g transform="translate(720, 140)" opacity="0.85">
+    <!-- Box: User -->
+    <rect x="0" y="0" width="160" height="48" rx="8" fill="rgba(13,11,1,0.8)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+    <text x="80" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="rgba(250,247,237,0.5)">External Agent</text>
+    <text x="80" y="38" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#faf7ed" font-weight="600">Any AI Platform</text>
+
+    <!-- Arrow down -->
+    <line x1="80" y1="48" x2="80" y2="88" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <polygon points="74,82 80,92 86,82" fill="rgba(245,158,11,0.6)"/>
+
+    <!-- Box: HiveMind -->
+    <rect x="0" y="92" width="160" height="48" rx="8" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="80" y="112" text-anchor="middle" font-family="monospace" font-size="11" fill="rgba(245,158,11,0.6)">POST /api/v1/execute</text>
+    <text x="80" y="130" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#f59e0b" font-weight="600">HiveMind Hub</text>
+
+    <!-- Arrow down -->
+    <line x1="80" y1="140" x2="80" y2="180" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <polygon points="74,174 80,184 86,174" fill="rgba(245,158,11,0.6)"/>
+
+    <!-- Box: Claude -->
+    <rect x="0" y="184" width="160" height="48" rx="8" fill="rgba(13,11,1,0.8)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+    <text x="80" y="204" text-anchor="middle" font-family="monospace" font-size="11" fill="rgba(250,247,237,0.5)">AI Coordinator</text>
+    <text x="80" y="222" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#faf7ed" font-weight="600">Claude evaluates</text>
+
+    <!-- Arrow down -->
+    <line x1="80" y1="232" x2="80" y2="272" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <polygon points="74,266 80,276 86,266" fill="rgba(245,158,11,0.6)"/>
+
+    <!-- Box: Solana -->
+    <rect x="0" y="276" width="160" height="48" rx="8" fill="rgba(153,69,255,0.08)" stroke="rgba(153,69,255,0.5)" stroke-width="1.5"/>
+    <text x="80" y="296" text-anchor="middle" font-family="monospace" font-size="11" fill="rgba(153,69,255,0.7)">complete_execution</text>
+    <text x="80" y="314" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#a78bfa" font-weight="600">Solana On-chain</text>
+
+    <!-- Score badge -->
+    <rect x="176" y="276" width="100" height="48" rx="8" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.4)" stroke-width="1"/>
+    <text x="226" y="296" text-anchor="middle" font-family="monospace" font-size="11" fill="rgba(16,185,129,0.7)">AI Score</text>
+    <text x="226" y="316" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#34d399" font-weight="700">88/100</text>
+    <line x1="162" y1="300" x2="178" y2="300" stroke="rgba(16,185,129,0.5)" stroke-width="1.5"/>
+    <polygon points="172,295 182,300 172,305" fill="rgba(16,185,129,0.6)"/>
+  </g>
+
+  <!-- Border -->
+  <rect x="1" y="1" width="1198" height="628" rx="0" fill="none" stroke="rgba(245,158,11,0.08)" stroke-width="2"/>
+</svg>

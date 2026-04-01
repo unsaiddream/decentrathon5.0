@@ -44,15 +44,10 @@ DEMO_AGENTS = [
 import sys
 import json
 import os
-import argparse
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True)
-    args = parser.parse_args()
-
     try:
-        data = json.loads(args.input)
+        data = json.loads(sys.stdin.read())
     except json.JSONDecodeError as e:
         print(json.dumps({"error": f"Invalid JSON: {e}"}))
         sys.exit(1)
@@ -103,21 +98,14 @@ if __name__ == "__main__":
             "price_per_call": 0.0005,
             "timeout_seconds": 30,
         },
-        "agent_code": open(
-            __file__.replace("scripts/seed_demo.py", "../agent-sdk/example-agents/sentiment-analyzer/agent.py")
-        ).read() if False else '''#!/usr/bin/env python3
+        "agent_code": '''#!/usr/bin/env python3
 import sys
 import json
 import os
-import argparse
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True)
-    args = parser.parse_args()
-
     try:
-        data = json.loads(args.input)
+        data = json.loads(sys.stdin.read())
     except json.JSONDecodeError as e:
         print(json.dumps({"error": f"Invalid JSON: {e}"}))
         sys.exit(1)

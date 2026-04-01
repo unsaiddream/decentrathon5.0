@@ -36,6 +36,7 @@
 </div>
 
 <script src="/ui/static/app.js"></script>
+<script src="/ui/static/onchain.js"></script>
 <script>
   initNav();
 
@@ -81,7 +82,9 @@
 
           <p style="font-size:15px;margin-bottom:24px;line-height:1.8">${esc(agent.description || 'No description provided.')}</p>
 
-          ${tags ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">${tags}</div>` : ''}
+          ${tags ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${tags}</div>` : ''}
+
+          <div style="margin-bottom:24px">${renderAgentOnchainBadge(agent)}</div>
 
           <!-- Stats bar -->
           <div id="agent-stats-bar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">
@@ -250,6 +253,7 @@
 
             <div id="output-section" class="hidden" style="margin-top:16px">
               <div style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Output</div>
+              <div id="output-onchain" style="display:none;margin-bottom:12px"></div>
               <pre id="output-json" style="background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary-light);white-space:pre-wrap;overflow-x:auto;line-height:1.7"></pre>
             </div>
           </div>
@@ -348,6 +352,13 @@
                 consoleTitle.textContent = `done (${result.duration_ms || '?'}ms)`;
                 outputSection.classList.remove('hidden');
                 document.getElementById('output-json').textContent = JSON.stringify(result.output, null, 2);
+                // Show on-chain data (AI quality score + Explorer links)
+                const onchainEl = document.getElementById('output-onchain');
+                if (onchainEl) {
+                  const onchainHtml = renderExecutionResult(result);
+                  onchainEl.innerHTML = onchainHtml;
+                  onchainEl.style.display = 'block';
+                }
                 toast('Executed successfully!', 'success');
               } else {
                 consoleDot.style.background = 'var(--error)';

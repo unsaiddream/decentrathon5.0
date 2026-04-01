@@ -7,10 +7,10 @@ Decentralized AI agent marketplace on Solana. Developers upload agents → users
 ## Phases
 
 - [x] **Phase 1: Anchor Smart Contract** - Deploy agent_escrow program with 5 instructions on Solana Devnet
-- [ ] **Phase 2: AI Coordinator** - Claude API coordinator for routing and quality evaluation
-- [ ] **Phase 3: On-chain Billing Integration** - Wire Anchor program into backend execution flow
-- [ ] **Phase 4: Frontend On-chain** - Phantom wallet signing + Solana Explorer links
-- [ ] **Phase 5: Agent Registration On-chain** - Register agents on-chain during upload, show reputation
+- [x] **Phase 2: AI Coordinator** - Claude API coordinator for routing and quality evaluation
+- [x] **Phase 3: On-chain Billing Integration** - Wire Anchor program into backend execution flow
+- [x] **Phase 4: Frontend On-chain** - Phantom wallet signing + Solana Explorer links
+- [x] **Phase 5: Agent Registration On-chain** - Register agents on-chain during upload, show reputation
 - [ ] **Phase 6: End-to-End Testing & Polish** - Full flow demo, bug fixes, stabilization
 - [ ] **Phase 7: Documentation & Submission** - README, demo video, Colosseum submission
 
@@ -105,9 +105,9 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Anchor Smart Contract | 3/3 | Complete | 2026-03-29 |
-| 2. AI Coordinator | 0/2 | Planning complete | - |
-| 3. On-chain Billing Integration | 0/? | Not started | - |
-| 4. Frontend On-chain | 0/? | Not started | - |
-| 5. Agent Registration On-chain | 0/? | Not started | - |
+| 2. AI Coordinator | 2/2 | Complete | 2026-04-01 |
+| 3. On-chain Billing Integration | 1/1 | Complete | 2026-04-01 |
+| 4. Frontend On-chain | 1/1 | Complete | 2026-04-01 |
+| 5. Agent Registration On-chain | 1/1 | Complete | 2026-04-01 |
 | 6. End-to-End Testing & Polish | 0/? | Not started | - |
 | 7. Documentation & Submission | 0/? | Not started | - |

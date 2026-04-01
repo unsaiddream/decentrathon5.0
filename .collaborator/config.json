@@ -4,7 +4,9 @@
     "/Users/33karaulov/Documents/decentrathon5.0/.planning/phases/02-ai-coordinator",
     "/Users/33karaulov/Documents/decentrathon5.0/frontend/static",
     "/Users/33karaulov/Documents/decentrathon5.0/.planning/phases",
-    "/Users/33karaulov/Documents/decentrathon5.0"
+    "/Users/33karaulov/Documents/decentrathon5.0",
+    "/Users/33karaulov/Documents/decentrathon5.0/.collaborator",
+    "/Users/33karaulov/Documents/decentrathon5.0/backend"
   ],
   "agent_skip_permissions": false
 }

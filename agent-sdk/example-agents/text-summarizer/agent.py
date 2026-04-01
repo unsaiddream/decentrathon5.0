@@ -4,21 +4,16 @@ Text Summarizer Agent — AgentsHub Example
 Принимает текст, возвращает краткое содержание и 3 ключевых пункта.
 
 Использование:
-  python agent.py --input '{"text": "Long text here...", "language": "en"}'
+  echo '{"text": "Long text here...", "language": "en"}' | python agent.py
 """
 import sys
 import json
 import os
-import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True, help="JSON input")
-    args = parser.parse_args()
-
     try:
-        input_data = json.loads(args.input)
+        input_data = json.loads(sys.stdin.read())
     except json.JSONDecodeError as e:
         print(json.dumps({"error": f"Invalid JSON input: {e}"}))
         sys.exit(1)

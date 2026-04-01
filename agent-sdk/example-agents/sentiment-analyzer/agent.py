@@ -4,21 +4,16 @@ Sentiment Analyzer Agent — AgentsHub Example
 Анализирует тональность текста (positive/negative/neutral).
 
 Использование:
-  python agent.py --input '{"text": "This is amazing!"}'
+  echo '{"text": "This is amazing!"}' | python agent.py
 """
 import sys
 import json
 import os
-import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True, help="JSON input")
-    args = parser.parse_args()
-
     try:
-        input_data = json.loads(args.input)
+        input_data = json.loads(sys.stdin.read())
     except json.JSONDecodeError as e:
         print(json.dumps({"error": f"Invalid JSON input: {e}"}))
         sys.exit(1)

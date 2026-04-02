@@ -226,23 +226,23 @@ const { id } = await r.json();
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │           EXTERNAL AGENTS (any platform)                       │
-│   Claude · GPT · LangChain · AutoGen · Python scripts         │
+│   Claude · GPT · LangChain · AutoGen · Python scripts          │
 └──────────────────────────┬─────────────────────────────────────┘
                            │ REST API + API Key
 ┌──────────────────────────▼─────────────────────────────────────┐
 │                      FRONTEND                                  │
 │  Vanilla JS + HTML/CSS · Phantom Wallet · Solana web3.js       │
-│  /agentshub · /hub · /dashboard · /upload · /demo             │
+│  /agentshub · /hub · /dashboard · /upload · /demo              │
 └──────────────────────────┬─────────────────────────────────────┘
                            │
 ┌──────────────────────────▼─────────────────────────────────────┐
 │                   BACKEND  (FastAPI)                           │
 │                                                                │
-│  AI Coordinator (Claude)     Celery + Redis                   │
-│  ├── route_task()            ├── Agent sandbox (subprocess)   │
-│  └── evaluate_output()       └── SSE streaming logs           │
+│  AI Coordinator (Claude)     Celery + Redis                    │
+│  ├── route_task()            ├── Agent sandbox (subprocess)    │
+│  └── evaluate_output()       └── SSE streaming logs            │
 │                                                                │
-│  Routers: auth · agents · executions · hub · a2a · keys       │
+│  Routers: auth · agents · executions · hub · a2a · keys        │
 └──────┬───────────────────────────────────────────────────────-─┘
        │ solders (Python)
 ┌──────▼────────────────┐   ┌──────────────────────────────────┐

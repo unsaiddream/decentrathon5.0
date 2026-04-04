@@ -461,30 +461,22 @@ pre#code-pre {
     </div>
     <div class="step-body">
 
-      <!-- Auth gate (shown if not logged in) -->
-      <div class="auth-card" id="auth-gate">
-        <h3>Sign in to run the demo</h3>
-        <p>Use your wallet address and password to run the full on-chain AI pipeline.</p>
-        <input class="auth-input" type="text" id="login-wallet" placeholder="Wallet address" autocomplete="off">
-        <input class="auth-input" type="password" id="login-password" placeholder="Password">
-        <button class="run-btn" id="login-btn" onclick="doLogin()">
-          <span class="run-spinner"></span>Sign In
-        </button>
-        <div class="auth-err" id="auth-error"></div>
-      </div>
-
-      <!-- Task panel (shown when logged in) -->
-      <div class="input-card" id="demo-panel" style="display:none">
+      <!-- Task panel — no login required, uses Open Agent Protocol -->
+      <div class="input-card" id="demo-panel">
         <div class="preset-row">
-          <button class="preset" onclick="setTask(this)">Summarize this text and analyze its sentiment</button>
           <button class="preset" onclick="setTask(this)">Analyze sentiment of: HiveMind is a revolutionary AI marketplace on Solana built for Decentrathon 5.0</button>
           <button class="preset" onclick="setTask(this)">Summarize: AgentsHub is a decentralized marketplace where AI agents earn SOL for completing tasks, with quality evaluated by Claude AI</button>
+          <button class="preset" onclick="setTask(this)">Tell me a joke about blockchain and AI</button>
+          <button class="preset" onclick="setTask(this)">Count words in: The quick brown fox jumps over the lazy dog on Solana devnet</button>
         </div>
         <textarea class="task-textarea" id="task-input" placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
         <div class="demo-err" id="demo-err"></div>
         <button class="run-btn" id="run-btn" onclick="runDemo()">
           <span class="run-spinner"></span>▶ &nbsp;Run with AI
         </button>
+        <div style="margin-top:10px;font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-align:center">
+          No login required · Open Agent Protocol · Results settled on Solana Devnet
+        </div>
       </div>
 
     </div>
@@ -709,9 +701,9 @@ pre#code-pre {
 <div class="program-bar">
   <div>
     <div class="program-bar-lbl">Anchor Program · Solana Devnet</div>
-    <div class="program-bar-val">2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G</div>
+    <div class="program-bar-val">7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY</div>
   </div>
-  <a href="https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet" target="_blank">
+  <a href="https://explorer.solana.com/address/7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY?cluster=devnet" target="_blank">
     ⛓ View on Solana Explorer ↗
   </a>
 </div>
@@ -721,7 +713,7 @@ pre#code-pre {
 <!-- ════════════════ SCRIPTS ══════════════════════════════ -->
 <script src="/ui/static/app.js"></script>
 <script>
-const PROGRAM_ID = '2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G';
+const PROGRAM_ID = '7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY';
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
@@ -729,77 +721,62 @@ function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 const CODE = {
   py: `<span class="kw">import</span> httpx, asyncio
 
-API = <span class="str">"https://hivemind.cv/api/v1"</span>
-KEY = <span class="str">"hm_your_api_key"</span>
+<span class="cm"># No API key needed — Open Agent Protocol</span>
+API = <span class="str">"https://hivemind.cv"</span>
 
-<span class="kw">async def</span> <span class="fn">call_agent</span>(slug, input_data):
-    headers = {<span class="str">"Authorization"</span>: <span class="str">f"Bearer {KEY}"</span>}
+<span class="kw">async def</span> <span class="fn">invoke_agent</span>(slug, input_data):
     <span class="kw">async with</span> httpx.AsyncClient() <span class="kw">as</span> c:
-        <span class="cm"># 1. Start execution — AI coordinator routes the task</span>
-        r = <span class="kw">await</span> c.post(<span class="str">f"{API}/execute"</span>, headers=headers,
-            json={<span class="str">"agent_slug"</span>: slug, <span class="str">"input"</span>: input_data})
-        exec_id = r.json()[<span class="str">"id"</span>]
+        <span class="cm"># One call — runs agent, Claude evaluates, settles on Solana</span>
+        r = <span class="kw">await</span> c.post(
+            <span class="str">f"{API}/open/invoke/{slug}"</span>,
+            json={<span class="str">"input"</span>: input_data},
+            headers={<span class="str">"X-Caller-System"</span>: <span class="str">"my-agent/1.0"</span>},
+            timeout=<span class="num">60</span>
+        )
+        <span class="kw">return</span> r.json()
 
-        <span class="cm"># 2. Poll until done (Claude evaluates quality async)</span>
-        <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="num">40</span>):
-            <span class="kw">await</span> asyncio.sleep(<span class="num">2</span>)
-            d = (<span class="kw">await</span> c.get(<span class="str">f"{API}/executions/{exec_id}"</span>, headers=headers)).json()
-            <span class="kw">if</span> d[<span class="str">"status"</span>] <span class="kw">in</span> (<span class="str">"done"</span>, <span class="str">"failed"</span>):
-                <span class="kw">return</span> d
-
-result = asyncio.run(<span class="fn">call_agent</span>(
+result = asyncio.run(<span class="fn">invoke_agent</span>(
     <span class="str">"2qtxr7zo/text-summarizer"</span>,
     {<span class="str">"text"</span>: <span class="str">"HiveMind is a decentralized AI marketplace..."</span>}
 ))
 
-print(result[<span class="str">"output"</span>][<span class="str">"summary"</span>])       <span class="cm"># Agent output</span>
-print(result[<span class="str">"ai_quality_score"</span>])        <span class="cm"># Claude's score 0–100</span>
-print(result[<span class="str">"complete_tx_hash"</span>])        <span class="cm"># Solana TX — immutable proof</span>`,
+print(result[<span class="str">"output"</span>])               <span class="cm"># Agent output</span>
+print(result[<span class="str">"ai_quality_score"</span>])     <span class="cm"># Claude's score 0–100</span>
+print(result[<span class="str">"complete_tx_hash"</span>])     <span class="cm"># Solana TX — immutable proof</span>
+print(result[<span class="str">"explorer_url"</span>])         <span class="cm"># Solana Explorer link</span>`,
 
-  curl: `<span class="cm"># Step 1: Start execution</span>
-curl -X POST https://hivemind.cv/api/v1/execute <span class="kw">\\</span>
-  -H <span class="str">"Authorization: Bearer hm_your_api_key"</span> <span class="kw">\\</span>
+  curl: `<span class="cm"># No auth required — one call returns everything</span>
+curl -X POST https://hivemind.cv/open/invoke/2qtxr7zo/text-summarizer <span class="kw">\\</span>
   -H <span class="str">"Content-Type: application/json"</span> <span class="kw">\\</span>
-  -d <span class="str">'{"agent_slug":"2qtxr7zo/text-summarizer","input":{"text":"..."}}'</span>
+  -H <span class="str">"X-Caller-System: my-agent"</span> <span class="kw">\\</span>
+  -d <span class="str">'{"input":{"text":"HiveMind is a decentralized AI marketplace..."}}'</span>
 
-<span class="cm"># Response: {"id":"550e8400-...","status":"pending"}</span>
-
-<span class="cm"># Step 2: Check result</span>
-curl https://hivemind.cv/api/v1/executions/550e8400-... <span class="kw">\\</span>
-  -H <span class="str">"Authorization: Bearer hm_your_api_key"</span>
-
+<span class="cm"># Response — everything in one shot:</span>
 <span class="cm"># {</span>
 <span class="cm">#   "status": "done",</span>
 <span class="cm">#   "output": {"summary": "...", "word_count": 42},</span>
-<span class="cm">#   "ai_quality_score": 87,       ← Claude's verdict</span>
-<span class="cm">#   "complete_tx_hash": "5KtPn1x..." ← Solana TX</span>
+<span class="cm">#   "ai_quality_score": 87,</span>
+<span class="cm">#   "on_chain_execution_id": "BitXp1QH...",  ← ExecutionAccount PDA</span>
+<span class="cm">#   "complete_tx_hash": "5KtPn1x...",        ← Solana TX</span>
+<span class="cm">#   "explorer_url": "https://explorer.solana.com/..."</span>
 <span class="cm"># }</span>`,
 
-  js: `<span class="kw">const</span> API = <span class="str">'https://hivemind.cv/api/v1'</span>;
-<span class="kw">const</span> KEY = <span class="str">'hm_your_api_key'</span>;
-<span class="kw">const</span> headers = { <span class="str">'Authorization'</span>: <span class="str">\`Bearer \${KEY}\`</span>, <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> };
-
-<span class="kw">async function</span> <span class="fn">callAgent</span>(slug, input) {
-  <span class="cm">// 1. Trigger — Claude selects agents automatically</span>
-  <span class="kw">const</span> { id } = <span class="kw">await</span> fetch(<span class="str">\`\${API}/execute\`</span>, {
-    method: <span class="str">'POST'</span>, headers,
-    body: JSON.stringify({ agent_slug: slug, input })
-  }).then(r => r.json());
-
-  <span class="cm">// 2. Poll for result</span>
-  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">40</span>; i++) {
-    <span class="kw">await new</span> Promise(r => setTimeout(r, <span class="num">2000</span>));
-    <span class="kw">const</span> d = <span class="kw">await</span> fetch(<span class="str">\`\${API}/executions/\${id}\`</span>, { headers }).then(r => r.json());
-    <span class="kw">if</span> ([<span class="str">'done'</span>, <span class="str">'failed'</span>].includes(d.status)) <span class="kw">return</span> d;
+  js: `<span class="cm">// No API key needed — works from any browser or Node.js</span>
+<span class="kw">const</span> result = <span class="kw">await</span> fetch(
+  <span class="str">'https://hivemind.cv/open/invoke/2qtxr7zo/text-summarizer'</span>,
+  {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>, <span class="str">'X-Caller-System'</span>: <span class="str">'my-agent'</span> },
+    body: JSON.stringify({
+      input: { text: <span class="str">'HiveMind is a decentralized AI marketplace on Solana...'</span> }
+    })
   }
-}
+).then(r => r.json());
 
-<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">callAgent</span>(<span class="str">'2qtxr7zo/text-summarizer'</span>, {
-  text: <span class="str">'HiveMind is a decentralized AI marketplace on Solana...'</span>
-});
-console.log(result.output.summary);     <span class="cm">// Agent result</span>
+console.log(result.output);             <span class="cm">// Agent result</span>
 console.log(result.ai_quality_score);   <span class="cm">// 0–100 from Claude</span>
-console.log(result.complete_tx_hash);   <span class="cm">// Solana TX hash</span>`
+console.log(result.complete_tx_hash);   <span class="cm">// Solana TX hash</span>
+console.log(result.explorer_url);       <span class="cm">// Explorer link</span>`
 };
 
 let activeTab = 'py';
@@ -878,49 +855,12 @@ async function runVisualization() {
 }
 
 
-/* ─── Auth ─── */
-function checkAuth() {
-  const loggedIn = isLoggedIn();
-  document.getElementById('auth-gate').style.display   = loggedIn ? 'none' : 'block';
-  document.getElementById('demo-panel').style.display  = loggedIn ? 'block' : 'none';
-  if (loggedIn) {
-    setStepState(1, 'active');
-  }
-  updateNavWallet && updateNavWallet();
-}
-
+/* ─── Init ─── */
 function setStepState(n, state) {
   const el = document.getElementById('sn' + n);
   if (!el) return;
   el.className = 'step-num ' + state;
 }
-
-async function doLogin() {
-  const walletOrEmail = document.getElementById('login-wallet').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl = document.getElementById('auth-error');
-  const btn = document.getElementById('login-btn');
-  errEl.textContent = '';
-  if (!walletOrEmail || !password) { errEl.textContent = 'Fill in both fields'; return; }
-  btn.classList.add('loading'); btn.disabled = true;
-  try {
-    const res = await fetch('/api/v1/auth/login', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wallet_address: walletOrEmail, password }),
-    });
-    if (!res.ok) { const d = await res.json().catch(()=>({})); throw new Error(d.detail || `Error ${res.status}`); }
-    const data = await res.json();
-    setToken(data.access_token);
-    checkAuth();
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.classList.remove('loading'); btn.disabled = false;
-  }
-}
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('auth-gate').style.display !== 'none') doLogin();
-});
 
 function setTask(btn) { document.getElementById('task-input').value = btn.textContent.trim(); }
 
@@ -937,27 +877,23 @@ function appendExecLog(line) {
   execLog.scrollTop = execLog.scrollHeight;
 }
 
-async function pollExec(id) {
-  for (let i = 0; i < 150; i++) {
-    await sleep(1500);
-    const d = await apiFetch('GET', `/api/v1/executions/${id}`);
-    if (d.status === 'done' || d.status === 'failed') return d;
-  }
-  throw new Error('Polling timed out — check execution manually');
-}
-
 function buildResult(slug, ex) {
   const score = ex.ai_quality_score;
   const scoreBadge = score != null ? `<span class="score-pill ${score>=70?'hi':'lo'}">AI Score ${score}/100</span>` : '';
-  const tx = ex.complete_tx_hash || ex.on_chain_tx_hash;
-  const txLink = tx ? `<a class="tx-link" href="https://explorer.solana.com/tx/${esc(tx)}?cluster=devnet" target="_blank">⛓ Explorer ↗</a>` : '';
+  const completeTx = ex.complete_tx_hash;
+  const initTx = ex.on_chain_tx_hash;
+  const pdaAddr = ex.on_chain_execution_id;
+  const txLinks = [
+    completeTx ? `<a class="tx-link" href="https://explorer.solana.com/tx/${esc(completeTx)}?cluster=devnet" target="_blank">⛓ Settle TX ↗</a>` : '',
+    pdaAddr ? `<a class="tx-link" href="https://explorer.solana.com/address/${esc(pdaAddr)}?cluster=devnet" target="_blank">⬡ PDA ↗</a>` : (initTx ? `<a class="tx-link" href="https://explorer.solana.com/tx/${esc(initTx)}?cluster=devnet" target="_blank">⛓ TX ↗</a>` : ''),
+  ].join('');
   const out = ex.output ? JSON.stringify(ex.output, null, 2) : (ex.error || 'No output');
   const reason = ex.ai_reasoning ? `<div class="res-ai">🤖 ${esc(ex.ai_reasoning)}</div>` : '';
   const dur = ex.duration_ms ? `<span style="font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace">${ex.duration_ms}ms</span>` : '';
   return `<div class="res-card" style="margin-bottom:12px">
     <div class="res-head">
       <div class="res-slug">${esc(slug)}</div>
-      <div class="res-meta">${scoreBadge}${txLink}${dur}</div>
+      <div class="res-meta">${scoreBadge}${txLinks}${dur}</div>
     </div>
     <div class="res-body"><div class="res-out">${esc(out)}</div>${reason}</div>
   </div>`;
@@ -980,11 +916,16 @@ async function runDemo() {
   setStepState(1, 'active');
 
   try {
-    // Step 2: AI routing
+    // Step 2: AI routing via Open Agent Protocol (no auth)
     setStepState(2, 'active');
-    const routeRes = await apiFetch('POST', '/api/v1/hub/ai-route', { task });
+    const routeRes = await fetch('/open/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task, limit: 2 }),
+    }).then(r => r.json());
+
     const calls = routeRes.calls || [];
-    if (!calls.length) throw new Error('No agents found. Make sure demo agents are seeded.');
+    if (!calls.length) throw new Error('No agents found for this task.');
 
     document.getElementById('plan-sec').style.display = 'block';
     document.getElementById('plan-reason').textContent = routeRes.reasoning || 'Claude selected the following agents:';
@@ -998,11 +939,12 @@ async function runDemo() {
     });
     setStepState(2, 'done');
 
-    // Step 3: Execute
+    // Step 3: Execute via /open/invoke (no auth, returns sync result with on-chain TX)
     setStepState(3, 'active');
     document.getElementById('exec-sec').style.display = 'block';
     execLog = document.getElementById('exec-log');
     execLog.innerHTML = '';
+    appendExecLog('[system] Open Agent Protocol — no auth required');
     appendExecLog('[system] Pipeline started...');
 
     const results = [];
@@ -1010,10 +952,19 @@ async function runDemo() {
       const call = calls[i];
       const csEl = document.getElementById(`cs-${i}`);
       csEl.className = 'plan-status running'; csEl.textContent = 'running';
-      appendExecLog(`[system] Executing ${call.slug}...`);
+      appendExecLog(`[system] Invoking ${call.slug}...`);
+      appendExecLog(`[chain] Locking SOL in PDA escrow...`);
       try {
-        const er = await apiFetch('POST', '/api/v1/execute', { agent_slug: call.slug, input: call.input || {} });
-        const ex = await pollExec(er.id || er.execution_id);
+        const ex = await fetch(`/open/invoke/${call.slug}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Caller-System': 'demo' },
+          body: JSON.stringify({ input: call.input || { text: task } }),
+        }).then(r => r.json());
+
+        if (ex.detail) throw new Error(ex.detail);
+
+        const settled = ex.complete_tx_hash ? 'complete_execution ✓' : ex.on_chain_tx_hash ? 'initiate_execution ✓' : 'no chain';
+        appendExecLog(`[chain] ${settled} — AI score: ${ex.ai_quality_score ?? '?'}/100`);
         appendExecLog(ex.status === 'done'
           ? `[system] ${call.slug} → done (${ex.duration_ms}ms)`
           : `[error] ${call.slug} → ${ex.error||'failed'}`);
@@ -1053,8 +1004,9 @@ function showErr(msg) {
 
 /* ─── Init ─── */
 document.addEventListener('DOMContentLoaded', () => {
-  checkAuth();
-  initHexBackground && initHexBackground();
+  setStepState(1, 'active');
+  typeof updateNavWallet === 'function' && updateNavWallet();
+  typeof initHexBackground === 'function' && initHexBackground();
 });
 </script>
 </body>

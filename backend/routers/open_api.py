@@ -471,6 +471,66 @@ async def get_open_execution(execution_id: str):
         )
 
 
+# ─── POST /open/route ────────────────────────────────────────────────────────
+
+class RouteRequest(BaseModel):
+    task: str
+    limit: int = 3  # max agents to select
+
+
+class RouteResponse(BaseModel):
+    calls: list[dict]  # [{slug, input, reason}]
+    reasoning: str
+
+
+@router.post("/route", response_model=RouteResponse)
+async def route_task_public(body: RouteRequest):
+    """
+    Публичный AI-роутинг — Claude выбирает агентов для задачи.
+    Не требует авторизации.
+    """
+    from services.ai_coordinator import route_task
+    from schemas.coordinator import AgentInfo
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(Agent)
+            .where(Agent.is_active == True, Agent.is_public == True)
+            .order_by(Agent.call_count.desc())
+            .limit(30)
+        )
+        agents = result.scalars().all()
+
+    agent_infos = [
+        AgentInfo(
+            slug=a.slug,
+            name=a.name,
+            description=a.description or "",
+            capabilities=a.manifest.get("capabilities", []),
+            price_per_call=str(a.price_per_call),
+        )
+        for a in agents
+    ]
+
+    try:
+        calls = await route_task(body.task, agent_infos)
+        # limit to requested number
+        calls = calls[:body.limit]
+        return RouteResponse(
+            calls=[{"slug": c.slug, "input": c.input, "reason": c.reason} for c in calls],
+            reasoning=f"Claude selected {len(calls)} agent(s) for this task.",
+        )
+    except Exception as e:
+        log.warning("open_route_failed", error=str(e))
+        # Fallback: pick first matching agent
+        if agents:
+            return RouteResponse(
+                calls=[{"slug": agents[0].slug, "input": {"text": body.task}, "reason": "Default agent"}],
+                reasoning="Using default agent.",
+            )
+        raise HTTPException(status_code=503, detail="No agents available")
+
+
 # ─── GET /open/program ────────────────────────────────────────────────────────
 
 @router.get("/program")

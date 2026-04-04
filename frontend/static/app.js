@@ -387,3 +387,86 @@ async function copyText(text) {
     toast('Copied', 'success');
   } catch { toast('Copy failed', 'error'); }
 }
+
+// ─── AI Coordinator + Pipeline helpers ───────────────────────────────────────
+
+async function requestAIPlan(task) {
+  // Вызывает /hub/ai-route → Claude выбирает агентов
+  return apiFetch('POST', '/api/v1/hub/ai-route', { task });
+}
+
+async function pollExecution(id, maxWaitMs = 120000) {
+  // Ждём завершения execution (done | failed)
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    const exec = await apiFetch('GET', `/api/v1/executions/${id}`);
+    if (exec.status === 'done' || exec.status === 'failed') return exec;
+    await new Promise(r => setTimeout(r, 1800));
+  }
+  throw new Error('Execution timed out after 2 minutes');
+}
+
+function renderExecutionResult(execution) {
+  // Рендерит результат выполнения с AI-оценкой и Solana Explorer ссылками
+  const EXPLORER = 'https://explorer.solana.com';
+  const NET = 'devnet';
+
+  // Output
+  let outputHtml = '';
+  if (execution.output) {
+    const raw = execution.output;
+    const text = typeof raw === 'object'
+      ? (raw.result ?? raw.output ?? raw.text ?? raw.content ?? JSON.stringify(raw, null, 2))
+      : String(raw);
+    outputHtml = `<pre style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;max-height:280px;overflow-y:auto;line-height:1.7;margin:0">${esc(typeof text === 'string' ? text : JSON.stringify(text, null, 2))}</pre>`;
+  } else if (execution.error) {
+    outputHtml = `<div style="color:var(--error);font-size:12px;padding:10px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:6px;font-family:'JetBrains Mono',monospace">Error: ${esc(execution.error)}</div>`;
+  }
+
+  // AI quality score
+  let scoreBadge = '';
+  if (execution.ai_quality_score != null) {
+    const score = execution.ai_quality_score;
+    const ok = score >= 70;
+    const clr = ok ? '#10b981' : '#f87171';
+    const label = ok ? 'Approved' : 'Refunded';
+    scoreBadge = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em">AI Score</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${clr}">${score}</span>
+        <span style="font-size:10px;color:var(--text-dim)">/100</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:3px;background:${ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'};color:${clr};border:1px solid ${ok ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};font-family:'JetBrains Mono',monospace">⬡ ${label}</span>
+      </div>
+      ${execution.ai_reasoning ? `<div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;font-style:italic;line-height:1.5">"${esc(execution.ai_reasoning)}"</div>` : ''}
+    `;
+  }
+
+  // Solana Explorer links
+  let chainLinks = '';
+  if (execution.on_chain_execution_id) {
+    chainLinks += `<a href="${EXPLORER}/address/${execution.on_chain_execution_id}?cluster=${NET}" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 Execution PDA</a>`;
+  }
+  if (execution.on_chain_tx_hash) {
+    chainLinks += `<a href="${EXPLORER}/tx/${execution.on_chain_tx_hash}?cluster=${NET}" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 Initiate TX</a>`;
+  }
+  if (execution.complete_tx_hash) {
+    chainLinks += `<a href="${EXPLORER}/tx/${execution.complete_tx_hash}?cluster=${NET}" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 Settle TX</a>`;
+  }
+
+  const duration = execution.duration_ms ? ` · ${execution.duration_ms}ms` : '';
+  const statusOk = execution.status === 'done';
+  const statusClr = statusOk ? 'var(--success)' : 'var(--error)';
+
+  return `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:16px;background:rgba(0,0,0,0.2)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${statusClr};flex-shrink:0"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${statusClr};text-transform:uppercase;letter-spacing:0.1em">${esc(execution.status)}${duration}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);margin-left:auto;opacity:0.5">${(execution.id || '').slice(0,8)}…</span>
+      </div>
+      ${scoreBadge}
+      ${chainLinks ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${chainLinks}</div>` : ''}
+      ${outputHtml}
+    </div>
+  `;
+}

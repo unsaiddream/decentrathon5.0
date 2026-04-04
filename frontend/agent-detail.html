@@ -164,6 +164,29 @@
               </div>
             </div>` : ''}
           </div>
+
+          <!-- On-chain Info -->
+          ${agent.on_chain_address ? `
+          <div class="card" style="margin-top:20px;border-color:rgba(153,69,255,0.3);background:rgba(153,69,255,0.04)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <span style="font-size:16px">⬡</span>
+              <div class="section-title" style="margin:0;color:#c77dff">On-chain · Solana Devnet</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+              <div>
+                <div style="font-size:9px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Agent PDA</div>
+                <code style="font-size:10px;color:#c77dff;font-family:'JetBrains Mono',monospace;word-break:break-all">${agent.on_chain_address}</code>
+              </div>
+              <div>
+                <div style="font-size:9px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Reputation</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#c77dff" id="onchain-reputation">—</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="https://explorer.solana.com/address/${esc(agent.on_chain_address)}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 Agent Account</a>
+              ${agent.register_tx_hash ? `<a href="https://explorer.solana.com/tx/${esc(agent.register_tx_hash)}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="explorer-badge">🔗 Register TX</a>` : ''}
+            </div>
+          </div>` : ''}
         </div>
 
           <!-- README -->
@@ -569,9 +592,44 @@
     return html;
   }
 
+  async function loadOnchainReputation() {
+    // Загружаем on-chain reputation из Solana RPC (если агент зарегистрирован on-chain)
+    const el = document.getElementById('onchain-reputation');
+    if (!el || !agent?.on_chain_address) return;
+    try {
+      const resp = await fetch(
+        `https://api.devnet.solana.com`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0', id: 1,
+            method: 'getAccountInfo',
+            params: [agent.on_chain_address, { encoding: 'base64' }],
+          }),
+        }
+      );
+      const data = await resp.json();
+      if (data.result?.value?.data) {
+        // AgentAccount layout: 8 disc + 32 owner + (4+100 slug) + 8 price + 4 rep + 8 total + 1 active + 1 bump
+        // reputation_score is at offset: 8+32+104+8 = 152, u32 LE
+        const raw = atob(data.result.value.data[0]);
+        const bytes = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+        if (bytes.length >= 156) {
+          const view = new DataView(bytes.buffer);
+          const repScore = view.getUint32(152, true); // little-endian
+          el.textContent = (repScore / 100).toFixed(2) + ' / 100';
+        }
+      } else {
+        el.textContent = 'Not registered';
+      }
+    } catch { el.textContent = '—'; }
+  }
+
   load();
   // Load stats and readme after main load
-  setTimeout(() => { loadAgentStats(); loadReadme(); }, 100);
+  setTimeout(() => { loadAgentStats(); loadReadme(); loadOnchainReputation(); }, 100);
 </script>
 </body>
 </html>

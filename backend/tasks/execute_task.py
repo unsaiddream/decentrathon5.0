@@ -180,7 +180,8 @@ async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, ca
 
     try:
         agent_pda = agent.on_chain_address or ""
-        caller_wallet = caller.wallet_address if caller else ""
+        # Fallback на platform wallet для GitHub-пользователей без Solana кошелька
+        caller_wallet = (caller.wallet_address if caller and caller.wallet_address else "") or settings.PLATFORM_WALLET_ADDRESS or ""
 
         # Создаём on-chain PDA перед выполнением evaluate/settle
         if agent_pda and caller_wallet:
@@ -211,7 +212,8 @@ async def _evaluate_and_settle(execution: "Execution", agent: "Agent", owner, ca
         execution.ai_reasoning = evaluation.reasoning
 
         # On-chain settle на основе решения координатора
-        owner_wallet = owner.wallet_address or ""
+        # Fallback на platform wallet если owner не имеет Solana кошелька
+        owner_wallet = (owner.wallet_address or "") or settings.PLATFORM_WALLET_ADDRESS or ""
 
         if evaluation.decision == "complete" and agent_pda and owner_wallet:
             tx = await complete_execution_onchain(

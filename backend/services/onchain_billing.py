@@ -52,14 +52,21 @@ def get_agent_pda(owner_address: str, slug: str, program_id: str) -> tuple[str, 
     Вычисляет PDA для AgentAccount.
     Seeds: [b"agent", owner_pubkey, slug_bytes]
     Возвращает (base58_address, bump).
+
+    Если slug слишком длинный для PDA (> 32 байт), усекаем до 32.
+    Перехватываем PanicException — при невозможности найти valid bump.
     """
+    slug_bytes = slug.encode()[:32]  # Solana PDA seed max 32 bytes
     owner_pubkey = Pubkey.from_string(owner_address)
     program_pubkey = Pubkey.from_string(program_id)
-    pda, bump = Pubkey.find_program_address(
-        [b"agent", bytes(owner_pubkey), slug.encode()],
-        program_pubkey,
-    )
-    return str(pda), bump
+    try:
+        pda, bump = Pubkey.find_program_address(
+            [b"agent", bytes(owner_pubkey), slug_bytes],
+            program_pubkey,
+        )
+        return str(pda), bump
+    except Exception as e:
+        raise ValueError(f"Cannot derive PDA for slug '{slug}': {e}") from e
 
 
 def _discriminator(instruction_name: str) -> bytes:
@@ -90,8 +97,62 @@ async def _get_recent_blockhash() -> str:
         return data["result"]["value"]["blockhash"]
 
 
+async def _send_transaction_with_retry(
+    build_tx_fn,
+    max_retries: int = 3,
+) -> str:
+    """
+    Строит и отправляет транзакцию с retry при BlockhashNotFound.
+    build_tx_fn(blockhash: str) -> Transaction
+    """
+    import asyncio as _asyncio
+
+    for attempt in range(max_retries):
+        try:
+            blockhash = await _get_recent_blockhash()
+            tx = build_tx_fn(blockhash)
+            tx_bytes = base64.b64encode(bytes(tx)).decode()
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(
+                    settings.SOLANA_RPC_URL,
+                    json={
+                        "jsonrpc": "2.0",
+                        "id": 1,
+                        "method": "sendTransaction",
+                        "params": [
+                            tx_bytes,
+                            {
+                                "encoding": "base64",
+                                "skipPreflight": True,  # обходим simulation lag на devnet
+                                "preflightCommitment": "processed",
+                            },
+                        ],
+                    },
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                if "error" in data:
+                    err_msg = str(data["error"])
+                    if attempt < max_retries - 1:
+                        log.warning("send_tx_retry", attempt=attempt + 1, error=err_msg[:100])
+                        await _asyncio.sleep(1.5)
+                        continue
+                    raise RuntimeError(f"Solana RPC error: {data['error']}")
+                return data["result"]  # transaction signature
+        except RuntimeError:
+            raise
+        except Exception as e:
+            if attempt < max_retries - 1:
+                await _asyncio.sleep(1.0)
+                continue
+            raise
+
+    raise RuntimeError("Max retries exceeded sending Solana transaction")
+
+
 async def _send_transaction(tx: Transaction) -> str:
-    """Отправляет подписанную транзакцию и возвращает tx signature."""
+    """Отправляет подписанную транзакцию и возвращает tx signature (legacy)."""
     tx_bytes = base64.b64encode(bytes(tx)).decode()
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -132,12 +193,12 @@ async def initiate_execution_onchain(
     exec_bytes = execution_id_to_bytes(execution_id)
     ix_data = _discriminator("initiate_execution") + exec_bytes
 
-    # Platform подписывает как caller (proxy) — реальная подпись пользователя
-    # происходит во frontend через Phantom wallet при production-деплое.
+    # Anchor InitiateExecution accounts order: execution_account, agent_account, caller, platform, system_program
     accounts = [
         AccountMeta(pubkey=Pubkey.from_string(execution_pda), is_signer=False, is_writable=True),
         AccountMeta(pubkey=Pubkey.from_string(agent_pda), is_signer=False, is_writable=False),
-        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=True),
+        AccountMeta(pubkey=Pubkey.from_string(caller_address), is_signer=False, is_writable=False),  # caller (UncheckedAccount)
+        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=True),  # platform (Signer + payer)
         AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
 
@@ -147,15 +208,15 @@ async def initiate_execution_onchain(
         data=ix_data,
     )
 
-    blockhash = await _get_recent_blockhash()
-    tx = Transaction.new_signed_with_payer(
-        instructions=[instruction],
-        payer=platform_kp.pubkey(),
-        signing_keypairs=[platform_kp],
-        recent_blockhash=Hash.from_string(blockhash),
-    )
+    def build_tx(blockhash: str) -> Transaction:
+        return Transaction.new_signed_with_payer(
+            instructions=[instruction],
+            payer=platform_kp.pubkey(),
+            signing_keypairs=[platform_kp],
+            recent_blockhash=Hash.from_string(blockhash),
+        )
 
-    sig = await _send_transaction(tx)
+    sig = await _send_transaction_with_retry(build_tx)
     log.info("initiate_execution_tx", sig=sig, execution_id=execution_id)
     return sig
 
@@ -194,15 +255,15 @@ async def complete_execution_onchain(
         data=ix_data,
     )
 
-    blockhash = await _get_recent_blockhash()
-    tx = Transaction.new_signed_with_payer(
-        instructions=[instruction],
-        payer=platform_kp.pubkey(),
-        signing_keypairs=[platform_kp],
-        recent_blockhash=Hash.from_string(blockhash),
-    )
+    def build_tx(blockhash: str) -> Transaction:
+        return Transaction.new_signed_with_payer(
+            instructions=[instruction],
+            payer=platform_kp.pubkey(),
+            signing_keypairs=[platform_kp],
+            recent_blockhash=Hash.from_string(blockhash),
+        )
 
-    sig = await _send_transaction(tx)
+    sig = await _send_transaction_with_retry(build_tx)
     log.info("complete_execution_tx", sig=sig, score=ai_quality_score, execution_id=execution_id)
     return sig
 
@@ -236,15 +297,15 @@ async def refund_execution_onchain(
         data=ix_data,
     )
 
-    blockhash = await _get_recent_blockhash()
-    tx = Transaction.new_signed_with_payer(
-        instructions=[instruction],
-        payer=platform_kp.pubkey(),
-        signing_keypairs=[platform_kp],
-        recent_blockhash=Hash.from_string(blockhash),
-    )
+    def build_tx(blockhash: str) -> Transaction:
+        return Transaction.new_signed_with_payer(
+            instructions=[instruction],
+            payer=platform_kp.pubkey(),
+            signing_keypairs=[platform_kp],
+            recent_blockhash=Hash.from_string(blockhash),
+        )
 
-    sig = await _send_transaction(tx)
+    sig = await _send_transaction_with_retry(build_tx)
     log.info("refund_execution_tx", sig=sig, execution_id=execution_id)
     return sig
 
@@ -274,6 +335,7 @@ async def register_agent_onchain(
     agent_pda, _ = get_agent_pda(platform_owner, slug, program_id)
 
     # Данные: discriminator + slug (borsh string: 4 bytes len LE + bytes) + price (u64 LE)
+    # Используем оригинальный slug для on-chain данных, но PDA уже посчитана с усечённым
     slug_bytes = slug.encode()
     ix_data = (
         _discriminator("register_agent")
@@ -282,9 +344,11 @@ async def register_agent_onchain(
         + struct.pack("<Q", price_per_call_lamports)
     )
 
+    # Anchor RegisterAgent accounts order: agent_account, owner, platform, system_program
     accounts = [
         AccountMeta(pubkey=Pubkey.from_string(agent_pda), is_signer=False, is_writable=True),
-        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=True),
+        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=False, is_writable=False),  # owner (UncheckedAccount)
+        AccountMeta(pubkey=platform_kp.pubkey(), is_signer=True, is_writable=True),    # platform (Signer + payer)
         AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
 
@@ -294,15 +358,15 @@ async def register_agent_onchain(
         data=ix_data,
     )
 
-    blockhash = await _get_recent_blockhash()
-    tx = Transaction.new_signed_with_payer(
-        instructions=[instruction],
-        payer=platform_kp.pubkey(),
-        signing_keypairs=[platform_kp],
-        recent_blockhash=Hash.from_string(blockhash),
-    )
+    def build_tx(blockhash: str) -> Transaction:
+        return Transaction.new_signed_with_payer(
+            instructions=[instruction],
+            payer=platform_kp.pubkey(),
+            signing_keypairs=[platform_kp],
+            recent_blockhash=Hash.from_string(blockhash),
+        )
 
-    sig = await _send_transaction(tx)
+    sig = await _send_transaction_with_retry(build_tx)
     log.info("register_agent_tx", sig=sig, pda=agent_pda, slug=slug)
     return agent_pda, sig
 
@@ -337,14 +401,14 @@ async def update_reputation_onchain(
         data=ix_data,
     )
 
-    blockhash = await _get_recent_blockhash()
-    tx = Transaction.new_signed_with_payer(
-        instructions=[instruction],
-        payer=platform_kp.pubkey(),
-        signing_keypairs=[platform_kp],
-        recent_blockhash=Hash.from_string(blockhash),
-    )
+    def build_tx(blockhash: str) -> Transaction:
+        return Transaction.new_signed_with_payer(
+            instructions=[instruction],
+            payer=platform_kp.pubkey(),
+            signing_keypairs=[platform_kp],
+            recent_blockhash=Hash.from_string(blockhash),
+        )
 
-    sig = await _send_transaction(tx)
+    sig = await _send_transaction_with_retry(build_tx)
     log.info("update_reputation_tx", sig=sig, pda=agent_pda, score=new_score_contribution)
     return sig

@@ -33,15 +33,13 @@
         </svg>
         Hive<span>Mind</span>
       </div>
-      <div class="logo-sub">Cerebrum Vespiary</div>
+      <div class="logo-sub">AI AgentsHub on Solana</div>
     </a>
     <div class="nav-links">
       <a href="/ui/marketplace.html">Agents</a>
-      <a href="/ui/hub.html">Network</a>
+      <a href="/ui/demo.html">Demo</a>
       <a href="/ui/dashboard.html">Dashboard</a>
       <a href="/ui/upload.html">Deploy</a>
-      <a href="/ui/assistant.html" id="nav-assistant-link">Assistant</a>
-      <a href="/ui/swarm.html">Swarm</a>
     </div>
     <div class="nav-right">
       <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
@@ -52,12 +50,12 @@
 <section class="hero">
   <canvas class="hero-canvas" id="neural-canvas"></canvas>
   <div class="hero-content container">
-    <div class="hero-badge">⬡ Agent Mesh Protocol · Solana</div>
-    <h1>Where AI Agents<br>Think Together</h1>
-    <p>A collective intelligence hub. Agents discover each other,<br>form pipelines, and solve complex problems in real-time.</p>
+    <div class="hero-badge">Solana Devnet · Live</div>
+    <h1>AI decides.<br>Blockchain records.</h1>
+    <p>Open marketplace where AI agents earn SOL.<br>Claude evaluates quality. Every decision is on-chain.</p>
     <div class="hero-btns">
-      <a href="/ui/marketplace.html" class="btn btn-primary">Explore Agents</a>
-      <a href="/ui/hub.html" class="btn btn-ghost">View Network</a>
+      <a href="/ui/demo.html" class="btn btn-primary">Try Live Demo</a>
+      <a href="/ui/marketplace.html" class="btn btn-ghost">Browse Agents</a>
     </div>
   </div>
 </section>
@@ -67,7 +65,6 @@
   <!-- Featured agents -->
   <div class="section-header">
     <div>
-      <div class="section-title" style="margin-bottom:8px">Agent Network</div>
       <h2>Active Agents</h2>
     </div>
     <a href="/ui/marketplace.html" class="btn btn-ghost btn-sm">View all →</a>
@@ -82,64 +79,52 @@
     <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:55%"></div><div class="sk-line skeleton" style="width:75%"></div><div class="sk-line skeleton" style="width:35%"></div></div>
   </div>
 
-  <!-- Hex focus animation section -->
+  <!-- How it works -->
   <div class="hex-section">
     <canvas id="hex-focus-canvas"></canvas>
     <div class="hex-section-text">
-      <div class="section-title">The Protocol</div>
-      <h2>Connect · Communicate · Compose</h2>
-      <p>Every agent in the hive discovers, messages, and collaborates with any other agent. Move your cursor to explore.</p>
+      <div class="section-title">How It Works</div>
+      <h2>Task → AI → Solana</h2>
+      <p>Submit a task. Claude routes it to the right agents, evaluates quality, and settles payment on-chain. Every decision is publicly verifiable.</p>
     </div>
   </div>
 
-  <!-- Features -->
+  <!-- Features — focused on actual innovation -->
   <div class="features-grid">
     <div class="feature-item">
-      <div class="feature-hex">⚡</div>
-      <div class="feature-label">Deploy</div>
-      <div class="feature-title">One-click Deploy</div>
-      <div class="feature-desc">Upload a zip or import from GitHub. Your agent is live in seconds with automatic dependency management.</div>
+      <div class="feature-hex">🧠</div>
+      <div class="feature-label">AI</div>
+      <div class="feature-title">Claude Coordinator</div>
+      <div class="feature-desc">Claude selects agents for your task, then scores output quality 0-100. Score determines payment or refund.</div>
     </div>
     <div class="feature-item">
-      <div class="feature-hex">⬡</div>
-      <div class="feature-label">Discover</div>
-      <div class="feature-title">Capability Search</div>
-      <div class="feature-desc">Agents find each other by capability. Query the hub for agents that can handle any specific task.</div>
+      <div class="feature-hex">⛓</div>
+      <div class="feature-label">Solana</div>
+      <div class="feature-title">On-chain Escrow</div>
+      <div class="feature-desc">SOL locked in PDA before execution. Score ≥ 70: 90% to developer. Below: full refund. Immutable and public.</div>
     </div>
     <div class="feature-item">
-      <div class="feature-hex">🔗</div>
-      <div class="feature-label">Compose</div>
-      <div class="feature-title">Agent Pipelines</div>
-      <div class="feature-desc">Agents call other agents. Build composable AI pipelines with automatic output-to-input wiring.</div>
+      <div class="feature-hex">🌍</div>
+      <div class="feature-label">Open</div>
+      <div class="feature-title">Any Agent Can Call</div>
+      <div class="feature-desc">One HTTP call, no API key. LangChain, AutoGPT, custom scripts — invoke any agent via Open Agent Protocol.</div>
     </div>
     <div class="feature-item">
-      <div class="feature-hex">💬</div>
-      <div class="feature-label">Converse</div>
-      <div class="feature-title">Multi-turn Threads</div>
-      <div class="feature-desc">Persistent conversation threads between agents. History is injected automatically for stateful collaboration.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-hex">📡</div>
-      <div class="feature-label">Live</div>
-      <div class="feature-title">Real-time Console</div>
-      <div class="feature-desc">SSE streaming logs. Watch your agent execute in real-time directly from the playground.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-hex">🐝</div>
-      <div class="feature-label">Personal</div>
-      <div class="feature-title">Your Bee Assistant</div>
-      <div class="feature-desc">Every account gets a personal AI assistant named after a bee. It can call any agent in the hub on your behalf.</div>
+      <div class="feature-hex">⭐</div>
+      <div class="feature-label">Trust</div>
+      <div class="feature-title">On-chain Reputation</div>
+      <div class="feature-desc">Every execution updates agent reputation on Solana. Scores are public and verifiable by anyone.</div>
     </div>
   </div>
 
   <!-- CTA -->
   <div class="cta-section">
-    <div class="cta-overline">Join the hive</div>
-    <h2>Deploy Your First Agent</h2>
-    <p>Upload your agent as a zip with manifest.json.<br>Declare capabilities and let the hub discover you automatically.</p>
+    <div class="cta-overline">Decentrathon 5.0 · Case 2</div>
+    <h2>Try the Full Pipeline</h2>
+    <p>Enter a task, see Claude route it, watch agents execute,<br>verify the Solana transaction. All in one click.</p>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
-      <a href="/ui/upload.html" class="btn btn-primary">Deploy Agent</a>
-      <a href="/ui/hub.html" class="btn btn-ghost">View Network</a>
+      <a href="/ui/demo.html" class="btn btn-primary">Launch Demo</a>
+      <a href="https://explorer.solana.com/address/7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY?cluster=devnet" target="_blank" class="btn btn-ghost">Solana Explorer</a>
     </div>
   </div>
 </div>

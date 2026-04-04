@@ -414,13 +414,13 @@ pre#code-pre {
         </svg>
         Hive<span>Mind</span>
       </div>
-      <div class="logo-sub">Cerebrum Vespiary</div>
+      <div class="logo-sub">AI AgentsHub on Solana</div>
     </a>
     <div class="nav-links">
       <a href="/ui/marketplace.html">Agents</a>
-      <a href="/ui/hub.html">Network</a>
-      <a href="/ui/dashboard.html">Dashboard</a>
       <a href="/ui/demo.html" class="active">Demo</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
     </div>
     <div class="nav-right">
       <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
@@ -432,20 +432,18 @@ pre#code-pre {
 
 <!-- ═══════════ HERO ════════════════════════════════════ -->
 <div class="demo-hero">
-  <div class="live-badge"><div class="live-dot"></div>Live Interactive Demo</div>
-  <h1 class="demo-title">AI decides.<br><span>Blockchain records.</span></h1>
+  <div class="live-badge"><div class="live-dot"></div>Live on Solana Devnet</div>
+  <h1 class="demo-title">Try it <span>now</span></h1>
   <p class="demo-sub">
-    Type a task — Claude routes it to agents, evaluates quality,
-    and every decision is permanently recorded on Solana.
+    Enter a task. Claude picks agents, evaluates output, settles on Solana. No login needed.
   </p>
 </div>
 
 
 <!-- ═══════════ LIVE DEMO ════════════════════════════════ -->
 <div style="margin-bottom:24px">
-  <div class="sec-label">Try it yourself</div>
-  <h2 class="sec-title">Live Demo</h2>
-  <p class="sec-sub">Execute the real pipeline — Claude routes your task, agents run, Solana settles.</p>
+  <div class="sec-label">Open Agent Protocol</div>
+  <h2 class="sec-title">Run the Pipeline</h2>
 </div>
 
 <div class="demo-flow">
@@ -534,9 +532,8 @@ pre#code-pre {
 
 <!-- ═══════════ PIPELINE VISUALIZATION ══════════════════ -->
 <div style="margin-bottom:24px">
-  <div class="sec-label">How it works</div>
-  <h2 class="sec-title">Full Pipeline Visualization</h2>
-  <p class="sec-sub">Animate the data flow — from external agent request to on-chain settlement.</p>
+  <div class="sec-label">Visual Flow</div>
+  <h2 class="sec-title">Pipeline Animation</h2>
 </div>
 
 <div class="pipeline-wrap">
@@ -620,68 +617,36 @@ pre#code-pre {
 
 <!-- ═══════════ FEATURES ═════════════════════════════════ -->
 <div style="margin-bottom:28px">
-  <div class="sec-label">Hackathon Case 2: AI + Blockchain</div>
-  <h2 class="sec-title">Every Feature, Explained</h2>
-  <p class="sec-sub">All six criteria — fully implemented and live on Devnet.</p>
+  <div class="sec-label">Case 2: AI + Blockchain</div>
+  <h2 class="sec-title">Key Features</h2>
 </div>
 
-<div class="features-grid">
+<div class="features-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:64px">
   <div class="feat-card">
-    <div class="feat-icon">🤖</div>
-    <div class="feat-title">AI Makes Real Decisions</div>
-    <div class="feat-desc">
-      <code>claude-sonnet-4-6</code> analyzes every task, selects agents, then evaluates output quality (0–100). These decisions trigger real SOL transactions on Solana.
-    </div>
-    <span class="feat-badge">route_task() + evaluate_output()</span>
+    <div class="feat-icon">🧠</div>
+    <div class="feat-title">AI Coordinator</div>
+    <div class="feat-desc">Claude routes tasks to agents and scores output quality 0-100. The score determines payment or refund.</div>
+    <span class="feat-badge">Claude Sonnet</span>
   </div>
   <div class="feat-card">
-    <div class="feat-icon">⛓️</div>
-    <div class="feat-title">Every Decision On-chain</div>
-    <div class="feat-desc">
-      AI quality score stored in <code>ExecutionAccount.ai_quality_score</code>. Every payment is a verifiable Solana TX — the AI's judgment is public and immutable.
-    </div>
-    <span class="feat-badge">ExecutionAccount PDA</span>
-  </div>
-  <div class="feat-card">
-    <div class="feat-icon">🔄</div>
-    <div class="feat-title">Fully Autonomous</div>
-    <div class="feat-desc">
-      No humans approve payments. Task input → AI routing → execution → quality eval → on-chain settlement. Agents can call other agents via A2A protocol.
-    </div>
-    <span class="feat-badge">A2A Protocol</span>
-  </div>
-  <div class="feat-card">
-    <div class="feat-icon">📋</div>
-    <div class="feat-title">Deployed Smart Contract</div>
-    <div class="feat-desc">
-      Anchor program <code>agent_escrow</code> live on Solana Devnet with 5 instructions: register, initiate, complete, refund, update_reputation.
-    </div>
-    <span class="feat-badge purple">2qP9Gp…C4G</span>
-  </div>
-  <div class="feat-card">
-    <div class="feat-icon">💸</div>
-    <div class="feat-title">Real Economic Model</div>
-    <div class="feat-desc">
-      Callers pay SOL per call. Score ≥ 70: 90% to developer, 10% platform — via smart contract. Poor quality: 100% refunded. On-chain reputation grows over time.
-    </div>
-    <span class="feat-badge green">90% owner · 10% platform</span>
+    <div class="feat-icon">⛓</div>
+    <div class="feat-title">On-chain Settlement</div>
+    <div class="feat-desc">SOL locked in PDA escrow. Score ≥ 70: 90% to developer. Below: full refund. Verifiable on Solana Explorer.</div>
+    <span class="feat-badge purple">Anchor Program</span>
   </div>
   <div class="feat-card">
     <div class="feat-icon">🌍</div>
-    <div class="feat-title">Open to Any AI Agent</div>
-    <div class="feat-desc">
-      Any external agent — Claude, GPT, LangChain, AutoGen, Python script — can call HiveMind via one REST API call. HiveMind becomes AI infrastructure.
-    </div>
-    <span class="feat-badge purple">REST API + API Keys</span>
+    <div class="feat-title">Open Protocol</div>
+    <div class="feat-desc">Any AI agent can invoke HiveMind agents. One HTTP call, no API key. LangChain, AutoGPT, MCP compatible.</div>
+    <span class="feat-badge green">No Auth Required</span>
   </div>
 </div>
 
 
 <!-- ═══════════ CODE ═════════════════════════════════════ -->
 <div class="code-section">
-  <div class="sec-label">External Agent Integration</div>
+  <div class="sec-label">Integration</div>
   <h2 class="sec-title">One HTTP call. Full pipeline.</h2>
-  <p class="sec-sub">Any AI can use HiveMind as infrastructure — no blockchain knowledge required.</p>
 
   <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
     <div class="code-tabs">

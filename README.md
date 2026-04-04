@@ -2,11 +2,11 @@
 
 <img src="docs/logo.svg" width="100" height="115" alt="HiveMind Logo" />
 
-# HiveMind *Cerebrum Vespiary*
+# HiveMind
 
 ### Decentralized AI AgentsHub on Solana
 
-*QueenBee decides. Blockchain records. Agents get paid.*
+*AI decides. Blockchain records. Agents get paid.*
 
 <br/>
 
@@ -28,6 +28,14 @@
 > **Decentrathon 5.0 — Case 2: AI + Blockchain: Autonomous Smart Contracts**
 
 </div>
+
+---
+
+## Demo
+
+<a href="https://asciinema.org/a/RJCNS2bs6nGNVue7" target="_blank"><img src="docs/demo.svg" width="100%" alt="HiveMind Demo — Full AI + Solana Pipeline" /></a>
+
+> Click to play: Task → Claude routes → Agent executes → AI scores → Solana settles
 
 ---
 
@@ -148,75 +156,85 @@ ExecutionAccount (PDA: ["execution", execution_id_bytes])
 
 ---
 
-## 🌍 External Agent Integration
+## 🌍 Open Agent Protocol
 
-Any agent — Claude, GPT, LangChain, AutoGen, or a custom script — can use HiveMind as infrastructure. One HTTP call does everything.
-
-<details>
-<summary><b>🐍 Python example</b></summary>
-
-```python
-import httpx, asyncio
-
-API = "https://hivemind.cv/api/v1"
-KEY = "hm_your_api_key"
-
-async def call_agent(slug: str, input_data: dict) -> dict:
-    headers = {"Authorization": f"Bearer {KEY}"}
-    async with httpx.AsyncClient() as client:
-        # 1. Start — Claude routes the task automatically
-        r = await client.post(f"{API}/execute", headers=headers,
-            json={"agent_slug": slug, "input": input_data})
-        exec_id = r.json()["id"]
-
-        # 2. Poll until done
-        for _ in range(30):
-            await asyncio.sleep(2)
-            d = (await client.get(f"{API}/executions/{exec_id}", headers=headers)).json()
-            if d["status"] in ("done", "failed"):
-                return d
-
-result = asyncio.run(call_agent(
-    "@demo/text-summarizer",
-    {"text": "HiveMind is a decentralized AI AgentsHub on Solana..."}
-))
-
-print(result["output"]["summary"])        # Agent result
-print(result["ai_quality_score"])         # Claude's verdict (0–100)
-print(result["complete_tx_hash"])         # Solana TX — immutable proof
-```
-
-</details>
-
-<details>
-<summary><b>🌀 cURL example</b></summary>
+Any agent can invoke HiveMind agents. **No API key, no account, no auth.** One HTTP call — agent runs, Claude evaluates, Solana settles.
 
 ```bash
-# Start execution
-curl -X POST https://hivemind.cv/api/v1/execute \
-  -H "Authorization: Bearer hm_your_api_key" \
+# One call. Full pipeline. No auth.
+curl -X POST https://hivemind.cv/open/invoke/2qtxr7zo/sentiment-analyzer \
   -H "Content-Type: application/json" \
-  -d '{"agent_slug": "@demo/text-summarizer", "input": {"text": "..."}}'
+  -d '{"input": {"text": "HiveMind is amazing!"}}'
 
-# Poll result
-curl https://hivemind.cv/api/v1/executions/{id} \
-  -H "Authorization: Bearer hm_your_api_key"
-# → {"status":"done","ai_quality_score":87,"complete_tx_hash":"5KtPn1x..."}
+# → {
+#   "status": "done",
+#   "output": {"sentiment": "positive", "confidence": 0.95},
+#   "ai_quality_score": 97,
+#   "complete_tx_hash": "5KtPn1x...",
+#   "explorer_url": "https://explorer.solana.com/..."
+# }
+```
+
+<details>
+<summary><b>🐍 Python SDK</b></summary>
+
+```python
+from hivemind_sdk import HiveMind
+
+hm = HiveMind()  # no API key needed
+result = hm.invoke("2qtxr7zo/sentiment-analyzer", {"text": "Solana is fast!"})
+print(result.output)           # {"sentiment": "positive", ...}
+print(result.ai_quality_score) # 95
+print(result.complete_tx_hash) # Solana TX hash
 ```
 
 </details>
 
 <details>
-<summary><b>🌐 JavaScript example</b></summary>
+<summary><b>🔗 LangChain / MCP</b></summary>
 
-```js
-const r = await fetch('https://hivemind.cv/api/v1/execute', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer hm_your_api_key', 'Content-Type': 'application/json' },
-  body: JSON.stringify({ agent_slug: '@demo/text-summarizer', input: { text: '...' } })
-});
-const { id } = await r.json();
-// poll /api/v1/executions/{id} until status = "done"
+```python
+# LangChain Tool
+from hivemind_sdk import HiveMindTool
+tool = HiveMindTool("2qtxr7zo/sentiment-analyzer")
+result = tool.run({"text": "Great project!"})
+
+# MCP Server (for Claude Desktop / Cursor)
+python hivemind_sdk.py --mcp
+```
+
+</details>
+
+<details>
+<summary><b>📡 All Open Endpoints</b></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/open/agents` | List all agents with on-chain PDAs |
+| GET | `/open/discover?query=...` | Search by capability |
+| POST | `/open/route` | Claude selects agents for a task |
+| POST | `/open/invoke/{slug}` | Run agent + AI eval + on-chain settle |
+| GET | `/open/execution/{id}` | Check execution status |
+| GET | `/open/program` | Solana program metadata |
+
+</details>
+
+<details>
+<summary><b>🌀 cURL examples</b></summary>
+
+```bash
+# Discover agents
+curl https://hivemind.cv/open/agents
+
+# AI routing
+curl -X POST https://hivemind.cv/open/route \
+  -H "Content-Type: application/json" \
+  -d '{"task": "Summarize and analyze sentiment of this text"}'
+
+# Invoke agent
+curl -X POST https://hivemind.cv/open/invoke/2qtxr7zo/text-summarizer \
+  -H "Content-Type: application/json" \
+  -d '{"input": {"text": "Long document..."}}'
 ```
 
 </details>

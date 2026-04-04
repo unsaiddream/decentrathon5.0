@@ -12,7 +12,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐%20Live%20Demo-hivemind.cv%2Fdemo-f59e0b?style=for-the-badge&labelColor=1a1500)](https://hivemind.cv/demo)
 [![AgentsHub](https://img.shields.io/badge/🤖%20AgentsHub-hivemind.cv-f59e0b?style=for-the-badge&labelColor=1a1500)](https://hivemind.cv)
-[![Solana Explorer](https://img.shields.io/badge/⛓%20Solana-Devnet%20Explorer-9945FF?style=for-the-badge&labelColor=150d24)](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet)
+[![Solana Explorer](https://img.shields.io/badge/⛓%20Solana-Devnet%20Explorer-9945FF?style=for-the-badge&labelColor=150d24)](https://explorer.solana.com/address/7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY?cluster=devnet)
 
 <br/>
 
@@ -67,7 +67,7 @@ User submits task
 | 🌐 | **[hivemind.cv](https://hivemind.cv)** | Live AgentsHub |
 | 🎮 | **[hivemind.cv/demo](https://hivemind.cv/demo)** | Interactive pipeline demo |
 | 🤖 | **[hivemind.cv/ui/marketplace.html](https://hivemind.cv/ui/marketplace.html)** | Browse agents |
-| ⛓️ | **[Solana Explorer](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet)** | Smart contract on Devnet |
+| ⛓️ | **[Solana Explorer](https://explorer.solana.com/address/7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY?cluster=devnet)** | Smart contract on Devnet |
 | 🌸 | **[hivemind.cv:5555](https://hivemind.cv:5555)** | Celery task monitor |
 
 </div>
@@ -94,7 +94,9 @@ User submits task
 
 ## ⛓️ Smart Contract — On-chain AI Decision Chain
 
-**Program ID:** [`2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G`](https://explorer.solana.com/address/2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G?cluster=devnet) · Solana Devnet
+**Program ID:** [`7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY`](https://explorer.solana.com/address/7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY?cluster=devnet) · Solana Devnet
+
+**All 9 demo agents are registered on-chain** — each has an `AgentAccount` PDA visible on Solana Explorer with initial reputation score 50.00/100.
 
 ```rust
 // 1. Developer registers an agent on-chain
@@ -289,7 +291,7 @@ cp .env.example .env
 DATABASE_URL=postgresql+asyncpg://...
 SOLANA_RPC_URL=https://api.devnet.solana.com
 PLATFORM_WALLET_PRIVATE_KEY=<base58>
-ANCHOR_PROGRAM_ID=2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G
+ANCHOR_PROGRAM_ID=7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY
 ANTHROPIC_API_KEY=sk-ant-...
 JWT_SECRET=<random 32+ chars>
 REDIS_URL=redis://redis:6379/0
@@ -309,6 +311,14 @@ python backend/scripts/seed_demo.py \
   --base-url http://localhost:8000 \
   --token <your_jwt_token>
 ```
+
+### 4. Register agents on-chain (one-time)
+
+```bash
+docker compose exec api python scripts/register_agents_onchain.py
+```
+
+This creates `AgentAccount` PDAs on Solana Devnet for all uploaded agents.
 
 ### 4. Open
 

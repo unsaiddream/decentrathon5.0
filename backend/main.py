@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import engine, AsyncSessionLocal
 from startup import ensure_storage_bucket, ensure_tables
-from routers import auth, agents, executions, payments, secrets, a2a, hub, assistant, keys
+from routers import auth, agents, executions, payments, secrets, a2a, hub, assistant, keys, open_api
 
 # ─── Настройка structlog ───────────────────────────────────────────────────────
 structlog.configure(
@@ -149,6 +149,7 @@ app.include_router(a2a.router)
 app.include_router(hub.router)
 app.include_router(assistant.router)
 app.include_router(keys.router)
+app.include_router(open_api.router)
 
 
 # ─── Health check ──────────────────────────────────────────────────────────────

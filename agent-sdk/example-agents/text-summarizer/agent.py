@@ -1,75 +1,100 @@
-#!/usr/bin/env python3
 """
-Text Summarizer Agent — AgentsHub Example
-Принимает текст, возвращает краткое содержание и 3 ключевых пункта.
+AgentsHub Example Agent: text-summarizer
+-----------------------------------------
+Reads JSON from stdin, writes JSON to stdout.
+Exit code 0 = success, non-zero = failure (stderr message shown as error).
 
-Использование:
-  echo '{"text": "Long text here...", "language": "en"}' | python agent.py
+Contract:
+  stdin  → {"text": "...", "max_sentences": 3}
+  stdout → {"summary": "...", "word_count": N, "reduction_pct": N}
 """
-import sys
+
 import json
-import os
+import sys
+import re
+from collections import Counter
+from typing import Any
 
 
-def main():
-    try:
-        input_data = json.loads(sys.stdin.read())
-    except json.JSONDecodeError as e:
-        print(json.dumps({"error": f"Invalid JSON input: {e}"}))
-        sys.exit(1)
+def extract_sentences(text: str) -> list[str]:
+    """Разбиваем текст на предложения простым regex."""
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    return [s.strip() for s in sentences if len(s.strip()) > 10]
 
-    text = input_data.get("text", "")
-    language = input_data.get("language", "en")
 
-    if not text:
-        print(json.dumps({"error": "text field is required"}))
-        sys.exit(1)
+def score_sentences(sentences: list[str]) -> list[tuple[int, float]]:
+    """Оцениваем каждое предложение по частоте слов."""
+    # Собираем все слова
+    all_words: list[str] = []
+    for s in sentences:
+        words = re.findall(r'\b[a-zA-Zа-яА-Я]{3,}\b', s.lower())
+        all_words.extend(words)
 
-    if len(text) > 10000:
-        text = text[:10000]
+    freq = Counter(all_words)
+    if not freq:
+        return [(i, 0.0) for i in range(len(sentences))]
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        # Fallback без AI
-        words = text.split()
-        result = {
-            "summary": " ".join(words[:20]) + "...",
-            "bullets": [
-                " ".join(words[:10]) + "...",
-                " ".join(words[10:20]) + "...",
-                " ".join(words[20:30]) + "...",
-            ],
-        }
-        print(json.dumps(result, ensure_ascii=False))
-        return
+    max_freq = max(freq.values())
 
-    import anthropic
+    scored = []
+    for i, sentence in enumerate(sentences):
+        words = re.findall(r'\b[a-zA-Zа-яА-Я]{3,}\b', sentence.lower())
+        score = sum(freq[w] / max_freq for w in words) / max(len(words), 1)
+        scored.append((i, score))
 
-    lang_instruction = "Respond in Russian." if language == "ru" else "Respond in English."
-    prompt = f"""Summarize the following text.
-{lang_instruction}
+    return scored
 
-Return ONLY valid JSON with this exact structure:
-{{"summary": "one sentence summary", "bullets": ["point 1", "point 2", "point 3"]}}
 
-Text:
-{text}"""
+def summarize(text: str, max_sentences: int = 3) -> dict[str, Any]:
+    """Основная логика суммаризации."""
+    sentences = extract_sentences(text)
 
-    client = anthropic.Anthropic(api_key=api_key)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=512,
-        messages=[{"role": "user", "content": prompt}],
+    if not sentences:
+        return {"summary": text[:200], "word_count": len(text.split()), "reduction_pct": 0.0}
+
+    scored = score_sentences(sentences)
+
+    # Выбираем топ-N по score, сохраняем оригинальный порядок
+    top_indices = sorted(
+        sorted(scored, key=lambda x: x[1], reverse=True)[:max_sentences],
+        key=lambda x: x[0]
     )
 
-    raw = message.content[0].text.strip()
-    start = raw.find("{")
-    end = raw.rfind("}") + 1
-    if start == -1:
-        print(json.dumps({"error": "AI returned invalid response", "raw": raw[:200]}))
+    summary = " ".join(sentences[i] for i, _ in top_indices)
+    word_count = len(text.split())
+    summary_word_count = len(summary.split())
+    reduction_pct = round((1 - summary_word_count / max(word_count, 1)) * 100, 1)
+
+    return {
+        "summary": summary,
+        "word_count": word_count,
+        "reduction_pct": reduction_pct,
+    }
+
+
+def main() -> None:
+    # Читаем входные данные из stdin
+    try:
+        raw = sys.stdin.read()
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        print(f"Invalid JSON input: {e}", file=sys.stderr)
         sys.exit(1)
 
-    result = json.loads(raw[start:end])
+    # Валидируем обязательные поля
+    text = data.get("text", "")
+    if not text or not isinstance(text, str):
+        print("Field 'text' is required and must be a string", file=sys.stderr)
+        sys.exit(1)
+
+    max_sentences = data.get("max_sentences", 3)
+    if not isinstance(max_sentences, int) or not (1 <= max_sentences <= 10):
+        max_sentences = 3
+
+    # Выполняем суммаризацию
+    result = summarize(text, max_sentences)
+
+    # Записываем результат в stdout (платформа читает отсюда)
     print(json.dumps(result, ensure_ascii=False))
 
 

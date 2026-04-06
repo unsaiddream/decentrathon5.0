@@ -1,0 +1,29 @@
+{
+  "name": "sql-generator",
+  "version": "1.0.0",
+  "description": "Converts natural language questions into optimized SQL queries for any database",
+  "author": "hivemind",
+  "entrypoint": "agent.py",
+  "runtime": "python3.11",
+  "timeout_seconds": 30,
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {"type": "string", "description": "Natural language question"},
+      "dialect": {"type": "string", "default": "postgresql"}
+    },
+    "required": ["text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "sql": {"type": "string"},
+      "explanation": {"type": "string"},
+      "dialect": {"type": "string"},
+      "tables_referenced": {"type": "array"}
+    }
+  },
+  "tags": ["sql", "natural-language", "database"],
+  "category": "data-analysis",
+  "uses_agents": []
+}

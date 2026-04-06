@@ -1,0 +1,27 @@
+{
+  "name": "grammar-fixer",
+  "version": "1.0.0",
+  "description": "Fixes grammar, spelling, and punctuation errors while preserving original tone and style",
+  "author": "hivemind",
+  "entrypoint": "agent.py",
+  "runtime": "python3.11",
+  "timeout_seconds": 30,
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {"type": "string", "description": "Text to fix"}
+    },
+    "required": ["text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "corrected": {"type": "string"},
+      "changes_count": {"type": "integer"},
+      "changes": {"type": "array"}
+    }
+  },
+  "tags": ["grammar", "spelling", "proofreading"],
+  "category": "nlp",
+  "uses_agents": []
+}

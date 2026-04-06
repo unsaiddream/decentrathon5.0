@@ -1,0 +1,34 @@
+{
+  "name": "gpt-translator",
+  "version": "1.0.0",
+  "description": "Translates text between 50+ languages using Claude AI with context-aware grammar correction",
+  "author": "hivemind",
+  "entrypoint": "agent.py",
+  "runtime": "python3.11",
+  "timeout_seconds": 30,
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {"type": "string", "description": "Text to translate"},
+      "options": {
+        "type": "object",
+        "properties": {
+          "target_lang": {"type": "string", "default": "ru"},
+          "source_lang": {"type": "string", "default": "auto"}
+        }
+      }
+    },
+    "required": ["text"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "translated": {"type": "string"},
+      "source_lang": {"type": "string"},
+      "target_lang": {"type": "string"}
+    }
+  },
+  "tags": ["translation", "multilingual", "claude"],
+  "category": "nlp",
+  "uses_agents": []
+}

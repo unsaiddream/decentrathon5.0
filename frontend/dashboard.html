@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Cabinet — HiveMind</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="stylesheet" href="/static/style.css?v=10">
   <style>
     /* ── Profile header ── */
     .profile-banner {
@@ -157,12 +158,12 @@
 
 <nav class="navbar">
   <div class="navbar-inner">
-    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
+    <a href="/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
     <div class="nav-links">
-      <a href="/ui/marketplace.html">Explore</a>
-      <a href="/ui/demo.html">Demo</a>
-      <a href="/ui/dashboard.html">Dashboard</a>
-      <a href="/ui/upload.html">Deploy</a>
+      <a href="/hub">Hub</a>
+      <a href="/demo">Demo</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/deploy">Deploy</a>
     </div>
     <div class="nav-right">
       <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
@@ -202,14 +203,14 @@
         <span id="profile-wallet">—</span>
         <span class="sep">·</span>
         <span id="profile-joined" style="color:var(--text-dim)">—</span>
-        <a href="/ui/assistant.html" class="profile-bee" id="profile-bee" style="display:none">
+        <a href="/demo" class="profile-bee" id="profile-bee" style="display:none">
           <span id="bee-emoji-nav">🐝</span>
           <span id="bee-name-nav">My Assistant</span>
         </a>
       </div>
     </div>
     <div class="profile-actions">
-      <a href="/ui/upload.html" class="btn btn-primary btn-sm">+ Deploy Agent</a>
+      <a href="/deploy" class="btn btn-primary btn-sm">+ Deploy Agent</a>
       <button class="btn btn-ghost btn-sm" onclick="if(confirm('Sign out?'))logout()">Sign Out</button>
     </div>
   </div>
@@ -251,7 +252,7 @@
   <div id="tab-agents">
     <div class="section-header" style="margin-bottom:16px">
       <span id="agents-count" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.1em"></span>
-      <a href="/ui/upload.html" class="btn btn-primary btn-sm">+ New Agent</a>
+      <a href="/deploy" class="btn btn-primary btn-sm">+ New Agent</a>
     </div>
     <div id="agents-list">
       <div style="text-align:center;padding:64px;color:var(--text-muted)">
@@ -346,8 +347,8 @@
         </div>
         <p style="font-size:13px;margin-bottom:20px">Your personal AI assistant named after a bee. It can call any agent in the hub on your behalf.</p>
         <div style="display:flex;gap:8px">
-          <a href="/ui/assistant.html" class="btn btn-primary btn-sm">Open Chat</a>
-          <a href="/ui/assistant.html" class="btn btn-ghost btn-sm">Configure</a>
+          <a href="/demo" class="btn btn-primary btn-sm">Open Chat</a>
+          <a href="/demo" class="btn btn-ghost btn-sm">Configure</a>
         </div>
       </div>
     </div>
@@ -414,7 +415,7 @@
   </div>
 </div>
 
-<script src="/ui/static/app.js"></script>
+<script src="/static/app.js?v=10"></script>
 <script>
   initNav();
 
@@ -518,7 +519,7 @@
             <div style="font-size:36px;margin-bottom:16px">⬡</div>
             <h3>No agents yet</h3>
             <p>Deploy your first agent to the hub</p>
-            <a href="/ui/upload.html" class="btn btn-primary" style="margin-top:20px">Deploy Agent</a>
+            <a href="/deploy" class="btn btn-primary" style="margin-top:20px">Deploy Agent</a>
           </div>`;
         return;
       }
@@ -527,7 +528,7 @@
         <div class="agent-row-card">
           <div class="agent-row-icon">${a.emoji || '⬡'}</div>
           <div class="agent-row-info">
-            <a href="/ui/agent-detail.html?slug=${encodeURIComponent(a.slug)}" class="agent-row-name">${esc(a.name)}</a>
+            <a href="/agent-detail?slug=${encodeURIComponent(a.slug)}" class="agent-row-name">${esc(a.name)}</a>
             <div class="agent-row-slug">${esc(a.slug)}</div>
           </div>
           <div class="agent-row-stats">
@@ -536,7 +537,7 @@
             <span class="badge ${a.is_active ? 'badge-green' : 'badge-gray'}">${a.is_active ? 'Active' : 'Paused'}</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            <a href="/ui/agent-detail.html?slug=${encodeURIComponent(a.slug)}" class="btn btn-ghost btn-sm">View</a>
+            <a href="/agent-detail?slug=${encodeURIComponent(a.slug)}" class="btn btn-ghost btn-sm">View</a>
             <button class="btn btn-ghost btn-sm" onclick="toggleAgent('${esc(a.slug)}',${!a.is_active})">${a.is_active ? 'Pause' : 'Resume'}</button>
           </div>
         </div>`).join('');
@@ -775,5 +776,29 @@
 
   init();
 </script>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="footer-logos">
+      <div class="footer-logo-item">
+        <svg class="footer-hivemind-icon" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>
+        HiveMind
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <img src="/static/decentrathon-logo.png" alt="Decentrathon 5.0" class="footer-decentrathon-img">
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <svg class="footer-solana-icon" viewBox="0 0 397.7 311.7" xmlns="http://www.w3.org/2000/svg"><linearGradient id="sf1" x1="360.88" x2="141.21" y1="18.96" y2="302.07" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sf2" x1="264.83" x2="45.16" y1="-40.46" y2="242.65" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sf3" x1="312.55" x2="92.88" y1="-10.91" y2="272.2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sf1)"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sf2)"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1z" fill="url(#sf3)"/></svg>
+        Solana
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <img src="/static/anchor-logo.png" alt="Anchor" class="footer-anchor-img">
+        Anchor
+      </div>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

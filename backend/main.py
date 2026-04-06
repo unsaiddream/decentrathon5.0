@@ -158,21 +158,52 @@ async def health_check():
     return {"status": "ok", "version": app.version}
 
 
-@app.get("/", tags=["system"])
-async def root():
-    """Корневой redirect на UI."""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/ui/", status_code=302)
-
-
-@app.get("/demo", tags=["system"])
-async def demo():
-    """Redirect на демо-страницу."""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/ui/demo.html", status_code=302)
-
-
 # ─── Frontend (mounted last to avoid overriding API routes) ──────────────────
 _frontend_dir = Path(__file__).parent.parent / "frontend"
+
+
+# ─── Legacy /ui/ redirect middleware ──────────────────────────────────────────
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import RedirectResponse as StarletteRedirect
+
+
+class LegacyUIRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        path = request.url.path
+        if path.startswith("/ui"):
+            clean = path.replace("/ui", "", 1).replace(".html", "").replace("marketplace", "hub")
+            if not clean or clean == "/index":
+                clean = "/"
+            if clean.startswith("/upload"):
+                clean = "/deploy"
+            return StarletteRedirect(url=clean, status_code=301)
+        return await call_next(request)
+
+
+app.add_middleware(LegacyUIRedirectMiddleware)
+
+
+# ─── Clean URL routes (serve HTML without .html extension) ───────────────────
+from fastapi.responses import FileResponse
+
+
+def _page_route(path: str, filename: str):
+    @app.api_route(path, methods=["GET", "HEAD"], tags=["frontend"], name=f"page_{filename}")
+    async def _handler():
+        return FileResponse(str(_frontend_dir / filename), media_type="text/html")
+
+
+_page_route("/hub", "hub.html")
+_page_route("/demo", "demo.html")
+_page_route("/dashboard", "dashboard.html")
+_page_route("/deploy", "upload.html")
+_page_route("/agent-detail", "agent-detail.html")
+
+
 if _frontend_dir.exists():
-    app.mount("/ui", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
+    # Mount static assets at /static
+    _static_dir = _frontend_dir / "static"
+    if _static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static-assets")
+    # Mount root for index.html and other direct files
+    app.mount("/", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")

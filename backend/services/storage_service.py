@@ -44,8 +44,28 @@ async def delete_bundle(owner_wallet: str, agent_slug: str) -> None:
     log.info("bundle_deleted", path=path)
 
 
+async def download_bundle_by_url(bundle_url: str) -> bytes:
+    """Скачивает zip-бандл по прямому URL (public или authenticated)."""
+    async with httpx.AsyncClient() as client:
+        # Сначала пробуем публичный URL как есть
+        resp = await client.get(bundle_url, timeout=60.0)
+        if resp.status_code == 200:
+            return resp.content
+
+        # Если public URL не сработал — пробуем через service key (private bucket)
+        # Убираем /public/ из пути для authenticated доступа
+        private_url = bundle_url.replace("/object/public/", "/object/")
+        resp = await client.get(
+            private_url,
+            headers={"Authorization": f"Bearer {settings.SUPABASE_SERVICE_KEY}"},
+            timeout=60.0,
+        )
+        resp.raise_for_status()
+        return resp.content
+
+
 async def download_bundle(owner_wallet: str, agent_slug: str) -> bytes:
-    """Скачивает zip-бандл для выполнения агента."""
+    """Скачивает zip-бандл для выполнения агента (legacy — по owner_wallet + slug)."""
     path = f"{owner_wallet}/{agent_slug}/bundle.zip"
     async with httpx.AsyncClient() as client:
         resp = await client.get(

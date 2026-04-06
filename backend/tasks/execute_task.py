@@ -117,6 +117,7 @@ async def _run_execution_async(execution_id: UUID, AsyncSessionLocal=None):
                     timeout_seconds=timeout,
                     user_secrets=user_secrets,
                     log_callback=log_callback,
+                    bundle_url=agent.bundle_url,
                 )
                 duration_ms = int(datetime.now(timezone.utc).timestamp() * 1000 - start_ms)
 

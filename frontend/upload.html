@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Deploy Agent — HiveMind</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="stylesheet" href="/static/style.css?v=10">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
 </head>
 <body>
 
 <nav class="navbar">
   <div class="navbar-inner">
-    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
+    <a href="/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
     <div class="nav-links">
-      <a href="/ui/marketplace.html">Explore</a>
-      <a href="/ui/demo.html">Demo</a>
-      <a href="/ui/dashboard.html">Dashboard</a>
-      <a href="/ui/upload.html">Deploy</a>
+      <a href="/hub">Hub</a>
+      <a href="/demo">Demo</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/deploy">Deploy</a>
     </div>
     <div class="nav-right">
       <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
@@ -181,7 +182,7 @@
 </div>
 </div><!-- /upload-content -->
 
-<script src="/ui/static/app.js"></script>
+<script src="/static/app.js?v=10"></script>
 <script>
   initNav();
 
@@ -229,7 +230,7 @@
     const hint = document.getElementById('github-url-hint');
     const branchInput = document.getElementById('github-branch');
 
-    const m = val.match(/github\.com\/([^/]+)\/([^/]+?)(?:\/tree\/([^/]+))?(?:\.git)?(?:\/|$)/);
+    const m = val.match(/github\.com/([^/]+)/([^/]+?)(?:/tree/([^/]+))?(?:\.git)?(?:/|$)/);
     if (m) {
       const [, owner, repo, branch] = m;
       label.textContent = `${owner}/${repo}`;
@@ -286,7 +287,7 @@
       if (Object.keys(overrides).length) form.append('manifest_override', JSON.stringify(overrides));
       const agent = await apiUpload('/api/v1/agents', form);
       toast(`Agent "${agent.name}" deployed!`, 'success');
-      setTimeout(() => location.href = `/ui/agent-detail.html?slug=${encodeURIComponent(agent.slug)}`, 1000);
+      setTimeout(() => location.href = `/agent-detail.html?slug=${encodeURIComponent(agent.slug)}`, 1000);
     } catch(e) {
       _showError(e.message);
       toast(e.message, 'error');
@@ -309,7 +310,7 @@
       if (Object.keys(overrides).length) body.manifest_override = overrides;
       const agent = await apiFetch('POST', '/api/v1/agents/import-github', body);
       toast(`Agent "${agent.name}" imported!`, 'success');
-      setTimeout(() => location.href = `/ui/agent-detail.html?slug=${encodeURIComponent(agent.slug)}`, 1000);
+      setTimeout(() => location.href = `/agent-detail.html?slug=${encodeURIComponent(agent.slug)}`, 1000);
     } catch(e) {
       _showError(e.message);
       toast(e.message, 'error');
@@ -324,5 +325,29 @@
     document.getElementById('upload-content').classList.remove('hidden');
   }
 </script>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="footer-logos">
+      <div class="footer-logo-item">
+        <svg class="footer-hivemind-icon" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>
+        HiveMind
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <img src="/static/decentrathon-logo.png" alt="Decentrathon 5.0" class="footer-decentrathon-img">
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <svg class="footer-solana-icon" viewBox="0 0 397.7 311.7" xmlns="http://www.w3.org/2000/svg"><linearGradient id="sf1" x1="360.88" x2="141.21" y1="18.96" y2="302.07" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sf2" x1="264.83" x2="45.16" y1="-40.46" y2="242.65" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sf3" x1="312.55" x2="92.88" y1="-10.91" y2="272.2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sf1)"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sf2)"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1z" fill="url(#sf3)"/></svg>
+        Solana
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <img src="/static/anchor-logo.png" alt="Anchor" class="footer-anchor-img">
+        Anchor
+      </div>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

@@ -77,7 +77,30 @@
 
 <canvas id="hex-bg-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
-<nav class="navbar"></nav>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo">
+      <div class="logo-top">
+        <svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
+          <path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/>
+          <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
+        </svg>
+        Hive<span>Mind</span>
+      </div>
+      <div class="logo-sub">AI AgentsHub on Solana</div>
+    </a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Explore</a>
+      <a href="/ui/demo.html">Demo</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>
+</nav>
 
 <section class="hero">
   <canvas class="hero-canvas" id="neural-canvas"></canvas>
@@ -185,6 +208,16 @@
     <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:65%"></div><div class="sk-line skeleton" style="width:85%"></div><div class="sk-line skeleton" style="width:40%"></div></div>
     <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:80%"></div><div class="sk-line skeleton" style="width:60%"></div><div class="sk-line skeleton" style="width:50%"></div></div>
     <div class="skeleton-card"><div class="sk-line skeleton" style="height:16px;width:55%"></div><div class="sk-line skeleton" style="width:75%"></div><div class="sk-line skeleton" style="width:35%"></div></div>
+  </div>
+
+  <!-- Agent Network Visualization -->
+  <div class="hex-section" style="margin-top:48px">
+    <canvas id="hex-focus-canvas"></canvas>
+    <div class="hex-section-text">
+      <div class="section-title">Agent Network</div>
+      <h2>Task → AI → Solana</h2>
+      <p>Submit a task. Claude routes it to the right agents, evaluates quality, and settles payment on-chain. Every decision is publicly verifiable.</p>
+    </div>
   </div>
 
   <!-- For Developers -->
@@ -358,6 +391,186 @@
     window.addEventListener('resize', () => { resize(); createNodes(40); });
   })();
 
+  // ── Hex focus section — agent network visualization ──────────────────────
+  (function() {
+    const canvas = document.getElementById('hex-focus-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const S = 38;
+    const W3 = Math.sqrt(3);
+    let W, H, hexes = [], mx = -9999, my = -9999, t = 0;
+    let hoveredAgent = null;
+    let agentNodes = [];
+
+    const tip = document.createElement('div');
+    tip.style.cssText = 'position:absolute;display:none;pointer-events:none;z-index:10;background:rgba(5,4,0,0.97);border:1px solid rgba(245,158,11,0.5);border-radius:6px;padding:8px 12px;font-family:"JetBrains Mono",monospace;font-size:11px;color:#f59e0b;white-space:nowrap;letter-spacing:0.04em;';
+    canvas.parentElement.appendChild(tip);
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      W = canvas.width = rect.width;
+      H = canvas.height = rect.height;
+      buildGrid();
+      placeAgents();
+    }
+
+    function buildGrid() {
+      hexes = [];
+      const cols = Math.ceil(W / (W3 * S)) + 3;
+      const rows = Math.ceil(H / (1.5 * S)) + 3;
+      for (let r = -1; r < rows; r++) {
+        for (let c = -1; c < cols; c++) {
+          hexes.push({ x: c * W3 * S + (r % 2) * (W3 * S / 2), y: r * 1.5 * S, g: 0 });
+        }
+      }
+    }
+
+    function placeAgents() {
+      if (!agentNodes.length || !W || !H) return;
+      const cx = W / 2, cy = H / 2;
+      const rx = W * 0.38, ry = H * 0.34;
+      const n = agentNodes.length;
+      agentNodes.forEach((an, i) => {
+        const angle = (i / n) * Math.PI * 2 + 0.6;
+        const tx = cx + Math.cos(angle) * rx;
+        const ty = cy + Math.sin(angle) * ry;
+        let best = hexes[0], bestD = Infinity;
+        hexes.forEach(h => {
+          if (h.x < S || h.x > W - S || h.y < S || h.y > H - S) return;
+          const d = Math.hypot(h.x - tx, h.y - ty);
+          if (d < bestD) { bestD = d; best = h; }
+        });
+        an.x = best.x;
+        an.y = best.y;
+      });
+    }
+
+    window._hexSetAgents = function(agents) {
+      agentNodes = agents.slice(0, 9).map(a => ({
+        agent: a, x: 0, y: 0, pulse: Math.random() * Math.PI * 2,
+      }));
+      placeAgents();
+    };
+
+    function hexPath(cx, cy, size) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI / 3 * i - Math.PI / 6;
+        const px = cx + size * Math.cos(a);
+        const py = cy + size * Math.sin(a);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    }
+
+    function draw() {
+      t += 0.02;
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(7,6,0,0.85)';
+      ctx.fillRect(0, 0, W, H);
+
+      // Hex grid
+      hexes.forEach(h => {
+        const d = Math.hypot(h.x - mx, h.y - my);
+        const target = d < S * 3 ? Math.pow(1 - d / (S * 3), 2) * 0.8 : 0;
+        h.g += (target - h.g) * 0.1;
+        hexPath(h.x, h.y, S - 2);
+        ctx.strokeStyle = `rgba(245,158,11,${0.07 + h.g * 0.35})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        if (h.g > 0.05) {
+          ctx.fillStyle = `rgba(245,158,11,${h.g * 0.08})`;
+          ctx.fill();
+        }
+      });
+
+      // Connection lines between agent nodes
+      agentNodes.forEach((an, i) => {
+        if (!an.x) return;
+        agentNodes.forEach((other, j) => {
+          if (j <= i || !other.x) return;
+          const dist = Math.hypot(an.x - other.x, an.y - other.y);
+          if (dist < W * 0.42) {
+            ctx.beginPath();
+            ctx.moveTo(an.x, an.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.strokeStyle = 'rgba(245,158,11,0.07)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        });
+      });
+
+      // Agent nodes
+      hoveredAgent = null;
+      agentNodes.forEach(an => {
+        if (!an.x) return;
+        const d = Math.hypot(an.x - mx, an.y - my);
+        const isHot = d < S;
+        if (isHot) hoveredAgent = an;
+        const pulse = Math.sin(t * 2.2 + an.pulse) * 0.5 + 0.5;
+        const r = (isHot ? 7 : 5) + pulse * 2.5;
+
+        const grd = ctx.createRadialGradient(an.x, an.y, 0, an.x, an.y, r * 5);
+        grd.addColorStop(0, `rgba(245,158,11,${isHot ? 0.45 : 0.28})`);
+        grd.addColorStop(0.5, `rgba(245,158,11,${isHot ? 0.12 : 0.06})`);
+        grd.addColorStop(1, 'rgba(245,158,11,0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(an.x, an.y, r * 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        const rp = (t * 0.8 + an.pulse) % (Math.PI * 2);
+        const ringR = r + ((rp / (Math.PI * 2)) * S * 1.2);
+        const ringA = 1 - (rp / (Math.PI * 2));
+        ctx.beginPath();
+        ctx.arc(an.x, an.y, ringR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(245,158,11,${ringA * 0.5})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(an.x, an.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = isHot ? '#fcd34d' : '#f59e0b';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(an.x, an.y, r * 0.38, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fill();
+      });
+
+      // Tooltip
+      if (hoveredAgent) {
+        const a = hoveredAgent.agent;
+        const tipX = Math.min(hoveredAgent.x + 14, W - 180);
+        const tipY = Math.max(hoveredAgent.y - 44, 4);
+        tip.style.display = 'block';
+        tip.style.left = tipX + 'px';
+        tip.style.top = tipY + 'px';
+        tip.innerHTML = `${a.name}<br><span style="opacity:0.45;font-size:9px;letter-spacing:0.08em">${a.slug}</span>`;
+        canvas.style.cursor = 'pointer';
+      } else {
+        tip.style.display = 'none';
+        canvas.style.cursor = 'default';
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      mx = e.clientX - rect.left;
+      my = e.clientY - rect.top;
+    });
+    canvas.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
+    canvas.addEventListener('click', () => {
+      if (hoveredAgent) window.location.href = `/ui/agent-detail.html?slug=${hoveredAgent.agent.slug}`;
+    });
+    window.addEventListener('resize', resize);
+    resize(); draw();
+  })();
+
   // ── Load featured agents + stats ─────────────────────────────────────────
   async function loadFeatured() {
     try {
@@ -367,6 +580,9 @@
         grid.innerHTML = '<div class="empty-state"><h3>No agents yet</h3><p>Be the first to deploy one</p></div>';
       } else {
         grid.innerHTML = data.agents.slice(0,6).map(renderAgentCard).join('');
+
+        // Feed agents into hex network visualization
+        if (window._hexSetAgents) window._hexSetAgents(data.agents);
 
         // Stats
         const agents = data.agents;

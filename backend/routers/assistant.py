@@ -226,6 +226,7 @@ async def chat(
             timeout_seconds=agent.manifest.get("timeout_seconds", 90),
             user_secrets=user_secrets,
             log_callback=None,
+            bundle_url=agent.bundle_url,
         )
         execution.status = "done"
         execution.output = output

@@ -160,6 +160,7 @@ async def call_agent(
                 timeout_seconds=timeout,
                 user_secrets=user_secrets,
                 call_depth=depth + 1,
+                bundle_url=target_agent.bundle_url,
             )
             duration_ms = int(datetime.now(timezone.utc).timestamp() * 1000 - start_ms)
 

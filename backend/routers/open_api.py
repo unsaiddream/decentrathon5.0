@@ -300,6 +300,7 @@ async def invoke_agent(
                 execution_id=execution.id,
                 timeout_seconds=agent.manifest.get("timeout_seconds", 30),
                 user_secrets={},
+                bundle_url=agent.bundle_url,
             )
             duration_ms = int(datetime.now(timezone.utc).timestamp() * 1000 - start_ms)
 

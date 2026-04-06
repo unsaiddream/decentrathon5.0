@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My Cabinet — HiveMind</title>
+  <title>My Cabinet — AgentsHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/ui/static/style.css?v=5">
@@ -155,26 +155,13 @@
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="navbar-inner">
-    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
-    <div class="nav-links">
-      <a href="/ui/marketplace.html">Agents</a>
-      <a href="/ui/demo.html">Demo</a>
-      <a href="/ui/dashboard.html" class="active">Dashboard</a>
-      <a href="/ui/upload.html">Deploy</a>
-    </div>
-    <div class="nav-right">
-      <button id="wallet-btn" onclick="handleWalletClick()">Join Collective</button>
-    </div>
-  </div>
-</nav>
+<nav class="navbar"></nav>
 
 <!-- Auth wall -->
 <div id="auth-wall" class="auth-wall hidden">
   <div class="auth-wall-card">
     <div class="auth-wall-icon">⬡</div>
-    <div class="auth-wall-overline">⬡ HiveMind Protocol</div>
+    <div class="auth-wall-overline">⬡ AgentsHub Protocol</div>
     <h2>Join Collective</h2>
     <p>Sign in to access your personal cabinet — manage agents, track executions, and control your balance.</p>
     <div class="auth-wall-btns">
@@ -291,7 +278,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div>
           <div style="font-size:15px;font-weight:600;margin-bottom:4px">API Keys</div>
-          <div style="font-size:12px;color:var(--text-muted)">Используй ключи чтобы агенты могли вызывать HiveMind API</div>
+          <div style="font-size:12px;color:var(--text-muted)">Используй ключи чтобы агенты могли вызывать AgentsHub API</div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="openCreateKeyModal()">+ New Key</button>
       </div>
@@ -388,7 +375,7 @@
   <div class="modal" onclick="event.stopPropagation()">
     <div style="font-size:9px;color:#22c55e;font-family:'JetBrains Mono',monospace;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:16px">↑ Withdraw SOL</div>
     <h3 style="margin-bottom:8px">Withdraw Funds</h3>
-    <p style="font-size:13px;margin-bottom:20px;color:var(--text-muted)">Send SOL from your HiveMind balance to any Solana wallet. Platform fee: <strong style="color:var(--primary)">10%</strong></p>
+    <p style="font-size:13px;margin-bottom:20px;color:var(--text-muted)">Send SOL from your AgentsHub balance to any Solana wallet. Platform fee: <strong style="color:var(--primary)">10%</strong></p>
     <div class="form-group">
       <label>Your Balance</label>
       <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;color:var(--primary);font-weight:700" id="withdraw-balance">—</div>

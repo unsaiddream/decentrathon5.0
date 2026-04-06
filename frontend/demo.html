@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live Demo — HiveMind AgentsHub</title>
+  <title>Live Demo — AgentsHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/ui/static/style.css?v=5">
@@ -403,30 +403,7 @@ pre#code-pre {
 
 <canvas id="hex-bg-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
-<nav class="navbar">
-  <div class="navbar-inner">
-    <a href="/ui/" class="logo">
-      <div class="logo-top">
-        <svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none">
-          <path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
-          <path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/>
-          <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
-        </svg>
-        Hive<span>Mind</span>
-      </div>
-      <div class="logo-sub">AI AgentsHub on Solana</div>
-    </a>
-    <div class="nav-links">
-      <a href="/ui/marketplace.html">Agents</a>
-      <a href="/ui/demo.html" class="active">Demo</a>
-      <a href="/ui/dashboard.html">Dashboard</a>
-      <a href="/ui/upload.html">Deploy</a>
-    </div>
-    <div class="nav-right">
-      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
-    </div>
-  </div>
-</nav>
+<nav class="navbar"></nav>
 
 <div class="container page">
 
@@ -462,10 +439,10 @@ pre#code-pre {
       <!-- Task panel — no login required, uses Open Agent Protocol -->
       <div class="input-card" id="demo-panel">
         <div class="preset-row">
-          <button class="preset" onclick="setTask(this)">Analyze sentiment of: HiveMind is a revolutionary AI marketplace on Solana built for Decentrathon 5.0</button>
-          <button class="preset" onclick="setTask(this)">Summarize: AgentsHub is a decentralized marketplace where AI agents earn SOL for completing tasks, with quality evaluated by Claude AI</button>
-          <button class="preset" onclick="setTask(this)">Tell me a joke about blockchain and AI</button>
-          <button class="preset" onclick="setTask(this)">Count words in: The quick brown fox jumps over the lazy dog on Solana devnet</button>
+          <button class="preset" onclick="setTask(this)">Analyze sentiment of: AgentsHub makes AI agents accessible to everyone through Solana blockchain</button>
+          <button class="preset" onclick="setTask(this)">Summarize: Decentralized AI agents earn SOL for completing tasks. Quality is scored by Claude AI and every decision is recorded on Solana.</button>
+          <button class="preset" onclick="setTask(this)">Tell me a joke about blockchain and artificial intelligence</button>
+          <button class="preset" onclick="setTask(this)">Count words in: The quick brown fox jumps over the lazy dog near the Solana validator</button>
         </div>
         <textarea class="task-textarea" id="task-input" placeholder="Describe your task — Claude will select the right agents automatically..."></textarea>
         <div class="demo-err" id="demo-err"></div>
@@ -969,9 +946,8 @@ function showErr(msg) {
 
 /* ─── Init ─── */
 document.addEventListener('DOMContentLoaded', () => {
+  initNav();
   setStepState(1, 'active');
-  typeof updateNavWallet === 'function' && updateNavWallet();
-  typeof initHexBackground === 'function' && initHexBackground();
 });
 </script>
 </body>

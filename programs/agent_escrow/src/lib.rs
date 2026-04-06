@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("2qP9GpKCspihqmSggbmu5gg5q5TdDiSGT2JcUhBjUC4G");
+declare_id!("7dnUyWpJ2JNbCWNRjy5paJXq8bYD5QPpwe6tf1ZAGGaY");
 
 // ─── Account structures ──────────────────────────────────────
 

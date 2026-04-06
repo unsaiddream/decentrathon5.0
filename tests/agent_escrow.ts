@@ -1,24 +1,23 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AgentEscrow } from "../target/types/agent_escrow";
-import { PublicKey, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { PublicKey, Keypair } from "@solana/web3.js";
 import { assert } from "chai";
+import * as fs from "fs";
 
 describe("agent_escrow", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.AgentEscrow as Program<AgentEscrow>;
 
-  const owner = Keypair.generate();
-  const platformWallet = Keypair.generate();
+  // Platform keypair — the only signer in all instructions (proxy model)
+  const platformKpBytes = JSON.parse(fs.readFileSync("/root/platform-keypair.json", "utf-8"));
+  const platform = Keypair.fromSecretKey(Uint8Array.from(platformKpBytes));
 
-  before(async () => {
-    // Airdrop SOL to test accounts
-    const sig1 = await provider.connection.requestAirdrop(owner.publicKey, 2 * LAMPORTS_PER_SOL);
-    const sig2 = await provider.connection.requestAirdrop(platformWallet.publicKey, 1 * LAMPORTS_PER_SOL);
-    await provider.connection.confirmTransaction(sig1);
-    await provider.connection.confirmTransaction(sig2);
-  });
+  // Owner and caller are just pubkeys (not signers in this program)
+  const ownerKeypair = Keypair.generate();
+  const owner = ownerKeypair.publicKey;
+  const caller = ownerKeypair.publicKey; // same for simplicity
 
   function getAgentPDA(ownerPubkey: PublicKey, slug: string): [PublicKey, number] {
     return PublicKey.findProgramAddressSync(
@@ -38,20 +37,20 @@ describe("agent_escrow", () => {
     const slug = "test-user/my-agent";
     const pricePerCall = 1_000_000; // 0.001 SOL in lamports
 
-    const [agentPDA] = getAgentPDA(owner.publicKey, slug);
+    const [agentPDA] = getAgentPDA(owner, slug);
 
-    // In Anchor 0.30+, PDA accounts are auto-resolved; pass only signers
     await program.methods
       .registerAgent(slug, new anchor.BN(pricePerCall))
       .accountsPartial({
-        owner: owner.publicKey,
+        owner: owner,
+        platform: platform.publicKey,
       })
-      .signers([owner])
+      .signers([platform])
       .rpc();
 
     const agentAccount = await program.account.agentAccount.fetch(agentPDA);
 
-    assert.equal(agentAccount.owner.toString(), owner.publicKey.toString());
+    assert.equal(agentAccount.owner.toString(), owner.toString());
     assert.equal(agentAccount.slug, slug);
     assert.equal(agentAccount.pricePerCall.toNumber(), pricePerCall);
     assert.equal(agentAccount.reputationScore, 5000);
@@ -59,21 +58,15 @@ describe("agent_escrow", () => {
     assert.equal(agentAccount.isActive, true);
   });
 
-  it("rejects slug longer than 100 chars", async () => {
-    // Slugs > 32 chars can't be used as raw PDA seeds (Solana seed limit).
-    // Use a slug of exactly 101 chars but <= 32 bytes by hashing approach.
-    // For test purposes, we verify that a 33-char (valid for PDA but > program limit)
-    // slug also gets rejected. Actually let's just verify 31-char slug (PDA ok)
-    // and use a slug that's 101 chars to verify program rejects it at instruction level.
-    // Since raw bytes > 32 fails at PDA derivation, we test a short slug with price=0 instead.
-    // This verifies the InvalidPrice error works:
+  it("rejects price=0 as InvalidPrice", async () => {
     try {
       await program.methods
-        .registerAgent("valid-slug", new anchor.BN(0)) // price 0 is invalid
+        .registerAgent("valid-slug", new anchor.BN(0))
         .accountsPartial({
-          owner: owner.publicKey,
+          owner: owner,
+          platform: platform.publicKey,
         })
-        .signers([owner])
+        .signers([platform])
         .rpc();
       assert.fail("Should have thrown");
     } catch (e: any) {
@@ -84,7 +77,7 @@ describe("agent_escrow", () => {
   it("initiates an execution and locks SOL in escrow", async () => {
     const slug = "test-user/my-agent";
     const pricePerCall = 1_000_000; // 0.001 SOL
-    const [agentPDA] = getAgentPDA(owner.publicKey, slug);
+    const [agentPDA] = getAgentPDA(owner, slug);
 
     const executionId = Array.from(Buffer.from("1234567890abcdef"));
     const [executionPDA] = getExecutionPDA(executionId);
@@ -93,14 +86,15 @@ describe("agent_escrow", () => {
       .initiateExecution(executionId)
       .accountsPartial({
         agentAccount: agentPDA,
-        caller: owner.publicKey,
+        caller: caller,
+        platform: platform.publicKey,
       })
-      .signers([owner])
+      .signers([platform])
       .rpc();
 
     const executionAccount = await program.account.executionAccount.fetch(executionPDA);
 
-    assert.equal(executionAccount.caller.toString(), owner.publicKey.toString());
+    assert.equal(executionAccount.caller.toString(), caller.toString());
     assert.equal(executionAccount.agent.toString(), agentPDA.toString());
     assert.equal(executionAccount.amountLocked.toNumber(), pricePerCall);
     assert.deepEqual(executionAccount.status, { pending: {} });
@@ -112,7 +106,7 @@ describe("agent_escrow", () => {
 
   it("completes execution — pays agent owner and updates reputation", async () => {
     const slug = "test-user/my-agent";
-    const [agentPDA] = getAgentPDA(owner.publicKey, slug);
+    const [agentPDA] = getAgentPDA(owner, slug);
     const executionId = Array.from(Buffer.from("complete_exec_01"));
     const [executionPDA] = getExecutionPDA(executionId);
 
@@ -121,9 +115,10 @@ describe("agent_escrow", () => {
       .initiateExecution(executionId)
       .accountsPartial({
         agentAccount: agentPDA,
-        caller: owner.publicKey,
+        caller: caller,
+        platform: platform.publicKey,
       })
-      .signers([owner])
+      .signers([platform])
       .rpc();
 
     // Complete with AI score 85
@@ -132,11 +127,11 @@ describe("agent_escrow", () => {
       .accountsPartial({
         executionAccount: executionPDA,
         agentAccount: agentPDA,
-        agentOwner: owner.publicKey,
-        platformWallet: platformWallet.publicKey,
-        platform: platformWallet.publicKey,
+        agentOwner: owner,
+        platformWallet: platform.publicKey,
+        platform: platform.publicKey,
       })
-      .signers([platformWallet])
+      .signers([platform])
       .rpc();
 
     const executionAccount = await program.account.executionAccount.fetch(executionPDA);
@@ -150,7 +145,7 @@ describe("agent_escrow", () => {
 
   it("refunds execution — returns SOL to caller", async () => {
     const slug = "test-user/my-agent";
-    const [agentPDA] = getAgentPDA(owner.publicKey, slug);
+    const [agentPDA] = getAgentPDA(owner, slug);
     const executionId = Array.from(Buffer.from("refund_exec_0001"));
     const [executionPDA] = getExecutionPDA(executionId);
 
@@ -158,19 +153,20 @@ describe("agent_escrow", () => {
       .initiateExecution(executionId)
       .accountsPartial({
         agentAccount: agentPDA,
-        caller: owner.publicKey,
+        caller: caller,
+        platform: platform.publicKey,
       })
-      .signers([owner])
+      .signers([platform])
       .rpc();
 
     await program.methods
       .refundExecution()
       .accountsPartial({
         executionAccount: executionPDA,
-        caller: owner.publicKey,
-        platform: platformWallet.publicKey,
+        caller: caller,
+        platform: platform.publicKey,
       })
-      .signers([platformWallet])
+      .signers([platform])
       .rpc();
 
     const executionAccount = await program.account.executionAccount.fetch(executionPDA);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agent — AgentsHub</title>
+  <title>Agent — HiveMind</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/ui/static/style.css?v=5">
@@ -46,7 +46,7 @@
     const inputSchema = JSON.stringify(manifest.input_schema || {}, null, 2);
     const exampleInput = buildExampleInput(manifest.input_schema);
 
-    document.title = `${agent.name} — AgentsHub`;
+    document.title = `${agent.name} — HiveMind`;
     document.getElementById('content').innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start" id="agent-layout">
 

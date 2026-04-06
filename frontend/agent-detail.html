@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agent — HiveMind</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ui/static/style.css?v=5">
+  <link rel="stylesheet" href="/static/style.css?v=10">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 30'%3E%3Cpath d='M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z' stroke='%23f59e0b' stroke-width='1.5' fill='%23070600'/%3E%3Ccircle cx='13' cy='14.5' r='3' fill='%23f59e0b'/%3E%3C/svg%3E">
 </head>
 <body>
 
 <nav class="navbar">
   <div class="navbar-inner">
-    <a href="/ui/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
+    <a href="/" class="logo"><div class="logo-top"><svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>Hive<span>Mind</span></div><div class="logo-sub">AI AgentsHub on Solana</div></a>
     <div class="nav-links">
-      <a href="/ui/marketplace.html">Explore</a>
-      <a href="/ui/demo.html">Demo</a>
-      <a href="/ui/dashboard.html">Dashboard</a>
-      <a href="/ui/upload.html">Deploy</a>
+      <a href="/hub">Hub</a>
+      <a href="/demo">Demo</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/deploy">Deploy</a>
     </div>
     <div class="nav-right">
       <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
@@ -33,13 +34,13 @@
   </div>
 </div>
 
-<script src="/ui/static/app.js"></script>
-<script src="/ui/static/onchain.js"></script>
+<script src="/static/app.js?v=10"></script>
+<script src="/static/onchain.js"></script>
 <script>
   initNav();
 
   const slug = new URLSearchParams(location.search).get('slug');
-  if (!slug) location.href = '/ui/marketplace.html';
+  if (!slug) location.href = '/marketplace.html';
 
   let agent = null;
 
@@ -66,7 +67,7 @@
         <!-- Left -->
         <div>
           <div style="margin-bottom:12px">
-            <a href="/ui/marketplace.html" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase">← Marketplace</a>
+            <a href="/hub" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase">← Marketplace</a>
           </div>
 
           <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
@@ -145,12 +146,12 @@
                 <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                 View on GitHub ↗
               </a>
-              <a href="/ui/swarm.html?agent=${encodeURIComponent(agent.slug)}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+              <a href="/hub?agent=${encodeURIComponent(agent.slug)}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
                 ⬡ Open in Swarm
               </a>
             </div>` : `
             <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-              <a href="/ui/swarm.html?agent=${encodeURIComponent(agent.slug)}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+              <a href="/hub?agent=${encodeURIComponent(agent.slug)}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
                 ⬡ Open in Swarm
               </a>
             </div>`}
@@ -629,5 +630,29 @@
   // Load stats and readme after main load
   setTimeout(() => { loadAgentStats(); loadReadme(); loadOnchainReputation(); }, 100);
 </script>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="footer-logos">
+      <div class="footer-logo-item">
+        <svg class="footer-hivemind-icon" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/><path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/><circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/></svg>
+        HiveMind
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <img src="/static/decentrathon-logo.png" alt="Decentrathon 5.0" class="footer-decentrathon-img">
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <svg class="footer-solana-icon" viewBox="0 0 397.7 311.7" xmlns="http://www.w3.org/2000/svg"><linearGradient id="sf1" x1="360.88" x2="141.21" y1="18.96" y2="302.07" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sf2" x1="264.83" x2="45.16" y1="-40.46" y2="242.65" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sf3" x1="312.55" x2="92.88" y1="-10.91" y2="272.2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sf1)"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sf2)"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1z" fill="url(#sf3)"/></svg>
+        Solana
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-logo-item">
+        <img src="/static/anchor-logo.png" alt="Anchor" class="footer-anchor-img">
+        Anchor
+      </div>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

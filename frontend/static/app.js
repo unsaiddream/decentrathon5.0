@@ -9,7 +9,7 @@ function renderNavbar() {
   if (!nav) return;
   nav.innerHTML = `
   <div class="navbar-inner">
-    <a href="/ui/" class="logo">
+    <a href="/" class="logo">
       <div class="logo-top">
         <svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
@@ -21,10 +21,10 @@ function renderNavbar() {
       <div class="logo-sub">AI AgentsHub on Solana</div>
     </a>
     <div class="nav-links">
-      <a href="/ui/marketplace.html">Explore</a>
-      <a href="/ui/demo.html">Demo</a>
-      <a href="/ui/dashboard.html">Dashboard</a>
-      <a href="/ui/upload.html">Deploy</a>
+      <a href="/hub">Hub</a>
+      <a href="/demo">Demo</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/deploy">Deploy</a>
     </div>
     <div class="nav-right">
       <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
@@ -159,7 +159,7 @@ function logout() {
   clearToken();
   updateNavWallet();
   toast('Signed out');
-  setTimeout(() => location.href = '/ui/', 400);
+  setTimeout(() => location.href = '/', 400);
 }
 
 // ─── Navbar wallet state ──────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ function updateNavWallet() {
       btn.textContent = `${wallet.slice(0,4)}...${wallet.slice(-4)}`;
     }
     btn.classList.add('connected');
-    btn.onclick = () => { window.location.href = '/ui/dashboard.html'; };
+    btn.onclick = () => { window.location.href = '/dashboard.html'; };
   } else {
     btn.textContent = 'Connect';
     btn.classList.remove('connected');
@@ -194,11 +194,11 @@ function showUserMenu() {
   menu.id = 'user-menu';
   menu.style.cssText = 'position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border-strong);border-radius:10px;padding:6px;min-width:180px;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.5)';
   menu.innerHTML = `
-    <a href="/ui/dashboard.html" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
+    <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Dashboard
     </a>
-    <a href="/ui/upload.html" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
+    <a href="/deploy" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Deploy Agent
     </a>
@@ -271,7 +271,7 @@ function loginWithGithub() {
 }
 
 async function handleWalletClick() {
-  if (isLoggedIn()) window.location.href = '/ui/dashboard.html';
+  if (isLoggedIn()) window.location.href = '/dashboard.html';
   else showJoinModal();
 }
 
@@ -280,7 +280,7 @@ function initNav() {
   const path = location.pathname;
   document.querySelectorAll('.nav-links a').forEach(a => {
     const href = new URL(a.href).pathname;
-    if (href === path || (href !== '/ui/' && path.startsWith(href))) {
+    if (href === path || (href !== '/' && path.startsWith(href))) {
       a.classList.add('active');
     }
   });
@@ -320,6 +320,8 @@ function _repositionToasts() {
 }
 
 // ─── Render agent card ────────────────────────────────────────────────────────
+const SOLANA_ICON = '<svg class="sol-icon" viewBox="0 0 397.7 311.7" xmlns="http://www.w3.org/2000/svg"><linearGradient id="sg1" x1="360.88" x2="141.21" y1="18.96" y2="302.07" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sg2" x1="264.83" x2="45.16" y1="-40.46" y2="242.65" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><linearGradient id="sg3" x1="312.55" x2="92.88" y1="-10.91" y2="272.2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00ffa3"/><stop offset="1" stop-color="#dc1fff"/></linearGradient><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sg1)"/><path d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1z" fill="url(#sg2)"/><path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1z" fill="url(#sg3)"/></svg>';
+
 function renderAgentCard(a) {
   const tags = (a.tags || []).slice(0, 3).map(t => `<span class="tag tag-gray">${esc(t)}</span>`).join('');
   const caps = (a.manifest?.capabilities || []).slice(0, 2).map(c => `<span class="tag" style="background:rgba(245,158,11,0.08);color:var(--primary);border-color:rgba(245,158,11,0.2)">${esc(c)}</span>`).join('');
@@ -336,7 +338,7 @@ function renderAgentCard(a) {
   const catLabel = a.category ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase">${esc(a.category)}</span>` : '';
 
   return `
-    <a class="agent-card" href="/ui/agent-detail.html?slug=${encodeURIComponent(a.slug)}">
+    <a class="agent-card" href="/agent-detail?slug=${encodeURIComponent(a.slug)}">
       <div class="agent-card-top">
         <div>
           <div class="agent-name">${esc(a.name)} ${githubIcon}${a2aIcon}</div>
@@ -347,13 +349,12 @@ function renderAgentCard(a) {
       <div class="agent-desc">${esc(a.description || 'No description')}</div>
       ${caps || tags ? `<div class="agent-tags">${caps}${tags}</div>` : ''}
       <div class="agent-footer">
-        <span class="agent-price">${priceStr} SOL</span>
+        <span class="agent-price">${SOLANA_ICON} ${priceStr} SOL</span>
         <span class="agent-meta">
           <span>${formatNumber(a.call_count || 0)} calls</span>
           <span>★ ${a.rating_avg && a.rating_avg !== '0.00' ? parseFloat(a.rating_avg).toFixed(1) : '—'}</span>
         </span>
       </div>
-      ${a.on_chain_address ? `<div class="onchain-badge"><span class="onchain-label">On-chain</span><a href="https://explorer.solana.com/address/${a.on_chain_address}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="explorer-badge" onclick="event.stopPropagation()">🔗 Solana</a></div>` : ''}
     </a>`;
 }
 

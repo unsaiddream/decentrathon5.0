@@ -12,7 +12,7 @@ from uuid import UUID
 
 import structlog
 
-from services.storage_service import download_bundle
+from services.storage_service import download_bundle, download_bundle_by_url
 
 log = structlog.get_logger()
 
@@ -122,6 +122,7 @@ async def run_agent_in_sandbox(
     user_secrets: dict | None = None,
     log_callback: Callable[[str], Awaitable[None]] | None = None,
     call_depth: int = 0,
+    bundle_url: str | None = None,
 ) -> dict:
     """
     Скачивает zip, создаёт venv, ставит deps, запускает агента.
@@ -129,10 +130,13 @@ async def run_agent_in_sandbox(
     """
     exec_dir = tempfile.mkdtemp(prefix=f"exec_{execution_id}_")
     try:
-        # 1. Скачиваем бандл
+        # 1. Скачиваем бандл (по URL из БД, или fallback по owner_wallet/slug)
         if log_callback:
             await log_callback("[system] Downloading agent bundle...")
-        zip_bytes = await download_bundle(owner_wallet, agent_slug)
+        if bundle_url:
+            zip_bytes = await download_bundle_by_url(bundle_url)
+        else:
+            zip_bytes = await download_bundle(owner_wallet, agent_slug)
 
         # 2. Распаковываем
         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:

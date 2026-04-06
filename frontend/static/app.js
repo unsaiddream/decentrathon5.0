@@ -16,9 +16,9 @@ function renderNavbar() {
           <path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/>
           <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
         </svg>
-        Agents<span>Hub</span>
+        Hive<span>Mind</span>
       </div>
-      <div class="logo-sub">Decentralized AI Agents on Solana</div>
+      <div class="logo-sub">AI AgentsHub on Solana</div>
     </a>
     <div class="nav-links">
       <a href="/ui/marketplace.html">Explore</a>
@@ -125,7 +125,7 @@ async function connectWallet() {
     const wallet = publicKey.toString();
 
     const timestamp = Math.floor(Date.now() / 1000);
-    const message = `AgentsHub login\nWallet: ${wallet}\nTimestamp: ${timestamp}`;
+    const message = `HiveMind login\nWallet: ${wallet}\nTimestamp: ${timestamp}`;
     const encoded = new TextEncoder().encode(message);
 
     const { signature } = await phantom.signMessage(encoded, 'utf8');
@@ -236,8 +236,8 @@ function showJoinModal() {
             <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
           </svg>
         </div>
-        <div class="join-overline">⬡ AgentsHub Protocol</div>
-        <h2 class="join-title">Join AgentsHub</h2>
+        <div class="join-overline">⬡ HiveMind Protocol</div>
+        <h2 class="join-title">Join HiveMind</h2>
         <p class="join-sub">Access the decentralized agent network. Deploy agents, invoke any agent via API, and earn SOL on Solana.</p>
         <div class="join-btns">
           <button class="btn btn-primary join-btn" onclick="loginWithGithub()">

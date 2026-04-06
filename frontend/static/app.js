@@ -3,6 +3,35 @@ const API = location.origin;
 const TOKEN_KEY = 'hivemind_token';
 const WALLET_KEY = 'hivemind_wallet';
 
+// ─── Navbar generator ────────────────────────────────────────────────────────
+function renderNavbar() {
+  const nav = document.querySelector('.navbar');
+  if (!nav) return;
+  nav.innerHTML = `
+  <div class="navbar-inner">
+    <a href="/ui/" class="logo">
+      <div class="logo-top">
+        <svg class="logo-mark" width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 1L24.5 7.5V20.5L13 27L1.5 20.5V7.5L13 1Z" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
+          <path d="M13 7.5L19 11V18L13 21.5L7 18V11L13 7.5Z" stroke="#f59e0b" stroke-width="1" fill="rgba(245,158,11,0.06)"/>
+          <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
+        </svg>
+        Agents<span>Hub</span>
+      </div>
+      <div class="logo-sub">Decentralized AI Agents on Solana</div>
+    </a>
+    <div class="nav-links">
+      <a href="/ui/marketplace.html">Explore</a>
+      <a href="/ui/demo.html">Demo</a>
+      <a href="/ui/dashboard.html">Dashboard</a>
+      <a href="/ui/upload.html">Deploy</a>
+    </div>
+    <div class="nav-right">
+      <button id="wallet-btn" onclick="handleWalletClick()">Connect Wallet</button>
+    </div>
+  </div>`;
+}
+
 // ─── Base58 encoder (для подписи Phantom) ────────────────────────────────────
 const B58_CHARS = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 function encodeBase58(bytes) {
@@ -50,7 +79,7 @@ async function apiFetch(method, path, body = null) {
   if (res.status === 401) {
     clearToken();
     updateNavWallet();
-    throw new Error('Сессия истекла, подключите кошелёк заново');
+    throw new Error('Session expired, please reconnect');
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
@@ -86,7 +115,7 @@ async function connectWallet() {
     phantom = _getPhantom();
   }
   if (!phantom) {
-    toast('Phantom не обнаружен. Установи расширение и перезагрузи страницу.', 'error');
+    toast('Phantom not found. Install the extension and reload.', 'error');
     window.open('https://phantom.app', '_blank');
     return null;
   }
@@ -96,7 +125,7 @@ async function connectWallet() {
     const wallet = publicKey.toString();
 
     const timestamp = Math.floor(Date.now() / 1000);
-    const message = `HiveMind login\nWallet: ${wallet}\nTimestamp: ${timestamp}`;
+    const message = `AgentsHub login\nWallet: ${wallet}\nTimestamp: ${timestamp}`;
     const encoded = new TextEncoder().encode(message);
 
     const { signature } = await phantom.signMessage(encoded, 'utf8');
@@ -111,14 +140,14 @@ async function connectWallet() {
 
     setToken(data.access_token);
     localStorage.setItem(WALLET_KEY, wallet);
-    toast(`${wallet.slice(0,4)}...${wallet.slice(-4)}`, 'success');
+    toast(`Connected: ${wallet.slice(0,4)}...${wallet.slice(-4)}`, 'success');
     updateNavWallet();
     return data;
   } catch (e) {
     if (e.message?.includes('User rejected')) {
-      toast('Подпись отклонена', 'info');
+      toast('Signature rejected', 'info');
     } else {
-      toast(e.message || 'Ошибка подключения', 'error');
+      toast(e.message || 'Connection error', 'error');
     }
     return null;
   }
@@ -129,7 +158,7 @@ function logout() {
   try { (_getPhantom())?.disconnect(); } catch {}
   clearToken();
   updateNavWallet();
-  toast('Вышли из аккаунта');
+  toast('Signed out');
   setTimeout(() => location.href = '/ui/', 400);
 }
 
@@ -152,7 +181,7 @@ function updateNavWallet() {
     btn.classList.add('connected');
     btn.onclick = () => { window.location.href = '/ui/dashboard.html'; };
   } else {
-    btn.textContent = 'Join Collective';
+    btn.textContent = 'Connect';
     btn.classList.remove('connected');
     btn.onclick = showJoinModal;
   }
@@ -167,10 +196,11 @@ function showUserMenu() {
   menu.innerHTML = `
     <a href="/ui/dashboard.html" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      My Cabinet
+      Dashboard
     </a>
-    <a href="/ui/assistant.html" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
-      🐝 My Assistant
+    <a href="/ui/upload.html" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;color:var(--text);font-size:13px;text-decoration:none" onmouseover="this.style.background='rgba(245,158,11,0.06)'" onmouseout="this.style.background='none'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Deploy Agent
     </a>
     <div style="height:1px;background:var(--border);margin:4px 0"></div>
     <button onclick="if(confirm('Log out?'))logout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;background:none;border:none;color:var(--error);font-size:13px;cursor:pointer;font-family:inherit;text-align:left" onmouseover="this.style.background='rgba(239,68,68,0.06)'" onmouseout="this.style.background='none'">
@@ -206,9 +236,9 @@ function showJoinModal() {
             <circle cx="13" cy="14.5" r="2.5" fill="#f59e0b"/>
           </svg>
         </div>
-        <div class="join-overline">⬡ HiveMind Protocol</div>
-        <h2 class="join-title">Join Collective</h2>
-        <p class="join-sub">Access the agent intelligence hub. Deploy agents, use your personal assistant, and connect with the network.</p>
+        <div class="join-overline">⬡ AgentsHub Protocol</div>
+        <h2 class="join-title">Join AgentsHub</h2>
+        <p class="join-sub">Access the decentralized agent network. Deploy agents, invoke any agent via API, and earn SOL on Solana.</p>
         <div class="join-btns">
           <button class="btn btn-primary join-btn" onclick="loginWithGithub()">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -246,6 +276,7 @@ async function handleWalletClick() {
 }
 
 function initNav() {
+  renderNavbar();
   const path = location.pathname;
   document.querySelectorAll('.nav-links a').forEach(a => {
     const href = new URL(a.href).pathname;

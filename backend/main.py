@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import engine, AsyncSessionLocal
 from startup import ensure_storage_bucket, ensure_tables
-from routers import auth, agents, executions, payments, secrets, a2a, hub, assistant, keys, open_api
+from routers import auth, agents, executions, payments, secrets, a2a, hub, keys, open_api
 
 # ─── Настройка structlog ───────────────────────────────────────────────────────
 structlog.configure(
@@ -107,9 +107,9 @@ async def lifespan(app: FastAPI):
 
 # ─── FastAPI app ───────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="HiveMind API",
-    description="Маркетплейс AI-агентов с Solana биллингом",
-    version="0.1.0",
+    title="AgentsHub API",
+    description="Decentralized AI Agent Registry on Solana",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
@@ -147,7 +147,6 @@ app.include_router(payments.router)
 app.include_router(secrets.router)
 app.include_router(a2a.router)
 app.include_router(hub.router)
-app.include_router(assistant.router)
 app.include_router(keys.router)
 app.include_router(open_api.router)
 
@@ -173,14 +172,7 @@ async def demo():
     return RedirectResponse(url="/ui/demo.html", status_code=302)
 
 
-@app.get("/feed", tags=["system"])
-async def feed():
-    """Redirect на live feed страницу."""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/ui/feed.html", status_code=302)
-
-
-# ─── Frontend (монтируем в конце, чтобы не перекрыть API роуты) ───────────────
+# ─── Frontend (mounted last to avoid overriding API routes) ──────────────────
 _frontend_dir = Path(__file__).parent.parent / "frontend"
 if _frontend_dir.exists():
     app.mount("/ui", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
